@@ -257,7 +257,7 @@ function setupBaseLayers() {
   }
   layers[BASE_LAYERS[currentKey].name].addTo(map);
 
-  // 國界線 overlay(Natural Earth 公有領域;丹麥紅/瑞典藍)
+  // 國界線 overlay:丹麥–瑞典 Øresund 領海界線(取自 OSM admin 邊界,與底圖同源、完全吻合)
   const bordersLayer = L.layerGroup();
   const layersCtl = L.control.layers(layers, { '國界線': bordersLayer }, { position: 'topright' }).addTo(map);
   fetch('./data/borders.json')
@@ -265,10 +265,7 @@ function setupBaseLayers() {
     .then((gj) => {
       L.geoJSON(gj, {
         interactive: false,
-        style: (f) => ({
-          color: f.properties.iso === 'DK' ? '#c8102e' : '#005293',
-          weight: 2, dashArray: '6 4', opacity: 0.65, fill: false,
-        }),
+        style: { color: '#c8102e', weight: 2.5, dashArray: '8 6', opacity: 0.75, fill: false },
       }).addTo(bordersLayer);
       if (store.getSetting('showBorders', true)) bordersLayer.addTo(map);
     })
