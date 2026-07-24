@@ -179,8 +179,28 @@ function openInMaps(r) {
   const wp = r.waypoints || [];
   if (wp.length < 2) { toast('路線至少需 2 點才能在 Google Maps 開啟'); return; }
   const urls = gmaps.multiStopUrl(wp, { travelmode: 'transit' });
-  urls.forEach((u) => window.open(u, '_blank', 'noopener'));
-  if (urls.length > 1) toast(`路線超過上限,分 ${urls.length} 段開啟`);
+  openSegmentsSequential(urls);
+}
+
+// 超過 Google Maps 單段上限(>9 waypoints)時 multiStopUrl 會回多段。
+// 同步連續 window.open 多個分頁會被彈窗攔截(只有第 1 個在使用者手勢內成功),
+// 故改為一次只開一段:先開第 1 段,其餘用 toast 行內按鈕逐段引導 —— 每次點擊
+// 「開下一段」都是新的使用者手勢,window.open 不會被攔截。
+function openSegmentsSequential(urls, i = 0) {
+  if (!urls.length || i >= urls.length) return;
+  window.open(urls[i], '_blank', 'noopener');
+  const total = urls.length;
+  if (total === 1) return; // 單段:維持原本靜默行為
+  const opened = i + 1;
+  if (opened < total) {
+    toast(`已開啟第 ${opened}/${total} 段`, {
+      actionLabel: '開下一段',
+      duration: 8000, // 給使用者足夠時間點擊,否則 toast 會先自動消失
+      onAction: () => openSegmentsSequential(urls, opened),
+    });
+  } else {
+    toast(`已開啟第 ${opened}/${total} 段(全部完成)`);
+  }
 }
 
 // ---- inline 改名 ----

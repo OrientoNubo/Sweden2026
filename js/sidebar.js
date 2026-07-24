@@ -2,7 +2,7 @@
 // 合約見 docs/CONTRACTS.md。
 import { state, emit, on } from './state.js';
 import { $, $$, el, toast } from './dom.js';
-import { CATEGORIES, TIER_LABELS, TRIP_DAYS, dayLabel, fmtStay } from './config.js';
+import { CATEGORIES, TRIP_DAYS, dayLabel, fmtStay } from './config.js';
 import { ICON, iconEl } from './icons.js';
 import * as store from './store.js';
 import { applyFilters } from './filters.js';

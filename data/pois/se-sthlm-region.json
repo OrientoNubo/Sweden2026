@@ -1,6 +1,6 @@
 {
   "region": "se-sthlm-region",
-  "version": "2026-07-24",
+  "version": "2026-07-25",
   "pois": [
     {
       "id": "se-sthlm-region-drottningholms-slott",
@@ -755,6 +755,32 @@
       "cost": null,
       "transit": "斯德哥爾摩搭通勤火車 Pendeltåg 約 1 小時",
       "sep_note": null
+    },
+    {
+      "id": "se-sthlm-region-nynas-slott",
+      "name": {
+        "zh": "尼奈斯城堡",
+        "local": "Nynäs slott",
+        "en": "Nynäs Castle"
+      },
+      "lat": 58.80833,
+      "lng": 17.36611,
+      "coord_source": "wikidata",
+      "country": "SE",
+      "region": "se-sthlm-region",
+      "city": "Nyköping",
+      "category": "castle",
+      "tier": 3,
+      "desc": "斯德哥爾摩以南、Tystberga 近郊的巴洛克莊園城堡,莊園史可溯至 14 世紀,現存建築由御前大臣 Erik Gyllenstierna 於 1650 年代興建。真正的看點是環抱城堡的 Nynäs 自然保護區——古橡樹草甸、海岸步道與寧靜海灣,是索德曼蘭(Sörmland)最美的濱海自然區之一;城堡內部僅夏季導覽開放,附設 1907 年橘園改建的季節性餐廳與花園店。位置偏遠、公共交通不便,以散步與莊園園區為主。含步道約 2–3 小時。",
+      "stay_min": 120,
+      "stay_max": 180,
+      "url": null,
+      "wikipedia": "https://en.wikipedia.org/wiki/Nyn%C3%A4s_Castle",
+      "image_file": "Nynäs slott, May 2010.jpg",
+      "hours": null,
+      "cost": "自然保護區免費,城堡導覽另收費",
+      "transit": "斯德哥爾摩以南約 1 小時車程,建議自駕",
+      "sep_note": "城堡內部導覽與橘園餐廳等夏季設施多於 8 月底至 9 月上旬結束當季營運,9 月主要能造訪自然保護區戶外步道"
     },
     {
       "id": "se-sthlm-region-venngarns-slott",

@@ -83,7 +83,9 @@ function makePoiMarker(poi, mode) {
 }
 
 function makeFavoriteMarker(poi) {
-  const m = L.marker([poi.lat, poi.lng], { icon: buildFavoriteIcon(poi) });
+  // zIndexOffset:1000 → 恆顯星形永遠疊在 cluster 泡泡之上(低 zoom 兩者重疊時,
+  // Leaflet 的 pane z-index = 螢幕 y + offset;重疊點 y 差僅 ~icon 尺寸,offset 1000 必勝)
+  const m = L.marker([poi.lat, poi.lng], { icon: buildFavoriteIcon(poi), zIndexOffset: 1000 });
   m._fav = true;
   bindMarkerInteractions(m, poi);
   return m;
@@ -504,7 +506,7 @@ export function init() {
   window.addEventListener('detailtoggle', () => {
     if (!map) return;
     map.invalidateSize();
-    setTimeout(() => { if (map) map.invalidateSize(); }, 260);
+    setTimeout(() => { if (map) map.invalidateSize(); }, 320); // 蓋過 #detail-panel 的 .28s 過場
   });
 
   // 主題切換 → 底圖聯動(使用者手動選過就不再自動聯動)

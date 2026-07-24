@@ -11,9 +11,15 @@ import { routeDistance, fmtDistance } from './geo.js';
 
 let sortables = [];
 
+// overlay:changed 會對「所有」mutation 觸發(含 route/settings 等與日程無關者)。
+// 全量重建 day-list 並 destroy/recreate 全部 Sortable 代價高,故只在與行程顯示相關的
+// 變更時重建。採黑名單(而非白名單):明確無關的 type 才略過,未知/不確定的 type 一律
+// 保守重建,避免漏更新。route=路線 tab、settings=通用設定,皆不出現在 day-list。
+const ITIN_IRRELEVANT_TYPES = new Set(['route', 'settings']);
+
 export function init() {
   on('pois:ready', render);
-  on('overlay:changed', render);
+  on('overlay:changed', (p) => { if (!p || !ITIN_IRRELEVANT_TYPES.has(p.type)) render(); });
   on('tab:changed', (tab) => { if (tab === 'days') render(); });
   render(); // app 於 store.init() 後才呼叫本 init,pois:ready 已錯過,需主動首渲染
 }

@@ -46,6 +46,12 @@ REGION_BBOX = {
 }
 COUNTRY_BBOX = {"SE": (55.33, 69.07, 10.95, 24.20), "DK": (54.55, 57.76, 8.00, 15.20)}
 
+# 鄰近去重的已知誤報白名單:名稱相近且相距 <150m,但確為不同 POI。
+# 每個元素是一對 id 的 frozenset;命中則跳過「疑似重複」warning。
+DEDUP_FALSE_POSITIVES = {
+    frozenset({"se-skane-se-kristianstad", "se-skane-se-filmmuseet-i-kristianstad"}),
+}
+
 
 def haversine_m(a, b):
     lat1, lng1, lat2, lng2 = map(radians, (a[0], a[1], b[0], b[1]))
@@ -129,6 +135,8 @@ def main():
                 continue
             same_name = na == nb or (len(na) > 6 and (na in nb or nb in na))
             if same_name and haversine_m((a["lat"], a["lng"]), (b["lat"], b["lng"])) < 150:
+                if frozenset({a["id"], b["id"]}) in DEDUP_FALSE_POSITIVES:
+                    continue
                 warnings.append(f"疑似重複:{fa}:{a['id']} ↔ {fb}:{b['id']}")
 
     if check_images:
