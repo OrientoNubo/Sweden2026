@@ -256,11 +256,31 @@ function setupBaseLayers() {
     baseKeyByName[cfg.name] = key;
   }
   layers[BASE_LAYERS[currentKey].name].addTo(map);
-  L.control.layers(layers, {}, { position: 'topright' }).addTo(map);
+
+  // 國界線 overlay(Natural Earth 公有領域;丹麥紅/瑞典藍)
+  const bordersLayer = L.layerGroup();
+  const layersCtl = L.control.layers(layers, { '國界線': bordersLayer }, { position: 'topright' }).addTo(map);
+  fetch('./data/borders.json')
+    .then((r) => r.json())
+    .then((gj) => {
+      L.geoJSON(gj, {
+        interactive: false,
+        style: (f) => ({
+          color: f.properties.iso === 'DK' ? '#c8102e' : '#005293',
+          weight: 2, dashArray: '6 4', opacity: 0.65, fill: false,
+        }),
+      }).addTo(bordersLayer);
+      if (store.getSetting('showBorders', true)) bordersLayer.addTo(map);
+    })
+    .catch((e) => console.warn('[mapview] 國界線載入失敗', e));
+  map.on('overlayadd', (e) => { if (e.layer === bordersLayer) store.setSetting('showBorders', true); });
+  map.on('overlayremove', (e) => { if (e.layer === bordersLayer) store.setSetting('showBorders', false); });
+
   map.on('baselayerchange', (e) => {
     const key = baseKeyByName[e.name];
     if (key) store.setSetting('baseLayer', key);
   });
+  void layersCtl;
 }
 
 // ── 入口 ──
