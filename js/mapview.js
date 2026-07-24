@@ -266,6 +266,7 @@ function setupBaseLayers() {
     .then((gj) => {
       L.geoJSON(gj, {
         interactive: false,
+        attribution: '國界 &copy; EuroGeographics',
         style: (f) => ({
           color: f.properties.iso === 'DK' ? '#c8102e' : '#005293',
           weight: 2, dashArray: '8 6', opacity: 0.7, fill: false,
