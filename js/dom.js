@@ -29,13 +29,27 @@ export function escapeHtml(s) {
 }
 
 let toastTimer = null;
-export function toast(msg, ms = 2400) {
+/** toast(msg) | toast(msg, ms) | toast(msg, {actionLabel, onAction, duration})
+ *  帶 action 時顯示一顆行內按鈕,點擊執行 onAction 並關閉。無 action 行為與舊版相同。 */
+export function toast(msg, opts) {
   const t = $('#toast');
   if (!t) return;
-  t.textContent = msg;
-  t.hidden = false;
+  const o = typeof opts === 'number' ? { duration: opts } : (opts || {});
+  const { actionLabel, onAction, duration = 2400 } = o;
+
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.hidden = true; }, ms);
+  t.replaceChildren(document.createTextNode(msg));
+
+  if (actionLabel && typeof onAction === 'function') {
+    const btn = el('button', {
+      class: 'toast-action',
+      type: 'button',
+      onclick: () => { clearTimeout(toastTimer); t.hidden = true; onAction(); },
+    }, actionLabel);
+    t.append(btn);
+  }
+  t.hidden = false;
+  toastTimer = setTimeout(() => { t.hidden = true; }, duration);
 }
 
 export function debounce(fn, ms) {

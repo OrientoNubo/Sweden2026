@@ -7,6 +7,10 @@
 #day-list .small, #route-list .small, #draw-banner .small { font-size: 12px; }
 #day-list .pad, #route-list .pad { padding: 12px; }
 
+/* 整合層 iconEl 產出的 inline SVG 尺寸(SVG 本身無 width/height,限本模組容器) */
+#day-list .btn-icon svg, #route-list .btn-icon svg { width: 18px; height: 18px; }
+#day-list .btn svg, #route-list .btn svg { width: 16px; height: 16px; }
+
 /* ============================ 行程:單日卡 ============================ */
 #day-list { padding: 8px; display: flex; flex-direction: column; gap: 10px; }
 
@@ -106,7 +110,7 @@
 .route-top { display: flex; align-items: center; gap: 8px; }
 .route-swatch {
   flex: 0 0 auto; width: 20px; height: 20px; border-radius: 6px;
-  border: 1px solid rgba(0,0,0,.25); cursor: pointer; padding: 0;
+  border: 1px solid var(--border); cursor: pointer; padding: 0;
 }
 .route-name {
   flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: 14px;
@@ -156,7 +160,9 @@
 
 /* 繪製游標 */
 .map-draw, .map-draw .leaflet-container { cursor: crosshair !important; }
-.route-node-icon, .route-ghost-icon { background: transparent; border: 0; }
+.route-node-icon, .route-ghost-icon, .route-preview-icon { background: transparent; border: 0; }
+/* 新繪預覽節點不攔截點擊,確保點地圖能持續加點 */
+.route-preview-icon { pointer-events: none; }
 
 /* ============================ 手機(≤768px) ============================ */
 @media (max-width: 768px) {

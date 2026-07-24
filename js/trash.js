@@ -4,6 +4,7 @@
 import { $, el, toast } from './dom.js';
 import { on, state } from './state.js';
 import { CATEGORIES } from './config.js';
+import { ICON, iconEl } from './icons.js';
 import * as store from './store.js';
 
 export function init() {
@@ -74,10 +75,15 @@ function renderList() {
   for (const p of items) list.append(trashItem(p));
 }
 
+function poiName(p) {
+  return p.name?.zh || p.name?.local || p.name?.en || '(未命名)';
+}
+
 function trashItem(p) {
+  const name = poiName(p);
   return el('div', { class: 'list-item', dataset: { id: p.id } },
     el('div', { class: 'li-body' },
-      el('div', { class: 'li-title' }, p.name.zh),
+      el('div', { class: 'li-title' }, name),
       el('div', { class: 'li-sub' },
         p.city ? el('span', {}, p.city) : null,
         catChip(p.category),
@@ -85,18 +91,18 @@ function trashItem(p) {
     ),
     el('div', { class: 'li-actions' },
       el('button', {
-        class: 'btn-icon', title: '還原',
+        class: 'btn-icon', title: '還原', 'aria-label': '還原',
         onclick: () => { store.restoreFromTrash(p.id); toast('已還原'); },
-      }, '↩'),
+      }, iconEl(ICON.restore)),
       el('button', {
-        class: 'btn-icon', title: '永久刪除',
+        class: 'btn-icon', title: '永久刪除', 'aria-label': '永久刪除',
         onclick: () => {
-          if (confirm(`永久刪除「${p.name.zh}」？此動作無法復原。`)) {
+          if (confirm(`永久刪除「${name}」？此動作無法復原。`)) {
             store.purgeFromTrash(p.id);
             toast('已永久刪除');
           }
         },
-      }, '🗑'),
+      }, iconEl(ICON.trash)),
     ),
   );
 }

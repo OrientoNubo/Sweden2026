@@ -4,6 +4,7 @@
 import { $, el, toast } from './dom.js';
 import { state, on, emit } from './state.js';
 import { TRIP_DAYS, dayLabel, dayColor } from './config.js';
+import { ICON, iconEl } from './icons.js';
 import * as store from './store.js';
 import * as gmaps from './gmaps.js';
 import { routeDistance, fmtDistance } from './geo.js';
@@ -70,8 +71,9 @@ function dayCard(day, ids) {
 
   const eyeBtn = el('button', {
     class: 'btn-icon day-eye', title: visible ? '隱藏此日' : '顯示此日',
+    'aria-label': visible ? '隱藏此日' : '顯示此日',
     onclick: () => toggleDay(day, card, eyeBtn),
-  }, visible ? '👁' : '🙈');
+  }, iconEl(visible ? ICON.eye : ICON.eyeOff));
 
   const head = el('div', { class: 'day-head' },
     el('span', { class: 'day-swatch' }),
@@ -103,8 +105,9 @@ function toggleDay(day, card, btn) {
   const next = !now;
   state.dayVisibility[day] = next;
   card.classList.toggle('day-dimmed', !next);
-  btn.textContent = next ? '👁' : '🙈';
+  btn.replaceChildren(iconEl(next ? ICON.eye : ICON.eyeOff));
   btn.title = next ? '隱藏此日' : '顯示此日';
+  btn.setAttribute('aria-label', next ? '隱藏此日' : '顯示此日');
   emit('day:visibility', { day, visible: next });
 }
 
@@ -118,9 +121,18 @@ function poiRow(day, p, i, color) {
   );
 
   const rm = el('button', {
-    class: 'btn-icon', title: '移出此日',
-    onclick: (e) => { e.stopPropagation(); store.assignToDay(p.id, null); },
-  }, '✕');
+    class: 'btn-icon', title: '移出此日', 'aria-label': '移出此日',
+    onclick: (e) => {
+      e.stopPropagation();
+      // 移出前快照該日順序,供 undo 精確還原原位置
+      const savedOrder = (store.getItinerary()[day] || []).slice();
+      store.assignToDay(p.id, null);
+      toast('已移出此日', {
+        actionLabel: '復原',
+        onAction: () => { store.assignToDay(p.id, day); store.reorderDay(day, savedOrder); },
+      });
+    },
+  }, iconEl(ICON.close));
 
   return el('div', { class: 'itin-item', dataset: { id: p.id } }, num, body, rm);
 }
@@ -131,10 +143,10 @@ function dayMapsLink(coords) {
   if (urls.length === 1) {
     return el('button', {
       class: 'btn day-maps-btn', onclick: () => window.open(urls[0], '_blank', 'noopener'),
-    }, '🗺 在 Google Maps 開啟此日路線');
+    }, iconEl(ICON.gmaps), '在 Google Maps 開啟此日路線');
   }
   const wrap = el('div', { class: 'day-maps-multi' },
-    el('div', { class: 'muted small' }, `🗺 此日路線超過上限,分 ${urls.length} 段開啟:`));
+    el('div', { class: 'muted small' }, `此日路線超過上限,分 ${urls.length} 段開啟:`));
   urls.forEach((u, i) => wrap.append(
     el('button', { class: 'btn btn-sm', onclick: () => window.open(u, '_blank', 'noopener') }, `第 ${i + 1} 段`)));
   return wrap;

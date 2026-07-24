@@ -64,10 +64,11 @@
 | se-malmo | 55.45, 55.66, 12.80, 13.45 |
 | se-lund-nw | 55.60, 56.35, 12.40, 13.50 |
 | se-skane-se | 55.30, 56.10, 12.75, 14.40 |
-| se-gbg-west | 56.55, 59.00, 10.90, 13.30 |
+| se-gbg-west | 56.30, 59.00, 10.90, 13.30 |
 | se-sthlm-core | 59.25, 59.40, 17.90, 18.20 |
 | se-sthlm-region | 58.80, 60.10, 16.40, 19.20 |
-| se-smaland-gotland | 56.10, 58.60, 14.10, 19.15 |
+| se-smaland-gotland | 56.10, 58.60, 13.30, 19.15 |
+| se-ostergotland | 58.05, 58.80, 14.55, 17.60 |
 | se-north | 59.00, 68.60, 11.90, 24.20 |
 | dk-cph-core | 55.64, 55.73, 12.52, 12.65 |
 | dk-cph-greater | 55.55, 55.82, 12.30, 12.70 |
@@ -82,6 +83,8 @@
 - Louisiana 美術館(Humlebæk)、Helsingør/Kronborg → `dk-nzealand`;Helsingborg(瑞典側)與 HH 渡輪 → `se-lund-nw`
 - Ven 島 → `se-lund-nw`;Drottningholm、Uppsala → `se-sthlm-region`(**不是** core)
 - Gränna/Jönköping/Vättern 東岸 → `se-smaland-gotland`;Dalarna → `se-north`
+- Bjäre 半島(Båstad/Torekov/Hovs hallar)與 Laholm → `se-gbg-west`;Hässleholm/Markaryd/Ljungby/Värnamo → `se-smaland-gotland`
+- Östergötland 全郡(Linköping/Norrköping/Söderköping/Omberg/Rökstenen/Tåkern)+ Sörmland 海岸(Nyköping/Stendörren/Kolmården)→ `se-ostergotland`;Vadstena 既有歸屬不變
 
 ## 資料來源與工作流(建議順序)
 

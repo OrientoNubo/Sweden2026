@@ -11,6 +11,7 @@ import * as routes from './routes.js';
 import * as routedraw from './routedraw.js';
 import * as trash from './trash.js';
 import * as io from './io.js';
+import { initTheme } from './theme.js';
 
 function bindModeToggle() {
   const box = $('#mode-toggle');
@@ -33,6 +34,7 @@ async function boot() {
     toast('資料載入失敗,請重新整理頁面');
     return;
   }
+  initTheme();
   mapview.init();
   filters.init();
   sidebar.init();

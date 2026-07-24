@@ -62,10 +62,12 @@
   font-size: 13.5px;
   color: var(--text-sub);
   cursor: pointer;
-  transition: background .12s, color .12s;
+  transition: background .12s, color .12s, transform .08s;
 }
 #mode-toggle button + button { border-left: 1px solid var(--border); }
 #mode-toggle button:hover { background: var(--bg-hover); }
+#mode-toggle button:active { transform: scale(.97); }
+#mode-toggle button:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--focus); }
 #mode-toggle button.active {
   background: var(--primary);
   color: #fff;
@@ -123,8 +125,11 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
+  transition: background .12s, color .12s, transform .08s;
 }
 #sidebar-tabs button:hover { background: var(--bg-soft); }
+#sidebar-tabs button:active { transform: scale(.97); }
+#sidebar-tabs button:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--focus); }
 #sidebar-tabs button.active { color: var(--text); font-weight: 600; }
 #sidebar-tabs button.active::after {
   content: "";
@@ -177,7 +182,7 @@
 #search-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
+  box-shadow: 0 0 0 3px var(--focus);
 }
 
 #poi-count { font-size: 12.5px; }
@@ -190,37 +195,36 @@
   min-height: 0;
 }
 
-/* ---- Detail(右欄,slide-in) ---- */
+/* ---- Detail(右欄:桌機佔位收合,不覆蓋地圖) ----
+   in-flow flex 項目:開啟時佔 --detail-w、地圖自然收窄;關閉時 flex-basis→0
+   收合。內容固定寬度避免收合動畫時 reflow,由面板 overflow:hidden 裁切。 */
 #detail-panel {
   display: flex;
   flex-direction: column;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: var(--detail-w);
-  max-width: 100%;
+  position: relative;
+  flex: 0 0 var(--detail-w);
+  min-height: 0;
+  overflow: hidden;
   background: var(--bg);
-  border-left: 1px solid var(--border);
-  box-shadow: var(--shadow-lg);
-  transform: translateX(100%);
-  transition: transform .28s cubic-bezier(.4, 0, .2, 1);
-  z-index: var(--z-detail);
-  will-change: transform;
+  box-shadow: inset 1px 0 0 var(--border);   /* 分隔線,不佔版面寬度 */
+  transition: flex-basis .28s cubic-bezier(.4, 0, .2, 1);
+  will-change: flex-basis;
 }
-#detail-panel:not([hidden]) { transform: translateX(0); }
+#detail-panel[hidden] { flex-basis: 0; }
 #detail-close {
   position: absolute;
   top: 8px;
   right: 8px;
-  z-index: 2;
+  z-index: 4;
   background: var(--bg);
   box-shadow: var(--shadow);
 }
 #detail-content {
   flex: 1 1 auto;
   min-height: 0;
+  width: var(--detail-w);                    /* 固定寬度:收合動畫時內容不 reflow */
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
 }
 
@@ -243,27 +247,29 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   white-space: nowrap;
-  transition: background .12s, border-color .12s, box-shadow .12s;
+  transition: filter .12s, border-color .12s, background .12s, transform .08s;
 }
-.btn:hover { background: var(--bg-hover); }
-.btn:active { background: var(--bg-soft); }
+/* 淺色描邊按鈕:hover 亮邊 + 微底;實心按鈕改用 brightness */
+.btn:hover { background: var(--bg-soft); border-color: var(--accent-border); }
+.btn:active { transform: scale(.96); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
-.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--primary-soft); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
 
 .btn-primary {
   color: #fff;
   background: var(--primary);
   border-color: var(--primary);
 }
-.btn-primary:hover { background: #1666d0; border-color: #1666d0; }
-.btn-primary:active { background: #135bbd; }
+.btn-primary:hover { filter: brightness(1.08); background: var(--primary); border-color: var(--primary); }
+.btn-primary:active { transform: scale(.96); }
 
 .btn-danger {
   color: var(--danger);
   border-color: var(--danger-soft);
   background: var(--danger-soft);
 }
-.btn-danger:hover { background: #fbdad6; }
+.btn-danger:hover { filter: brightness(1.06); background: var(--danger-soft); border-color: var(--danger); }
+.btn-danger:active { transform: scale(.96); }
 
 .btn-icon {
   appearance: none;
@@ -281,14 +287,34 @@
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background .12s, border-color .12s;
+  transition: filter .12s, border-color .12s, background .12s, transform .08s;
 }
 .btn-icon:hover { background: var(--bg-hover); }
-.btn-icon:active { background: var(--bg-soft); }
-.btn-icon:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--primary-soft); }
-.btn-icon.on { background: var(--bg-soft); }
+.btn-icon:active { transform: scale(.96); }
+.btn-icon:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
+.btn-icon.on { background: var(--accent-soft); }
 .btn-icon.danger { color: var(--danger); }
 .btn-icon.danger:hover { background: var(--danger-soft); }
+/* 收藏星填色(僅 fav 態帶此 class) */
+.ico-fav { color: var(--star); }
+
+/* ============================================================
+   全域 inline SVG icon 尺寸
+   icons.js 的 SVG 只帶 viewBox、無固定 width/height,需在容器層統一尺寸。
+   涵蓋全站共用按鈕容器;地圖控件由 F1、planner 由 F4 各自 scoped。
+   ============================================================ */
+.btn svg,
+.btn-icon svg,
+.li-actions svg,
+.toast-action svg,
+.tab svg,
+#sidebar-tabs button svg,
+#mode-toggle button svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  vertical-align: -2px;
+}
 
 .badge {
   display: inline-flex;
@@ -345,8 +371,11 @@
   background: var(--bg);
   border-color: var(--border);
   font-weight: 400;
+  transition: background .12s, border-color .12s, color .12s, transform .08s;
 }
-.chip.toggle:hover { background: var(--bg-hover); }
+.chip.toggle:hover { background: var(--bg-hover); border-color: var(--accent-border); }
+.chip.toggle:active { transform: scale(.96); }
+.chip.toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
 .chip.toggle.on {
   border-color: var(--c);
   background: var(--primary-soft);   /* fallback */
@@ -508,6 +537,13 @@
   margin-left: auto;
 }
 #filter-bar .filter-clear:hover { text-decoration: underline; }
+#filter-bar .filter-clear:focus-visible,
+.filter-more:focus-visible {
+  outline: none;
+  text-decoration: underline;
+  box-shadow: 0 0 0 3px var(--focus);
+  border-radius: var(--radius-sm);
+}
 
 /* 分類 chips 摺疊 */
 .filter-cats {
@@ -660,7 +696,7 @@
 .detail-note:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
+  box-shadow: 0 0 0 3px var(--focus);
   background: var(--bg);
 }
 
@@ -711,7 +747,7 @@
 .field input:focus, .field textarea:focus, .field select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
+  box-shadow: 0 0 0 3px var(--focus);
 }
 .field .hint { font-size: 11.5px; color: var(--text-faint); }
 .form-actions { display: flex; gap: 8px; margin-top: 4px; }
@@ -768,10 +804,52 @@
 }
 #toast[hidden] { display: none; }
 
+/* toast 行內動作鈕(如刪除的「復原」);accent 小膠囊 */
+.toast-action {
+  appearance: none;
+  margin-left: 14px;
+  padding: 5px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #fff;
+  background: var(--primary);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  vertical-align: middle;
+  white-space: nowrap;
+  transition: filter .12s, transform .08s;
+}
+.toast-action:hover { filter: brightness(1.1); }
+.toast-action:active { transform: scale(.96); }
+.toast-action:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
+
+/* ============================================================
+   手機 sheet 拖曳把手 / 背景遮罩(桌機隱藏,行為見 detail.js)
+   ============================================================ */
+.sheet-handle { display: none; }
+.sheet-handle-bar {
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--text-faint);
+  opacity: .7;
+}
+.detail-scrim { display: none; }
+
 /* ============================================================
    桌機:漢堡鍵隱藏
    ============================================================ */
 #btn-sidebar { display: none; }
+
+/* ============================================================
+   中等桌機:詳情面板窄一點(手機另走 bottom sheet)
+   ============================================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root { --detail-w: 320px; }
+}
 
 /* ============================================================
    RWD:≤768px
@@ -812,44 +890,66 @@
     z-index: calc(var(--z-sidebar) - 1);
   }
 
-  /* Detail → 底部 sheet(自下滑入) */
+  /* Detail → 底部 sheet(自下滑入;覆蓋在地圖上,非佔位) */
   #detail-panel {
+    position: fixed;
     top: auto;
     left: 0;
     right: 0;
     bottom: 0;
+    flex: 0 0 auto;
     width: 100%;
     max-height: 78dvh;
-    border-left: 0;
     border-top: 1px solid var(--border);
     border-radius: 16px 16px 0 0;
+    box-shadow: var(--shadow-lg);
     transform: translateY(100%);
     transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+    z-index: var(--z-detail);
   }
   #detail-panel:not([hidden]) { transform: translateY(0); }
-  #detail-content { padding-top: 6px; }
-  /* sheet 頂部拖曳提示條 */
-  #detail-panel::before {
-    content: "";
-    position: absolute;
-    top: 7px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 4px;
-    border-radius: 999px;
-    background: var(--border);
-    z-index: 3;
-  }
+  #detail-content { width: 100%; padding-top: 4px; }
   #detail-close { top: 10px; right: 10px; }
+
+  /* 拖曳把手:44px 命中區 + 置中膠囊(視覺條) */
+  .sheet-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    height: 44px;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+  }
+  .sheet-handle:active { cursor: grabbing; }
+
+  /* Detail 背景遮罩(點擊關閉;桌機隱藏) */
+  .detail-scrim {
+    display: block;
+    position: fixed;
+    inset: var(--toolbar-h) 0 0 0;
+    background: rgba(0, 0, 0, .35);
+    z-index: calc(var(--z-detail) - 1);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .24s;
+  }
+  body.detail-open .detail-scrim { opacity: 1; pointer-events: auto; }
 
   /* 觸控目標 ≥44px */
   #sidebar-tabs button { padding: 14px 4px; min-height: 44px; }
   .btn { padding: 10px 16px; min-height: 44px; }
   .btn-icon { width: 44px; height: 44px; font-size: 18px; }
-  .li-actions .btn-icon { width: 40px; height: 40px; }
+  .btn-icon svg { width: 18px; height: 18px; }   /* 44px 觸控鈕內的圖示放大一點 */
+  /* 44px 命中區 → 4 個控制項在窄機放不下同列,允許收縮換行(圖示列 + 日期列) */
+  .li-actions { flex: 0 1 auto; max-width: 52%; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+  .li-actions .btn-icon { width: 44px; height: 44px; }
+  .li-actions select { min-height: 44px; max-width: 92px; }
   .list-item { padding: 12px; }
-  .chip { padding: 7px 12px; font-size: 13px; }
+  .chip { padding: 8px 12px; font-size: 13px; }
+  .chip.toggle { min-height: 40px; }
+  .toast-action { min-height: 44px; padding: 10px 18px; }
   #detail-panel .detail-actions .btn { min-height: 44px; }
 }
 

@@ -1,22 +1,31 @@
-/* tokens.css — 全站設計變數(Phase 0 凍結) */
+/* tokens.css — 全站設計變數(主題化:light / dark) */
 :root {
-  --bg: #ffffff;
-  --bg-soft: #f6f7f9;
-  --bg-hover: #eef1f4;
-  --border: #dde2e8;
-  --text: #1f2933;
-  --text-sub: #5f6b76;
-  --text-faint: #9aa5b1;
-  --primary: #1a73e8;
-  --primary-soft: #e8f0fe;
+  color-scheme: light;
+
+  --bg: #f8f8f6;
+  --bg-soft: #ebebe6;          /* 卡片/次級表面 */
+  --bg-hover: #e2e2dc;         /* hover 底 */
+  --border: #d7d7d5;
+  --text: #0b0b0b;
+  --text-sub: #898781;         /* muted / 次級文字 */
+  --text-faint: #adaba4;       /* 更淡的第三級文字 */
+  --primary: #328a97;          /* accent(teal) */
+
   --danger: #d93025;
   --danger-soft: #fdecea;
   --star: #f5b301;
 
-  --radius: 10px;
+  /* 衍生 accent 色(以 primary 混 transparent,兩主題共用) */
+  --primary-soft: color-mix(in srgb, var(--primary) 16%, transparent);   /* focus ring / active 背景 */
+  --focus: color-mix(in srgb, var(--primary) 25%, transparent);
+  --accent-border: color-mix(in srgb, var(--primary) 45%, transparent);
+  --accent-soft: color-mix(in srgb, var(--primary) 12%, transparent);
+
   --radius-sm: 6px;
-  --shadow: 0 2px 10px rgba(0,0,0,.12);
-  --shadow-lg: 0 6px 24px rgba(0,0,0,.18);
+  --radius: 8px;
+  --radius-lg: 14px;
+  --shadow: 0 2px 10px rgba(31, 30, 29, .08);
+  --shadow-lg: 0 6px 24px rgba(31, 30, 29, .14);
 
   --toolbar-h: 52px;
   --sidebar-w: 360px;
@@ -34,6 +43,37 @@
   --day-0: #e6194b; --day-1: #f58231; --day-2: #d9a400; --day-3: #3cb44b;
   --day-4: #00a86b; --day-5: #17a2b8; --day-6: #4363d8; --day-7: #7b5be6;
   --day-8: #911eb4; --day-9: #f032e6; --day-10: #a0522d; --day-11: #556b2f;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #1f1f1e;
+  --bg-soft: #171717;
+  --bg-hover: #2a2a28;
+  --border: #292929;
+  --text: #ffffff;
+  --text-sub: #c2c2b7;         /* muted / 次級文字 */
+  --text-faint: #8f8f86;
+  --primary: #328a97;          /* accent 不變 */
+
+  --danger: #ec5b52;
+  --danger-soft: #3a201d;
+  --star: #f5b301;
+
+  --shadow: 0 2px 10px rgba(0, 0, 0, .4);
+  --shadow-lg: 0 6px 24px rgba(0, 0, 0, .5);
+}
+
+/* 靜態 fallback:不支援 color-mix 時,衍生 accent 色退回等價 rgba
+   (primary #328a97 = rgb(50,138,151);accent 兩主題相同,無需分色) */
+@supports not (color: color-mix(in srgb, red 5%, white)) {
+  :root {
+    --primary-soft: rgba(50, 138, 151, .16);
+    --focus: rgba(50, 138, 151, .25);
+    --accent-border: rgba(50, 138, 151, .45);
+    --accent-soft: rgba(50, 138, 151, .12);
+  }
 }
 
 * { box-sizing: border-box; }

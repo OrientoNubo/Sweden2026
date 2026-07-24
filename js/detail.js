@@ -3,8 +3,9 @@
 import { state, emit, on } from './state.js';
 import { $, el, toast } from './dom.js';
 import {
-  CATEGORIES, TIER_LABELS, COUNTRY_LABELS, TRIP_DAYS, dayLabel, commonsPage,
+  CATEGORIES, TIER_LABELS, COUNTRY_LABELS, TRIP_DAYS, dayLabel, commonsPage, fmtStay,
 } from './config.js';
+import { ICON, iconEl } from './icons.js';
 import * as store from './store.js';
 import * as db from './db.js';
 
@@ -12,10 +13,33 @@ let panel, content;
 let currentId = null;
 let mode = 'view';        // 'view' | 'edit' | 'new'
 let objectUrls = [];      // 需要 revoke 的 idb objectURL
+let panelOpen = false;    // 面板是否開啟(供 detailtoggle 去重)
 
 function revokeUrls() {
   for (const u of objectUrls) URL.revokeObjectURL(u);
   objectUrls = [];
+}
+
+/** 開關狀態變化時派 detailtoggle(供 F1 mapview invalidateSize)+ 切 scrim。
+ *  換 POI / 開→開 不重複派(guard 相同狀態)。 */
+function setPanelOpen(open) {
+  if (open === panelOpen) return;
+  panelOpen = open;
+  document.body.classList.toggle('detail-open', open);
+  window.dispatchEvent(new CustomEvent('detailtoggle', { detail: { open } }));
+}
+
+/** 使用者要求關閉:統一由 select(null) 路徑收斂到 close() */
+function requestClose() {
+  state.selectedId = null;
+  emit('select', { id: null, source: 'other' });
+}
+
+/** 清掉手機拖曳殘留的 inline transform,避免下次開啟卡住 */
+function resetSheetTransform() {
+  if (!panel) return;
+  panel.style.transform = '';
+  panel.style.transition = '';
 }
 
 function close() {
@@ -23,6 +47,7 @@ function close() {
   currentId = null;
   mode = 'view';
   revokeUrls();
+  setPanelOpen(false);
 }
 
 function catInfo(cat) {
@@ -56,13 +81,6 @@ async function resolveImages(refs) {
     }
   }
   return out;
-}
-
-function fmtStay(p) {
-  const a = p.stay_min, b = p.stay_max;
-  if (a == null && b == null) return null;
-  if (a != null && b != null && a !== b) return `${a}–${b} 分鐘`;
-  return `${a ?? b} 分鐘`;
 }
 
 function gmapsSearch(lat, lng) {
@@ -157,7 +175,7 @@ function buildView(p, urls) {
 
   // meta
   const meta = el('div', { class: 'detail-meta' },
-    metaRow('停留', fmtStay(p)),
+    metaRow('停留', fmtStay(p.stay_min, p.stay_max)),
     metaRow('開放', p.hours),
     metaRow('費用', p.cost),
     metaRow('交通', p.transit),
@@ -180,15 +198,27 @@ function buildView(p, urls) {
   body.append(note);
 
   // 操作列
-  const favBtn = el('button', { class: 'btn' + (fav ? ' btn-primary' : ''),
-    onclick: () => store.setStatus(p.id, fav ? null : 'favorite') },
-    fav ? '⭐ 已收藏' : '☆ 收藏');
-  const delBtn = el('button', { class: 'btn btn-danger', onclick: () => doDelete(p.id) }, '🗑 刪除');
-  const gmBtn = el('button', { class: 'btn',
-    onclick: () => window.open(gmapsSearch(p.lat, p.lng), '_blank', 'noopener') }, '在 Google Maps 開啟');
-  const navBtn = el('button', { class: 'btn',
-    onclick: () => window.open(gmapsDir(p.lat, p.lng), '_blank', 'noopener') }, '導航(大眾運輸)');
-  const editBtn = el('button', { class: 'btn full', onclick: () => renderEdit(p.id) }, '✎ 編輯');
+  const favBtn = el('button', {
+    class: 'btn' + (fav ? ' btn-primary' : ''),
+    title: fav ? '取消收藏' : '收藏', 'aria-label': fav ? '取消收藏' : '收藏',
+    onclick: () => store.setStatus(p.id, fav ? null : 'favorite'),
+  }, iconEl(fav ? ICON.starFill : ICON.starOutline), fav ? '已收藏' : '收藏');
+  const delBtn = el('button', {
+    class: 'btn btn-danger', title: '移入回收站', 'aria-label': '移入回收站',
+    onclick: () => doDelete(p.id),
+  }, iconEl(ICON.trash), '刪除');
+  const gmBtn = el('button', {
+    class: 'btn', title: '在 Google Maps 開啟', 'aria-label': '在 Google Maps 開啟',
+    onclick: () => window.open(gmapsSearch(p.lat, p.lng), '_blank', 'noopener'),
+  }, iconEl(ICON.gmaps), '在 Google Maps 開啟');
+  const navBtn = el('button', {
+    class: 'btn', title: '導航(大眾運輸)', 'aria-label': '導航(大眾運輸)',
+    onclick: () => window.open(gmapsDir(p.lat, p.lng), '_blank', 'noopener'),
+  }, iconEl(ICON.route), '導航(大眾運輸)');
+  const editBtn = el('button', {
+    class: 'btn full', title: '編輯', 'aria-label': '編輯',
+    onclick: () => renderEdit(p.id),
+  }, iconEl(ICON.edit), '編輯');
 
   body.append(el('div', { class: 'detail-actions' },
     favBtn, delBtn,
@@ -206,11 +236,9 @@ function withFull(node) {
 }
 
 function doDelete(id) {
-  close();
+  requestClose();   // → select(null) → close()
   store.setStatus(id, 'deleted');
-  state.selectedId = null;
-  toast('已移入回收站,可在回收站還原');
-  emit('select', { id: null, source: 'other' });
+  toast('已移至回收站', { actionLabel: '復原', onAction: () => store.setStatus(id, null) });
 }
 
 // ============================================================
@@ -352,7 +380,9 @@ function renderEdit(id) {
 
   content.textContent = '';
   content.append(form);
+  resetSheetTransform();
   panel.hidden = false;
+  setPanelOpen(true);
 }
 
 // ============================================================
@@ -402,7 +432,9 @@ function renderNewCustom({ lat, lng }) {
 
   content.textContent = '';
   content.append(form);
+  resetSheetTransform();
   panel.hidden = false;
+  setPanelOpen(true);
 }
 
 // ============================================================
@@ -419,8 +451,55 @@ async function openPoi(id) {
   if (currentId !== id) return; // 期間被切換,放棄
   content.textContent = '';
   content.append(buildView(p, urls));
+  resetSheetTransform();
   panel.hidden = false;
+  setPanelOpen(true);
   content.scrollTop = prevScroll;
+}
+
+// ============================================================
+// 手機 sheet 下拉手勢(僅 ≤768px 啟用)
+// ============================================================
+function initSheetGesture(handle) {
+  const mq = window.matchMedia('(max-width: 768px)');
+  let startY = 0, dy = 0, lastY = 0, lastT = 0, velocity = 0, dragging = false;
+
+  handle.addEventListener('pointerdown', (e) => {
+    if (!mq.matches || panel.hidden) return;
+    dragging = true;
+    startY = lastY = e.clientY;
+    lastT = e.timeStamp;
+    dy = 0; velocity = 0;
+    panel.style.transition = 'none';        // 拖曳期間關過場,跟指
+    try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+
+  handle.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    dy = Math.max(0, e.clientY - startY);   // 只允許向下
+    const dt = e.timeStamp - lastT;
+    if (dt > 0) velocity = (e.clientY - lastY) / dt;  // px/ms(向下為正)
+    lastY = e.clientY; lastT = e.timeStamp;
+    panel.style.transform = `translateY(${dy}px)`;
+  });
+
+  const end = (e) => {
+    if (!dragging) return;
+    dragging = false;
+    try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
+    panel.style.transition = '';            // 恢復 CSS 過場
+    const h = panel.getBoundingClientRect().height || 1;
+    if (dy > h * 0.25 || velocity > 0.5) {
+      // 關閉:先邏輯關閉(hidden 前 inline transform 仍在,面板停在 dy),再動畫滑到底
+      requestClose();
+      panel.style.transform = 'translateY(100%)';
+      setTimeout(() => { panel.style.transform = ''; }, 300);
+    } else {
+      panel.style.transform = '';           // 彈回原位(CSS 過場)
+    }
+  };
+  handle.addEventListener('pointerup', end);
+  handle.addEventListener('pointercancel', end);
 }
 
 // ============================================================
@@ -431,11 +510,18 @@ export function init() {
   content = $('#detail-content');
   if (!panel || !content) return;
 
+  // 手機 sheet 拖曳把手(桌機由 CSS 隱藏);插在面板頂端
+  const handle = el('div', { class: 'sheet-handle', 'aria-hidden': 'true' },
+    el('span', { class: 'sheet-handle-bar' }));
+  panel.insertBefore(handle, panel.firstChild);
+  initSheetGesture(handle);
+
+  // 手機背景遮罩(桌機由 CSS 隱藏);點擊關閉 sheet
+  const scrim = el('div', { class: 'detail-scrim', 'aria-hidden': 'true', onclick: requestClose });
+  document.body.appendChild(scrim);
+
   const closeBtn = $('#detail-close');
-  if (closeBtn) closeBtn.addEventListener('click', () => {
-    state.selectedId = null;
-    emit('select', { id: null, source: 'other' });
-  });
+  if (closeBtn) closeBtn.addEventListener('click', requestClose);
 
   on('select', ({ id }) => {
     if (id == null) close();

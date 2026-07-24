@@ -1,38 +1,42 @@
 // mapview.js — 地圖核心:底圖、marker/cluster、行程圖層、自訂路線、互動(合約見 docs/CONTRACTS.md)
 import { state, on, emit } from './state.js';
 import * as store from './store.js';
-import { debounce, escapeHtml } from './dom.js';
-import { BASE_LAYERS, MAP_CENTER, MAP_ZOOM, dayColor } from './config.js';
+import { debounce, escapeHtml, toast } from './dom.js';
+import { BASE_LAYERS, MAP_CENTER, MAP_ZOOM, dayColor, CATEGORIES, ROUTE_COLORS } from './config.js';
 import { routeDistance, fmtDistance, fmtDuration } from './geo.js';
-import { buildIcon, clusterIcon } from './markers.js';
-import { buildPopupHtml, bindPopupEvents } from './popup.js';
+import { buildIcon, buildFavoriteIcon, clusterIcon } from './markers.js';
+import { bindPopupEvents } from './popup.js';
+import { ICON } from './icons.js';
 
 const L = window.L;
 
 const TOOLTIP_ZOOM = 13;       // 此縮放以上開 permanent tooltip
 const TOOLTIP_MAX = 150;       // 視窗內 tooltip 超過此數只留 tier 1–2
 const FLY_MIN_ZOOM = 14;       // select 定位時的最小縮放
-const STAR_COLOR = '#f5b301';
-
-const POPUP_OPTS = {
-  className: 'poi-popup-wrap',
-  maxWidth: 280,
-  minWidth: 240,
-  autoPanPadding: [24, 24],
-  closeButton: true,
-};
+const STAR_COLOR = '#f5b301';  // = tokens --star,淺/深主題皆可讀(circleMarker canvas 不能用 var())
+const DEFAULT_ROUTE_COLOR = ROUTE_COLORS[1]; // 藍;F4 建立路線通常已帶色,此為 fallback
 
 let map = null;
-let clusterGroup = null;       // 整理模式
+let clusterGroup = null;       // 整理模式(非收藏點)
+let favoriteLayer = null;      // 整理模式:收藏點恆顯層(不 cluster)
 let itineraryLayer = null;     // 行程模式(marker+polyline+favorite dots)
 let routeLayer = null;         // 自訂路線
-const markerById = new Map();  // 目前模式下 id -> 主要 marker(供 flyTo/openPopup/選取高亮)
+const markerById = new Map();  // 目前模式下 id -> 主要 marker(供 flyTo/選取高亮/focus)
 const routeLines = new Map();  // routeId -> polyline
 const baseKeyByName = {};      // 圖層顯示名 -> BASE_LAYERS 的 key
+const baseLayerObjs = {};      // BASE_LAYERS 的 key -> L.tileLayer 實例
+let layersCtl = null;
+let userPickedBase = false;    // 使用者本 session 是否手動換過底圖
+let autoSwitching = false;     // 自動聯動底圖中,避免 baselayerchange 誤判為手動
 let hiddenDrawRouteId = null;  // 繪製中、暫時隱藏的常規路線
 let lastSelected = null;
+let placeChipPopup = null;     // 新增地點確認 chip
+let locateMarker = null;       // 定位結果 marker
+const legendItems = [];        // 分類圖例的按鈕(供 active 狀態同步)
 
 const isDesktop = () => window.matchMedia('(min-width: 769px)').matches;
+const cssVar = (name, fallback) =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 
 // ── 篩選 predicate(對 state.filters;規則以 CONTRACTS 為準,為 curate 模式唯一真值來源) ──
 function textMatch(poi, q) {
@@ -62,29 +66,25 @@ function passesFilter(poi) {
 }
 
 // ── marker 建立與互動 ──
-function openMarkerPopup(marker) {
-  if (!isDesktop() || !marker._poi) return;
-  const html = buildPopupHtml(marker._poi);
-  if (marker.getPopup()) marker.setPopupContent(html);
-  else marker.bindPopup(html, POPUP_OPTS);
-  marker.openPopup();
-}
-
+// 桌機/手機統一:marker click 只發 select（不再左鍵開 popup;popup 模組保留給路線/其他用途）
 function bindMarkerInteractions(marker, poi) {
   marker._poi = poi;
   marker.on('click', () => {
     if (state.uiMode === 'draw') return;
-    if (isDesktop()) {
-      openMarkerPopup(marker);
-    } else {
-      state.selectedId = poi.id;
-      emit('select', { id: poi.id, source: 'map' });
-    }
+    state.selectedId = poi.id;
+    emit('select', { id: poi.id, source: 'map' });
   });
 }
 
 function makePoiMarker(poi, mode) {
   const m = L.marker([poi.lat, poi.lng], { icon: buildIcon(poi, { mode }) });
+  bindMarkerInteractions(m, poi);
+  return m;
+}
+
+function makeFavoriteMarker(poi) {
+  const m = L.marker([poi.lat, poi.lng], { icon: buildFavoriteIcon(poi) });
+  m._fav = true;
   bindMarkerInteractions(m, poi);
   return m;
 }
@@ -101,20 +101,31 @@ function renderCurate() {
   clearItinerary();
   markerById.clear();
   clusterGroup.clearLayers();
-  const markers = [];
+  favoriteLayer.clearLayers();
+  const clustered = [];
   for (const poi of store.getPois()) {
     if (!passesFilter(poi)) continue;
-    const m = makePoiMarker(poi, 'curate');
-    markers.push(m);
-    markerById.set(poi.id, m);
+    if (poi._status === 'favorite') {
+      // 收藏點:不進 cluster,任何 zoom 恆顯
+      const m = makeFavoriteMarker(poi);
+      m.addTo(favoriteLayer);
+      markerById.set(poi.id, m);
+    } else {
+      const m = makePoiMarker(poi, 'curate');
+      clustered.push(m);
+      markerById.set(poi.id, m);
+    }
   }
-  clusterGroup.addLayers(markers);
+  clusterGroup.addLayers(clustered);
   if (!map.hasLayer(clusterGroup)) map.addLayer(clusterGroup);
+  if (!map.hasLayer(favoriteLayer)) map.addLayer(favoriteLayer);
 }
 
 function renderItinerary() {
   if (map.hasLayer(clusterGroup)) map.removeLayer(clusterGroup);
+  if (map.hasLayer(favoriteLayer)) map.removeLayer(favoriteLayer);
   clusterGroup.clearLayers();
+  favoriteLayer.clearLayers();
   itineraryLayer.clearLayers();
   markerById.clear();
 
@@ -139,7 +150,7 @@ function renderItinerary() {
       markerById.set(poi.id, m);
     }
   }
-  // favorite 未排程點:半透明小圓點(可點)
+  // favorite 未排程點:半透明小圓點(可點;白描邊 + 金填充於淺/深主題皆可讀)
   for (const poi of pois) {
     if (poi._day || poi._status !== 'favorite') continue;
     const dot = L.circleMarker([poi.lat, poi.lng], {
@@ -170,7 +181,7 @@ function renderRoutes() {
     const routed = r.mode && r.mode !== 'straight'
       && Array.isArray(r.geometry) && r.geometry.length > 1;
     const line = L.polyline(routed ? r.geometry : r.waypoints, {
-      color: r.color || '#4363d8', weight: 4, opacity: 0.85,
+      color: r.color || DEFAULT_ROUTE_COLOR, weight: 4, opacity: 0.85,
     });
     line.on('click', (e) => {
       if (state.uiMode === 'draw') return;
@@ -217,6 +228,9 @@ function updateTooltips() {
 const updateTooltipsDebounced = debounce(updateTooltips, 160);
 
 // ── 選取高亮:只更新受影響的兩個 marker 圖示 ──
+function iconForMarker(m) {
+  return m._fav ? buildFavoriteIcon(m._poi) : buildIcon(m._poi, { mode: state.viewMode });
+}
 function refreshSelection() {
   const cur = state.selectedId;
   if (cur === lastSelected) return;
@@ -224,43 +238,59 @@ function refreshSelection() {
     if (!id) continue;
     const m = markerById.get(id);
     if (m && m._poi && typeof m.setIcon === 'function') {
-      m.setIcon(buildIcon(m._poi, { mode: state.viewMode }));
+      m.setIcon(iconForMarker(m));
     }
   }
   lastSelected = cur;
 }
 
-// ── select 定位 ──
-function focusPoi(id, openPop) {
+// ── select 定位(不再開 popup) ──
+function focusPoi(id) {
   const m = markerById.get(id);
   if (!m) return;
   const targetZoom = Math.max(map.getZoom(), FLY_MIN_ZOOM);
   if (state.viewMode === 'curate' && clusterGroup.hasLayer(m)) {
     clusterGroup.zoomToShowLayer(m, () => {
       map.setView(m.getLatLng(), Math.max(map.getZoom(), FLY_MIN_ZOOM), { animate: true });
-      if (openPop) openMarkerPopup(m);
     });
   } else {
     map.flyTo(m.getLatLng(), targetZoom);
-    if (openPop) map.once('moveend', () => openMarkerPopup(m));
   }
 }
 
-// ── 底圖 ──
+// ── 底圖 + 主題聯動 ──
+function switchBaseLayer(key) {
+  const layer = baseLayerObjs[key];
+  if (!layer || map.hasLayer(layer)) return;
+  autoSwitching = true;
+  for (const [k, lyr] of Object.entries(baseLayerObjs)) {
+    if (k !== key && map.hasLayer(lyr)) map.removeLayer(lyr);
+  }
+  layer.addTo(map);
+  autoSwitching = false;
+}
+
 function setupBaseLayers() {
   const layers = {};
-  let currentKey = store.getSetting('baseLayer', 'carto-voyager');
-  if (!BASE_LAYERS[currentKey]) currentKey = 'carto-voyager';
+  let storeKey = store.getSetting('baseLayer', 'carto-voyager');
+  if (!BASE_LAYERS[storeKey]) storeKey = 'carto-voyager';
+
+  // 初始:dark 主題 + store 為淺色層 → 初始即用 carto-dark(但不覆寫 store)
+  const initialDark = document.documentElement.dataset.theme === 'dark';
+  const initialKey = (initialDark && storeKey !== 'carto-dark') ? 'carto-dark' : storeKey;
+
   for (const [key, cfg] of Object.entries(BASE_LAYERS)) {
-    layers[cfg.name] = L.tileLayer(cfg.url, cfg.options);
+    const lyr = L.tileLayer(cfg.url, cfg.options);
+    layers[cfg.name] = lyr;
+    baseLayerObjs[key] = lyr;
     baseKeyByName[cfg.name] = key;
   }
-  layers[BASE_LAYERS[currentKey].name].addTo(map);
+  baseLayerObjs[initialKey].addTo(map);
 
   // 國境線 overlay:兩國完整 OSM admin 邊界(陸界 + 領海界線;與底圖同源,
   // 界線走海上 12 海里線而非海岸線,不會與底圖海岸錯位)
   const bordersLayer = L.layerGroup();
-  const layersCtl = L.control.layers(layers, { '國境線': bordersLayer }, { position: 'topright' }).addTo(map);
+  layersCtl = L.control.layers(layers, { '國境線': bordersLayer }, { position: 'topright' }).addTo(map);
   fetch('./data/borders.json')
     .then((r) => r.json())
     .then((gj) => {
@@ -268,7 +298,7 @@ function setupBaseLayers() {
         interactive: false,
         attribution: '國界 &copy; EuroGeographics',
         style: (f) => ({
-          color: f.properties.iso === 'DK' ? '#c8102e' : '#005293',
+          color: f.properties.iso === 'DK' ? '#c8102e' : '#005293', // 國旗色,固定
           weight: 2, dashArray: '8 6', opacity: 0.7, fill: false,
         }),
       }).addTo(bordersLayer);
@@ -280,9 +310,154 @@ function setupBaseLayers() {
 
   map.on('baselayerchange', (e) => {
     const key = baseKeyByName[e.name];
-    if (key) store.setSetting('baseLayer', key);
+    if (!key) return;
+    if (autoSwitching) return;        // 主題聯動的自動切換:不記錄、不視為手動
+    userPickedBase = true;
+    store.setSetting('baseLayer', key);
   });
-  void layersCtl;
+}
+
+// ── 分類圖例 control(左下;點某分類 → toggle state.filters.categories) ──
+function onLegendClick(catKey) {
+  const cats = state.filters.categories;
+  const i = cats.indexOf(catKey);
+  if (i >= 0) cats.splice(i, 1);   // 再點取消
+  else cats.push(catKey);
+  emit('filter:changed');
+  updateLegendActive();
+}
+function updateLegendActive() {
+  const cats = state.filters.categories || [];
+  for (const btn of legendItems) {
+    btn.classList.toggle('is-active', cats.includes(btn.dataset.cat));
+  }
+}
+function addLegendControl() {
+  const Legend = L.Control.extend({
+    options: { position: 'bottomleft' },
+    onAdd() {
+      const c = L.DomUtil.create('div', 'map-legend');
+      if (!isDesktop()) c.classList.add('is-collapsed'); // 手機預設收合
+
+      const toggle = L.DomUtil.create('button', 'legend-toggle', c);
+      toggle.type = 'button';
+      toggle.textContent = '分類圖例';
+      toggle.setAttribute('aria-expanded', String(isDesktop()));
+
+      const body = L.DomUtil.create('div', 'legend-body', c);
+      legendItems.length = 0;
+      for (const [key, cfg] of Object.entries(CATEGORIES)) {
+        const item = L.DomUtil.create('button', 'legend-item', body);
+        item.type = 'button';
+        item.dataset.cat = key;
+        const dot = L.DomUtil.create('span', 'legend-dot', item);
+        dot.style.setProperty('--c', cfg.color);
+        const label = document.createElement('span');
+        label.textContent = cfg.zh;
+        item.appendChild(label);
+        L.DomEvent.on(item, 'click', (ev) => { L.DomEvent.stop(ev); onLegendClick(key); });
+        legendItems.push(item);
+      }
+
+      L.DomEvent.on(toggle, 'click', (ev) => {
+        L.DomEvent.stop(ev);
+        const collapsed = c.classList.toggle('is-collapsed');
+        toggle.setAttribute('aria-expanded', String(!collapsed));
+      });
+
+      L.DomEvent.disableClickPropagation(c);
+      L.DomEvent.disableScrollPropagation(c);
+      updateLegendActive();
+      return c;
+    },
+  });
+  new Legend().addTo(map);
+}
+
+// ── 定位鈕 + 縮放至可見點鈕(左上,zoom 之下) ──
+function locateUser() {
+  if (!navigator.geolocation) { toast('此裝置不支援定位功能'); return; }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const ll = [pos.coords.latitude, pos.coords.longitude];
+      if (locateMarker) map.removeLayer(locateMarker);
+      locateMarker = L.circleMarker(ll, {
+        radius: 8, weight: 3, color: '#fff',
+        fillColor: cssVar('--primary', '#328a97'), fillOpacity: 0.95,
+      }).addTo(map);
+      map.flyTo(ll, Math.max(map.getZoom(), 13));
+    },
+    (err) => {
+      toast(err.code === err.PERMISSION_DENIED ? '定位權限被拒絕,請於瀏覽器開啟' : '無法取得您的位置');
+    },
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
+  );
+}
+function fitToVisible() {
+  const pts = [];
+  for (const m of markerById.values()) {
+    if (typeof m.getLatLng === 'function') pts.push(m.getLatLng());
+  }
+  if (!pts.length) { toast('目前沒有可顯示的地點'); return; }
+  map.fitBounds(L.latLngBounds(pts), { padding: [48, 48], maxZoom: 15 });
+}
+function addMapTools() {
+  const mkBtn = (svg, title, handler) => {
+    const a = document.createElement('a');
+    a.href = '#';
+    a.className = 'map-tool-btn';
+    a.title = title;
+    a.setAttribute('role', 'button');
+    a.setAttribute('aria-label', title);
+    a.innerHTML = svg;
+    L.DomEvent.on(a, 'click', (ev) => { L.DomEvent.stop(ev); handler(); });
+    return a;
+  };
+  const Tools = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd() {
+      const bar = L.DomUtil.create('div', 'leaflet-bar map-tools');
+      bar.appendChild(mkBtn(ICON.locate, '定位我的位置', locateUser));
+      bar.appendChild(mkBtn(ICON.fit, '縮放至目前可見的地點', fitToVisible));
+      L.DomEvent.disableClickPropagation(bar);
+      return bar;
+    },
+  });
+  new Tools().addTo(map);
+}
+
+// ── 雙擊 / 長按:開確認 chip,點按鈕才真正新增(防誤觸) ──
+function closePlaceChip() {
+  if (placeChipPopup) {
+    map.closePopup(placeChipPopup);
+    placeChipPopup = null;
+  }
+}
+function openPlaceChip(latlng) {
+  closePlaceChip();
+  const popup = L.popup({
+    className: 'place-chip-wrap',
+    closeButton: false,
+    autoClose: true,
+    closeOnClick: true,
+    autoPan: false,
+    offset: [0, -6],
+  })
+    .setLatLng(latlng)
+    .setContent(
+      `<button type="button" class="place-chip-btn">${ICON.plus}<span>在此新增地點</span></button>`)
+    .openOn(map);
+  placeChipPopup = popup;
+  const elm = popup.getElement();
+  const btn = elm && elm.querySelector('.place-chip-btn');
+  if (btn) {
+    L.DomEvent.on(btn, 'click', (ev) => {
+      L.DomEvent.stop(ev);
+      closePlaceChip();
+      emit('custom:place', { lat: latlng.lat, lng: latlng.lng });
+    });
+  }
+  map.once('movestart', closePlaceChip);   // 地圖 move 自動關
 }
 
 // ── 入口 ──
@@ -300,24 +475,23 @@ export function init() {
   clusterGroup = L.markerClusterGroup({
     chunkedLoading: true,
     maxClusterRadius: 50,
-    disableClusteringAtZoom: 13,
+    disableClusteringAtZoom: 14,
     spiderfyOnMaxZoom: true,
-    zoomToBoundsOnClick: false, // draw 模式需攔截 cluster 點擊,改由下方手動處理
     iconCreateFunction: clusterIcon,
+    // zoomToBoundsOnClick 預設 true;draw 模式改於執行期切 options(vendor 點擊時動態讀)
   });
-  clusterGroup.on('clusterclick', (e) => {
-    if (state.uiMode === 'draw') return;
-    e.layer.zoomToBounds({ padding: [20, 20] });
-  });
+  favoriteLayer = L.layerGroup();
   itineraryLayer = L.layerGroup();
   routeLayer = L.layerGroup().addTo(map);
 
   bindPopupEvents(map);
+  addLegendControl();
+  addMapTools();
 
-  // 地圖互動:雙擊 / 長按(contextmenu)新增自訂點
+  // 地圖互動:雙擊 / 長按(contextmenu)→ 確認 chip
   const placeHandler = (e) => {
     if (state.uiMode === 'draw') return;
-    emit('custom:place', { lat: e.latlng.lat, lng: e.latlng.lng });
+    openPlaceChip(e.latlng);
   };
   map.on('dblclick', placeHandler);
   map.on('contextmenu', placeHandler);
@@ -326,6 +500,26 @@ export function init() {
   map.on('moveend', updateTooltipsDebounced);
   clusterGroup.on('animationend', updateTooltipsDebounced);
 
+  // detail 面板開合 → 地圖尺寸失效重算(立即一次 + 過場結束再一次)
+  window.addEventListener('detailtoggle', () => {
+    if (!map) return;
+    map.invalidateSize();
+    setTimeout(() => { if (map) map.invalidateSize(); }, 260);
+  });
+
+  // 主題切換 → 底圖聯動(使用者手動選過就不再自動聯動)
+  window.addEventListener('themechange', (e) => {
+    if (userPickedBase) return;
+    const theme = e.detail?.theme;
+    if (theme === 'dark') {
+      switchBaseLayer('carto-dark');
+    } else if (theme === 'light') {
+      let key = store.getSetting('baseLayer', 'carto-voyager');
+      if (!BASE_LAYERS[key]) key = 'carto-voyager';
+      switchBaseLayer(key);
+    }
+  });
+
   // ── 事件匯流排 ──
   on('pois:ready', () => { renderPois(); renderRoutes(); });
   on('overlay:changed', ({ type } = {}) => {
@@ -333,25 +527,30 @@ export function init() {
     renderPois();
     if (type === 'import' || type === 'reset') renderRoutes();
   });
-  on('filter:changed', () => renderPois());
+  on('filter:changed', () => { renderPois(); updateLegendActive(); });
   on('mode:changed', () => renderPois());
   on('day:visibility', () => { if (state.viewMode === 'itinerary') renderPois(); });
 
   on('select', ({ id, source } = {}) => {
     refreshSelection();
     if (source === 'map' || id == null) return;
-    focusPoi(id, isDesktop());
+    focusPoi(id);
   });
 
-  // 繪製模式:隱藏 / 恢復被編輯的常規路線,並切換 crosshair 游標
+  // 繪製模式:隱藏 / 恢復被編輯的常規路線、切 crosshair 游標,並停用 cluster 點擊縮放/spiderfy
   on('draw:start', ({ routeId } = {}) => {
     document.body.classList.add('map-draw');
     hiddenDrawRouteId = routeId ?? null;
+    clusterGroup.options.zoomToBoundsOnClick = false;
+    clusterGroup.options.spiderfyOnMaxZoom = false;
+    closePlaceChip();
     renderRoutes();
   });
   on('draw:end', () => {
     document.body.classList.remove('map-draw');
     hiddenDrawRouteId = null;
+    clusterGroup.options.zoomToBoundsOnClick = true;
+    clusterGroup.options.spiderfyOnMaxZoom = true;
     renderRoutes();
   });
 

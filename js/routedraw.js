@@ -187,11 +187,10 @@ function redrawNew() {
     layer.addLayer(poly);
   }
   points.forEach((p) => {
-    const cm = L().circleMarker(p, {
-      radius: 5, color: '#ffffff', weight: 2, fillColor: workColor, fillOpacity: 1, interactive: false,
-    });
-    layer.addLayer(cm);
-    nodeMarkers.push(cm);
+    // 用 divIcon(DOM)取代 circleMarker,節點邊框走主題 token;非互動,點擊穿透到地圖加點
+    const m = L().marker(p, { icon: previewIcon(), interactive: false, keyboard: false });
+    layer.addLayer(m);
+    nodeMarkers.push(m);
   });
 }
 
@@ -229,17 +228,26 @@ function midpoint(a, b) {
 
 function nodeIcon(selected) {
   const size = selected ? 18 : 13;
-  const border = selected ? '#111111' : '#ffffff';
+  // 選中=高對比 --text 邊框;未選=與介面表面同色的 --bg 邊框,外加 --border 細描邊定義輪廓(兩主題皆可讀)
+  const border = selected ? 'var(--text)' : 'var(--bg)';
   const html = `<span style="display:block;width:${size}px;height:${size}px;border-radius:50%;`
-    + `background:${workColor};border:2px solid ${border};box-shadow:0 0 0 1px rgba(0,0,0,.3)"></span>`;
+    + `background:${workColor};border:2px solid ${border};box-shadow:0 0 0 1px var(--border)"></span>`;
   return L().divIcon({ className: 'route-node-icon', html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 }
 
 function ghostIcon() {
   const s = 11;
   const html = `<span style="display:block;width:${s}px;height:${s}px;border-radius:50%;`
-    + `background:${workColor};opacity:.55;border:1px dashed #ffffff"></span>`;
+    + `background:${workColor};opacity:.55;border:1px dashed var(--bg)"></span>`;
   return L().divIcon({ className: 'route-ghost-icon', html, iconSize: [s, s], iconAnchor: [s / 2, s / 2] });
+}
+
+// 新繪模式的預覽節點(非互動;邊框走主題 token,與編輯模式一致)
+function previewIcon() {
+  const s = 11;
+  const html = `<span style="display:block;width:${s}px;height:${s}px;border-radius:50%;`
+    + `background:${workColor};border:2px solid var(--bg);box-shadow:0 0 0 1px var(--border)"></span>`;
+  return L().divIcon({ className: 'route-preview-icon', html, iconSize: [s, s], iconAnchor: [s / 2, s / 2] });
 }
 
 function redrawEdit() {

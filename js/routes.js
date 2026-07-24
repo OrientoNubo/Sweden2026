@@ -3,6 +3,7 @@
 import { $, el, toast } from './dom.js';
 import { state, on } from './state.js';
 import { TRIP_DAYS, dayLabel, ROUTE_COLORS } from './config.js';
+import { ICON, iconEl } from './icons.js';
 import * as store from './store.js';
 import * as gmaps from './gmaps.js';
 import * as routedraw from './routedraw.js';
@@ -97,26 +98,24 @@ function routeRow(r) {
 
   const visBtn = el('button', {
     class: 'btn-icon', title: visible ? '隱藏路線' : '顯示路線',
+    'aria-label': visible ? '隱藏路線' : '顯示路線',
     onclick: (e) => { e.stopPropagation(); store.updateRoute(r.id, { visible: !visible }); },
-  }, visible ? '👁' : '🙈');
+  }, iconEl(visible ? ICON.eye : ICON.eyeOff));
 
   const editBtn = el('button', {
-    class: 'btn-icon', title: '編輯節點',
+    class: 'btn-icon', title: '編輯節點', 'aria-label': '編輯節點',
     onclick: (e) => { e.stopPropagation(); if (state.uiMode === 'draw') return; routedraw.startEdit(r.id); },
-  }, '✏️');
+  }, iconEl(ICON.edit));
 
   const mapsBtn = el('button', {
-    class: 'btn-icon', title: '在 Google Maps 開啟',
+    class: 'btn-icon', title: '在 Google Maps 開啟', 'aria-label': '在 Google Maps 開啟',
     onclick: (e) => { e.stopPropagation(); openInMaps(r); },
-  }, '🗺');
+  }, iconEl(ICON.gmaps));
 
   const delBtn = el('button', {
-    class: 'btn-icon danger', title: '刪除路線',
-    onclick: (e) => {
-      e.stopPropagation();
-      if (confirm(`確定刪除「${r.name || '此路線'}」?`)) store.deleteRoute(r.id);
-    },
-  }, '🗑');
+    class: 'btn-icon danger', title: '刪除路線', 'aria-label': '刪除路線',
+    onclick: (e) => { e.stopPropagation(); deleteRouteWithUndo(r); },
+  }, iconEl(ICON.trash));
 
   const bottom = el('div', { class: 'route-bottom' },
     modeSel, daySel, el('div', { class: 'route-actions' }, visBtn, editBtn, mapsBtn, delBtn));
@@ -134,6 +133,34 @@ function setRouteMode(r, mode) {
   store.updateRoute(r.id, { mode });
   toast('沿道路規劃中…');
   routing.recomputeIfRouted(r.id);
+}
+
+// ---- 刪除路線(可復原) ----
+// store 無還原 API,故先完整快照路線物件,undo 時以 addRoute + updateRoute 重建
+// (id 會不同,但名稱/顏色/日期/節點/模式/道路快取/顯示狀態皆還原)。
+function deleteRouteWithUndo(r) {
+  const snap = {
+    name: r.name, color: r.color, note: r.note, day: r.day,
+    visible: r.visible !== false, mode: r.mode || 'straight',
+    geometry: r.geometry ?? null,
+    road_distance: r.road_distance ?? null,
+    road_duration: r.road_duration ?? null,
+    waypoints: (r.waypoints || []).map((w) => [...w]),
+  };
+  store.deleteRoute(r.id);
+  toast('已刪除路線', {
+    actionLabel: '復原',
+    onAction: () => {
+      const id = store.addRoute({
+        name: snap.name, color: snap.color, note: snap.note,
+        day: snap.day, waypoints: snap.waypoints,
+      });
+      store.updateRoute(id, {
+        visible: snap.visible, mode: snap.mode, geometry: snap.geometry,
+        road_distance: snap.road_distance, road_duration: snap.road_duration,
+      });
+    },
+  });
 }
 
 // ---- 點路線項 → fitBounds ----

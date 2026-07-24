@@ -1,5 +1,5 @@
 {
-  "version": "2026-07-24",
+  "version": "2026-07-25",
   "files": [
     "pois/dk-bornholm.json",
     "pois/dk-cph-core.json",
@@ -11,6 +11,7 @@
     "pois/se-lund-nw.json",
     "pois/se-malmo.json",
     "pois/se-north.json",
+    "pois/se-ostergotland.json",
     "pois/se-skane-se.json",
     "pois/se-smaland-gotland.json",
     "pois/se-sthlm-core.json",

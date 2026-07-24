@@ -2,19 +2,13 @@
 // 合約見 docs/CONTRACTS.md。
 import { state, emit, on } from './state.js';
 import { $, $$, el, toast } from './dom.js';
-import { CATEGORIES, TIER_LABELS, TRIP_DAYS, dayLabel } from './config.js';
+import { CATEGORIES, TIER_LABELS, TRIP_DAYS, dayLabel, fmtStay } from './config.js';
+import { ICON, iconEl } from './icons.js';
 import * as store from './store.js';
 import { applyFilters } from './filters.js';
 
 const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 function closeSidebar() { document.body.classList.remove('sidebar-open'); }
-
-function fmtStay(p) {
-  const a = p.stay_min, b = p.stay_max;
-  if (a == null && b == null) return null;
-  if (a != null && b != null && a !== b) return `停留 ${a}–${b} 分`;
-  return `停留 ${a ?? b} 分`;
-}
 
 function catInfo(cat) {
   return CATEGORIES[cat] || { zh: cat || '其他', glyph: '📍', color: '#888888' };
@@ -46,29 +40,37 @@ function daySelect(p) {
 function listItem(p) {
   const c = catInfo(p.category);
   const fav = p._status === 'favorite';
-  const subParts = [p.city, c.zh, `Tier ${p.tier}`, fmtStay(p)].filter(Boolean);
+  const stay = fmtStay(p.stay_min, p.stay_max);
+  const subParts = [
+    p.city, c.zh,
+    p.tier ? `Tier ${p.tier}` : null,
+    stay ? `停留 ${stay}` : null,
+  ].filter(Boolean);
 
   const favBtn = el('button', {
     class: 'btn-icon' + (fav ? ' on' : ''),
     title: fav ? '取消收藏' : '收藏',
+    'aria-label': fav ? '取消收藏' : '收藏',
     onclick: (e) => { e.stopPropagation(); store.setStatus(p.id, fav ? null : 'favorite'); },
-  }, fav ? '⭐' : '☆');
+  }, iconEl(fav ? ICON.starFill : ICON.starOutline, fav ? 'ico-fav' : undefined));
 
   const delBtn = el('button', {
     class: 'btn-icon',
     title: '移入回收站',
+    'aria-label': '移入回收站',
     onclick: (e) => {
       e.stopPropagation();
       store.setStatus(p.id, 'deleted');
-      toast('已移入回收站,可在回收站還原');
+      toast('已移至回收站', { actionLabel: '復原', onAction: () => store.setStatus(p.id, null) });
     },
-  }, '🗑');
+  }, iconEl(ICON.trash));
 
   const locateBtn = el('button', {
     class: 'btn-icon',
     title: '在地圖定位',
+    'aria-label': '在地圖定位',
     onclick: (e) => { e.stopPropagation(); select(p.id); },
-  }, '📍');
+  }, iconEl(ICON.locate));
 
   const item = el('div', {
     class: 'list-item' + (p.id === state.selectedId ? ' active' : ''),
@@ -77,10 +79,10 @@ function listItem(p) {
   },
     thumb(p),
     el('div', { class: 'li-body' },
-      el('div', { class: 'li-title' }, (fav ? '⭐ ' : '') + (p.name?.zh || p.name?.local || '(未命名)')),
+      el('div', { class: 'li-title' }, p.name?.zh || p.name?.local || '(未命名)'),
       el('div', { class: 'li-sub' }, subParts.join(' · ')),
     ),
-    el('div', { class: 'li-actions' }, favBtn, delBtn, daySelect(p), locateBtn),
+    el('div', { class: 'li-actions' }, favBtn, delBtn, locateBtn, daySelect(p)),
   );
   return item;
 }

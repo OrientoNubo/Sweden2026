@@ -27,6 +27,17 @@ function emptyOverlay() {
   };
 }
 
+// 只保留 value 為陣列的 day 條目,避免匯入/損毀資料讓下游（rebuild/getItinerary/
+// removeFromItinerary）在非陣列上呼叫陣列方法而崩潰。
+function sanitizeItinerary(obj) {
+  if (!obj || typeof obj !== 'object') return {};
+  const out = {};
+  for (const [day, ids] of Object.entries(obj)) {
+    if (Array.isArray(ids)) out[day] = ids;
+  }
+  return out;
+}
+
 function normalizeOverlay(obj) {
   const skel = emptyOverlay();
   if (!obj || typeof obj !== 'object') return skel;
@@ -35,10 +46,11 @@ function normalizeOverlay(obj) {
     baseVersion: obj.baseVersion || manifestVersion,
     updatedAt: obj.updatedAt || skel.updatedAt,
     poiState: (obj.poiState && typeof obj.poiState === 'object') ? obj.poiState : {},
-    customPois: Array.isArray(obj.customPois) ? obj.customPois : [],
-    itinerary: (obj.itinerary && typeof obj.itinerary === 'object') ? obj.itinerary : {},
+    // 濾掉 null / 非物件元素,否則 rebuild(effectivePoi 讀 c.id)與 getRoutes(讀 r.waypoints)會崩潰。
+    customPois: Array.isArray(obj.customPois) ? obj.customPois.filter((c) => c && typeof c === 'object') : [],
+    itinerary: sanitizeItinerary(obj.itinerary),
     dayNotes: (obj.dayNotes && typeof obj.dayNotes === 'object') ? obj.dayNotes : {},
-    routes: Array.isArray(obj.routes) ? obj.routes : [],
+    routes: Array.isArray(obj.routes) ? obj.routes.filter((r) => r && typeof r === 'object') : [],
     settings: (obj.settings && typeof obj.settings === 'object') ? obj.settings : {},
   };
 }
@@ -349,7 +361,18 @@ export function deleteRoute(id) {
 }
 
 export function getRoutes() {
+  // 填預設再展開 r：匯入舊/不完整備份時,缺的欄位(mode/visible/geometry…)有合理值,
+  // 下游(F4 routes/routedraw)不會讀到 undefined。真實值一律以 r 為準。
   return overlay.routes.map((r) => ({
+    name: '未命名路線',
+    color: ROUTE_COLORS[0],
+    note: '',
+    day: null,
+    visible: true,
+    mode: 'straight',
+    geometry: null,
+    road_distance: null,
+    road_duration: null,
     ...r,
     waypoints: Array.isArray(r.waypoints) ? r.waypoints.map((w) => [...w]) : [],
   }));

@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sweden2026 · ECCV 2026 行程地圖</title>
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<script>
+  // no-flash:CSS 載入前先定主題,避免閃白/閃黑
+  (function () {
+    try {
+      var p = localStorage.getItem('sweden2026:theme');
+      var dark = (p === 'dark') || (p !== 'light' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    } catch (e) {}
+  })();
+</script>
 <link rel="stylesheet" href="./vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="./vendor/leaflet.markercluster/MarkerCluster.css">
 <link rel="stylesheet" href="./vendor/leaflet.markercluster/MarkerCluster.Default.css">
@@ -27,6 +38,7 @@
       <button data-mode="itinerary">行程</button>
     </div>
     <div class="toolbar-actions">
+      <button id="theme-btn" class="btn-icon" title="主題:跟隨系統" aria-label="主題:跟隨系統"></button>
       <button id="btn-export" class="btn" title="下載備份 JSON">匯出</button>
       <button id="btn-import" class="btn" title="還原備份 JSON">匯入</button>
       <input type="file" id="file-import" accept="application/json" hidden>

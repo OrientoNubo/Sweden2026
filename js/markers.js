@@ -2,10 +2,12 @@
 import { state } from './state.js';
 import { CATEGORIES, dayColor } from './config.js';
 import { escapeHtml } from './dom.js';
+import { ICON } from './icons.js';
 
 const L = window.L;
 
 const ICON_SIZE = 30;
+const FAV_SIZE = 36;           // 收藏星形略大於一般 pin
 
 /**
  * 依 POI 與情境產生 marker 圖示。
@@ -42,6 +44,24 @@ export function buildIcon(poi, ctx = {}) {
     iconAnchor: [ICON_SIZE / 2, ICON_SIZE / 2],
     popupAnchor: [0, -ICON_SIZE / 2 - 4],
     tooltipAnchor: [0, -ICON_SIZE / 2 - 4],
+  });
+}
+
+/**
+ * 收藏(_status==='favorite')恆顯星形 marker。
+ * 金色填充(--star)+ 描邊(CSS paint-order)確保淺/深主題皆可讀;點擊行為與一般 marker 相同。
+ */
+export function buildFavoriteIcon(poi) {
+  const selected = poi.id === state.selectedId;
+  const selCls = selected ? ' mk-sel' : '';
+  const html = `<div class="mk-fav${selCls}">${ICON.starFill}</div>`;
+  return L.divIcon({
+    html,
+    className: 'mk-wrap',
+    iconSize: [FAV_SIZE, FAV_SIZE],
+    iconAnchor: [FAV_SIZE / 2, FAV_SIZE / 2],
+    popupAnchor: [0, -FAV_SIZE / 2 - 4],
+    tooltipAnchor: [0, -FAV_SIZE / 2 - 4],
   });
 }
 

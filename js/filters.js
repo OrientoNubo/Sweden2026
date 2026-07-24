@@ -170,6 +170,10 @@ export function init() {
   on('overlay:changed', (p) => {
     if (p && ['custom', 'import', 'reset'].includes(p.type)) rebuildCities();
   });
+
+  // 外部改動 state.filters(如地圖圖例點擊)後,重繪篩選列同步 chip / select 選中狀態。
+  // render 不 emit,無回圈;本模組自身的變更亦走同事件,重繪為冪等。
+  on('filter:changed', render);
 }
 
 /** 純函式:依 state.filters 篩選 POI 陣列 */

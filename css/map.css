@@ -68,6 +68,38 @@
   z-index: 600;
 }
 
+/* ── 收藏恆顯星形 marker ── */
+.mk-fav {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--star);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .5));
+  transition: transform .1s ease;
+}
+.mk-fav svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+/* 描邊(paint-order:stroke 讓白邊落在填色下方形成外框),深/淺主題皆可讀 */
+.mk-fav svg polygon {
+  stroke: #fff;
+  stroke-width: 1.2;
+  paint-order: stroke;
+}
+.mk-wrap:hover .mk-fav {
+  transform: scale(1.12);
+  z-index: 500;
+}
+.mk-fav.mk-sel {
+  box-shadow: none;
+  filter: drop-shadow(0 0 2px var(--primary)) drop-shadow(0 0 4px var(--primary))
+    drop-shadow(0 1px 2px rgba(0, 0, 0, .5));
+}
+
 /* ── cluster ── */
 .cl-wrap {
   background: none;
@@ -86,13 +118,19 @@
   border: 2px solid rgba(255, 255, 255, .9);
   box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
 }
-.cl-sm { background: #4a80c4; font-size: 13px; width: 34px; height: 34px; }
-.cl-md { background: #3665a8; font-size: 14px; width: 40px; height: 40px; }
-.cl-lg { background: #244a80; font-size: 15px; width: 48px; height: 48px; }
+/* 三階以 --primary(#328a97)為基底,漸深;不支援 color-mix 時退回等價 hex */
+.cl-sm { background: #328a97; font-size: 13px; width: 34px; height: 34px; }
+.cl-md { background: #276c76; font-size: 14px; width: 40px; height: 40px; }
+.cl-lg { background: #1e535b; font-size: 15px; width: 48px; height: 48px; }
+@supports (color: color-mix(in srgb, red, blue)) {
+  .cl-sm { background: var(--primary); }
+  .cl-md { background: color-mix(in srgb, var(--primary) 78%, #000); }
+  .cl-lg { background: color-mix(in srgb, var(--primary) 58%, #000); }
+}
 
-/* ── permanent tooltip(名稱小字,白底陰影) ── */
+/* ── permanent tooltip(名稱小字,token 化;隨主題翻色) ── */
 .leaflet-tooltip.poi-tip {
-  background: rgba(255, 255, 255, .95);
+  background: var(--bg-soft);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
@@ -103,7 +141,7 @@
   white-space: nowrap;
 }
 .leaflet-tooltip.poi-tip::before {
-  border-top-color: rgba(255, 255, 255, .95);
+  border-top-color: var(--bg-soft);
 }
 
 /* ── popup 迷你卡 ── */
@@ -183,6 +221,10 @@
 }
 .pp-btn {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   padding: 6px 4px;
   font-size: 12px;
   border: 1px solid var(--border);
@@ -192,6 +234,11 @@
   cursor: pointer;
   white-space: nowrap;
   transition: background .12s ease, border-color .12s ease;
+}
+.pp-btn svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
 }
 .pp-btn:hover {
   background: var(--bg-hover);
@@ -219,7 +266,171 @@
   font-size: 12px;
 }
 
-/* ── 手機(≤768px):不顯示 popup(JS 不 bind),放大 cluster 觸控目標 ── */
+/* ── 新增地點確認 chip(雙擊/長按防誤觸) ── */
+.place-chip-wrap .leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--primary);
+  box-shadow: var(--shadow-lg);
+}
+.place-chip-wrap .leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+}
+.place-chip-wrap .leaflet-popup-tip {
+  background: var(--primary);
+}
+.place-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.place-chip-btn svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+.place-chip-btn:hover {
+  filter: brightness(.94);
+}
+
+/* ── 分類圖例 control(左下) ── */
+.map-legend {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-family: var(--font);
+  color: var(--text);
+  overflow: hidden;
+  max-width: 190px;
+}
+.legend-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  background: var(--bg-soft);
+  color: var(--text);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+.legend-toggle::after {
+  content: "▾";
+  font-size: 10px;
+  transition: transform .15s ease;
+}
+.map-legend.is-collapsed .legend-toggle::after {
+  transform: rotate(-90deg);
+}
+.map-legend.is-collapsed .legend-body {
+  display: none;
+}
+.legend-body {
+  display: grid;
+  gap: 1px;
+  padding: 4px;
+  max-height: 44vh;
+  overflow-y: auto;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.legend-item:hover {
+  background: var(--bg-hover);
+}
+.legend-item.is-active {
+  background: var(--accent-soft);
+  font-weight: 700;
+}
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--c, #888);
+  border: 1px solid rgba(0, 0, 0, .18);
+}
+.legend-item.is-active .legend-dot {
+  box-shadow: 0 0 0 2px var(--accent-border);
+}
+
+/* ── 定位 / 縮放至可見點 工具鈕(左上) ── */
+.leaflet-bar a.map-tool-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  background: var(--bg);
+}
+.leaflet-bar a.map-tool-btn:hover {
+  background: var(--bg-hover);
+}
+.map-tool-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── 暗色主題:覆寫 Leaflet 內建元件的硬白底 ── */
+:root[data-theme="dark"] .leaflet-popup-content-wrapper,
+:root[data-theme="dark"] .leaflet-popup-tip {
+  background: var(--bg);
+  color: var(--text);
+}
+:root[data-theme="dark"] .leaflet-bar a,
+:root[data-theme="dark"] .leaflet-bar a:hover {
+  background: var(--bg);
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+:root[data-theme="dark"] .leaflet-bar a:hover {
+  background: var(--bg-hover);
+}
+:root[data-theme="dark"] .leaflet-control-layers,
+:root[data-theme="dark"] .leaflet-control-layers-expanded {
+  background: var(--bg);
+  color: var(--text);
+  border-color: var(--border);
+}
+:root[data-theme="dark"] .leaflet-control-attribution {
+  background: rgba(20, 20, 20, .75);
+  color: var(--text-sub);
+}
+:root[data-theme="dark"] .leaflet-control-attribution a {
+  color: var(--text-sub);
+}
+/* place chip 於暗色維持 primary 底、白字,無需覆寫 */
+
+/* ── 手機(≤768px):放大 cluster / marker 觸控目標 ── */
 @media (max-width: 768px) {
   .cl-sm { width: 40px; height: 40px; font-size: 14px; }
   .cl-md { width: 46px; height: 46px; font-size: 15px; }
