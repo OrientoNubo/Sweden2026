@@ -24,6 +24,13 @@ export function fmtDistance(m) {
   return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(m < 10000 ? 1 : 0)} km`;
 }
 
+/** 秒數 → '25 分' / '1 小時 20 分' */
+export function fmtDuration(s) {
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m} 分`;
+  return `${Math.floor(m / 60)} 小時 ${m % 60} 分`;
+}
+
 /** 一組 [lat,lng] 的 L.latLngBounds;空陣列回傳 null */
 export function boundsOf(points) {
   if (!points.length) return null;

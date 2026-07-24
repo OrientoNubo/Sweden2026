@@ -3,7 +3,7 @@ import { state, on, emit } from './state.js';
 import * as store from './store.js';
 import { debounce, escapeHtml } from './dom.js';
 import { BASE_LAYERS, MAP_CENTER, MAP_ZOOM, dayColor } from './config.js';
-import { routeDistance, fmtDistance } from './geo.js';
+import { routeDistance, fmtDistance, fmtDuration } from './geo.js';
 import { buildIcon, clusterIcon } from './markers.js';
 import { buildPopupHtml, bindPopupEvents } from './popup.js';
 
@@ -167,17 +167,21 @@ function renderRoutes() {
     if (r.visible === false) continue;
     if (hiddenDrawRouteId && r.id === hiddenDrawRouteId) continue;
     if (!r.waypoints || r.waypoints.length < 2) continue;
-    const line = L.polyline(r.waypoints, {
+    const routed = r.mode && r.mode !== 'straight'
+      && Array.isArray(r.geometry) && r.geometry.length > 1;
+    const line = L.polyline(routed ? r.geometry : r.waypoints, {
       color: r.color || '#4363d8', weight: 4, opacity: 0.85,
     });
     line.on('click', (e) => {
       if (state.uiMode === 'draw') return;
-      const dist = fmtDistance(routeDistance(r.waypoints));
+      const info = routed
+        ? `${fmtDistance(r.road_distance)} · 約 ${fmtDuration(r.road_duration)}`
+        : fmtDistance(routeDistance(r.waypoints));
       L.popup({ className: 'route-pop-wrap' })
         .setLatLng(e.latlng)
         .setContent(
           `<div class="route-pop"><b>${escapeHtml(r.name || '自訂路線')}</b>` +
-          `<span class="muted">${escapeHtml(dist)}</span></div>`)
+          `<span class="muted">${escapeHtml(info)}</span></div>`)
         .openOn(map);
     });
     line.addTo(routeLayer);

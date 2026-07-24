@@ -336,9 +336,12 @@ function deleteNode(i) {
 
 function finishEdit() {
   if (points.length < 2) { toast('路線至少需 2 個節點'); return; }
-  store.updateRoute(editRouteId, { waypoints: points.slice() });
+  const id = editRouteId;
+  store.updateRoute(id, { waypoints: points.slice() });
   exitDraw();
   toast('路線已更新');
+  // 非直線模式的路線,節點變更後自動沿道路重算
+  import('./routing.js').then((m) => m.recomputeIfRouted(id)).catch(() => {});
 }
 
 function cancelEdit() {

@@ -169,3 +169,6 @@
   .color-popover { grid-template-columns: repeat(6, 26px); }
   .color-cell { width: 26px; height: 26px; }
 }
+
+/* ── 路徑模式選單(沿道路規劃) ── */
+.route-mode { max-width: 92px; flex: 0 0 auto; }

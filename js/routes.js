@@ -6,7 +6,8 @@ import { TRIP_DAYS, dayLabel, ROUTE_COLORS } from './config.js';
 import * as store from './store.js';
 import * as gmaps from './gmaps.js';
 import * as routedraw from './routedraw.js';
-import { routeDistance, fmtDistance, boundsOf } from './geo.js';
+import * as routing from './routing.js';
+import { routeDistance, fmtDistance, fmtDuration, boundsOf } from './geo.js';
 
 export function init() {
   const btn = $('#btn-new-route');
@@ -46,7 +47,10 @@ function render() {
 
 function routeRow(r) {
   const wp = r.waypoints || [];
-  const dist = fmtDistance(routeDistance(wp));
+  const routed = r.mode && r.mode !== 'straight' && Array.isArray(r.geometry) && r.geometry.length > 1;
+  const dist = routed
+    ? `${fmtDistance(r.road_distance)} · 約 ${fmtDuration(r.road_duration)}`
+    : fmtDistance(routeDistance(wp));
   const visible = r.visible !== false;
 
   const row = el('div', { class: 'route-item', dataset: { id: r.id } });
@@ -65,6 +69,18 @@ function routeRow(r) {
 
   const meta = el('div', { class: 'route-meta muted small' }, `${dist} · ${wp.length} 點`);
   const top = el('div', { class: 'route-top' }, swatch, name, meta);
+
+  // 路徑模式(直線/沿道路)
+  const modeSel = el('select', {
+    class: 'route-day route-mode', title: '路徑模式',
+    onclick: (e) => e.stopPropagation(),
+    onchange: (e) => setRouteMode(r, e.target.value),
+  });
+  Object.entries(routing.MODE_LABELS).forEach(([k, label]) => {
+    const o = el('option', { value: k }, label);
+    if ((r.mode || 'straight') === k) o.selected = true;
+    modeSel.append(o);
+  });
 
   // 所屬日期
   const daySel = el('select', {
@@ -103,19 +119,31 @@ function routeRow(r) {
   }, '🗑');
 
   const bottom = el('div', { class: 'route-bottom' },
-    daySel, el('div', { class: 'route-actions' }, visBtn, editBtn, mapsBtn, delBtn));
+    modeSel, daySel, el('div', { class: 'route-actions' }, visBtn, editBtn, mapsBtn, delBtn));
 
   row.append(top, bottom);
   return row;
 }
 
+// ---- 路徑模式切換 ----
+function setRouteMode(r, mode) {
+  if (mode === 'straight') {
+    store.updateRoute(r.id, { mode, geometry: null, road_distance: null, road_duration: null });
+    return;
+  }
+  store.updateRoute(r.id, { mode });
+  toast('沿道路規劃中…');
+  routing.recomputeIfRouted(r.id);
+}
+
 // ---- 點路線項 → fitBounds ----
 async function focusRoute(r) {
-  const wp = r.waypoints || [];
-  if (!wp.length) return;
+  const routed = r.mode && r.mode !== 'straight' && Array.isArray(r.geometry) && r.geometry.length > 1;
+  const pts = routed ? r.geometry : (r.waypoints || []);
+  if (!pts.length) return;
   const map = await getMapSafe();
   if (!map) return;
-  const b = boundsOf(wp);
+  const b = boundsOf(pts);
   if (b) map.fitBounds(b, { padding: [40, 40] });
 }
 

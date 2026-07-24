@@ -322,6 +322,10 @@ export function addRoute({ name, color, note, day, waypoints } = {}) {
     note: note || '',
     day: day ?? null,
     visible: true,
+    mode: 'straight',      // 'straight' | 'foot' | 'bike' | 'car'
+    geometry: null,        // 非直線模式時的道路幾何快取 [[lat,lng],…]
+    road_distance: null,   // 公尺
+    road_duration: null,   // 秒
     waypoints: Array.isArray(waypoints) ? waypoints.map((w) => [...w]) : [],
     createdAt: new Date().toISOString(),
   });
@@ -332,7 +336,8 @@ export function addRoute({ name, color, note, day, waypoints } = {}) {
 export function updateRoute(id, fields = {}) {
   const r = overlay.routes.find((x) => x.id === id);
   if (!r) return;
-  for (const k of ['name', 'color', 'note', 'day', 'visible', 'waypoints']) {
+  for (const k of ['name', 'color', 'note', 'day', 'visible', 'waypoints',
+                   'mode', 'geometry', 'road_distance', 'road_duration']) {
     if (k in fields) r[k] = fields[k];
   }
   commit('route', [id]);
