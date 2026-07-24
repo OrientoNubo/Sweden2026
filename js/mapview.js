@@ -257,19 +257,23 @@ function setupBaseLayers() {
   }
   layers[BASE_LAYERS[currentKey].name].addTo(map);
 
-  // 國界線 overlay:丹麥–瑞典 Øresund 領海界線(取自 OSM admin 邊界,與底圖同源、完全吻合)
+  // 國境線 overlay:兩國完整 OSM admin 邊界(陸界 + 領海界線;與底圖同源,
+  // 界線走海上 12 海里線而非海岸線,不會與底圖海岸錯位)
   const bordersLayer = L.layerGroup();
-  const layersCtl = L.control.layers(layers, { '國界線': bordersLayer }, { position: 'topright' }).addTo(map);
+  const layersCtl = L.control.layers(layers, { '國境線': bordersLayer }, { position: 'topright' }).addTo(map);
   fetch('./data/borders.json')
     .then((r) => r.json())
     .then((gj) => {
       L.geoJSON(gj, {
         interactive: false,
-        style: { color: '#c8102e', weight: 2.5, dashArray: '8 6', opacity: 0.75, fill: false },
+        style: (f) => ({
+          color: f.properties.iso === 'DK' ? '#c8102e' : '#005293',
+          weight: 2, dashArray: '8 6', opacity: 0.7, fill: false,
+        }),
       }).addTo(bordersLayer);
       if (store.getSetting('showBorders', true)) bordersLayer.addTo(map);
     })
-    .catch((e) => console.warn('[mapview] 國界線載入失敗', e));
+    .catch((e) => console.warn('[mapview] 國境線載入失敗', e));
   map.on('overlayadd', (e) => { if (e.layer === bordersLayer) store.setSetting('showBorders', true); });
   map.on('overlayremove', (e) => { if (e.layer === bordersLayer) store.setSetting('showBorders', false); });
 
