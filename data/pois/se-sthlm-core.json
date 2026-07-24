@@ -23,8 +23,8 @@
       "url": "https://www.kungligaslotten.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Stockholm_Palace",
       "image_file": "The Royal Palace (15891592359).jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "每日 10:00–17:00(9 月)",
+      "cost": "成人 240 SEK(5–9 月;含五座博物館)",
       "transit": "T-bana Gamla Stan 步行 5 分",
       "sep_note": null
     },
@@ -49,8 +49,8 @@
       "url": "https://www.svenskakyrkan.se/stockholmsdomkyrkoforsamling",
       "wikipedia": "https://en.wikipedia.org/wiki/Storkyrkan",
       "image_file": "Storkyrkan 2025 01.jpg",
-      "hours": null,
-      "cost": "約 80 SEK",
+      "hours": "9/1–13 每日 09:00–18:00;9/14 起 09:30–17:00",
+      "cost": "成人 120 SEK(18 歲以下免費,含語音導覽)",
       "transit": "T-bana Gamla Stan 步行 4 分",
       "sep_note": null
     },
@@ -75,8 +75,8 @@
       "url": "https://nobelprizemuseum.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Nobel_Prize_Museum",
       "image_file": "Börshuset, Stockholm, 2019 (01).jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "每日 10:00–18:00(週二至 20:00)",
+      "cost": "成人 160 SEK(週五 17–20 免費,18 歲以下免費)",
       "transit": "T-bana Gamla Stan 步行 5 分",
       "sep_note": null
     },
@@ -101,7 +101,7 @@
       "url": null,
       "wikipedia": "https://sv.wikipedia.org/wiki/Stortorget,_Stockholm",
       "image_file": "Stortorget i Gamla Stan i Stockholm-2.JPG",
-      "hours": null,
+      "hours": "全天開放",
       "cost": "免費",
       "transit": "T-bana Gamla Stan 步行 4 分",
       "sep_note": null
@@ -153,10 +153,10 @@
       "url": "https://www.kungligaslotten.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Riddarholmen_Church",
       "image_file": "Rhkyrkan fr staden.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "5/15–9/13 每日 10:00–17:00;9/14 起僅週六日 10:00–16:00",
+      "cost": "成人 65 SEK(18 歲以下免費)",
       "transit": "T-bana Gamla Stan 步行 8 分",
-      "sep_note": null
+      "sep_note": "9 月中(14 日起)內部改為僅週六日開放且時間縮短,平日僅能看外觀"
     },
     {
       "id": "se-sthlm-core-tyska-kyrkan",
@@ -283,8 +283,8 @@
       "url": "https://www.vasamuseet.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Vasa_Museum",
       "image_file": "Stockholm Vasa Museum and Nordic Museum 09.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "每日 10:00–17:00(週三至 20:00)",
+      "cost": "成人 240 SEK(0–18 歲免費)",
       "transit": "電車 7 號 Nordiska museet/Vasamuseet 站；或渡輪",
       "sep_note": null
     },
@@ -309,8 +309,8 @@
       "url": "https://www.skansen.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Skansen",
       "image_file": "Skansen huvudentre 2010.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "9/1–28 每日 10:00–17:00",
+      "cost": "成人約 250 SEK(線上預購較便宜;0–15 歲免費)",
       "transit": "電車 7 號 Skansen 站",
       "sep_note": null
     },
@@ -335,8 +335,8 @@
       "url": "https://abbathemuseum.com",
       "wikipedia": "https://en.wikipedia.org/wiki/ABBA_The_Museum",
       "image_file": "ABBA the Museum, winter 2014 01.JPG",
-      "hours": null,
-      "cost": null,
+      "hours": "每日 10:00–18:00(9 月)",
+      "cost": "成人 249–329 SEK(浮動定價,建議線上預約)",
       "transit": "電車 7 號 Liljevalchs/Gröna Lund 站",
       "sep_note": null
     },
@@ -361,8 +361,8 @@
       "url": "https://www.gronalund.com",
       "wikipedia": "https://en.wikipedia.org/wiki/Gr%C3%B6na_Lund",
       "image_file": "Grona Lund.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "9 月僅週末及特定日開放,詳見官網",
+      "cost": "入園+一日暢遊券約 395–595 SEK(依日期浮動)",
       "transit": "電車 7 號 Gröna Lund 站",
       "sep_note": "季節性營運:9 月多僅週末開放、月底前後收 season,前往前務必查官網當日營業"
     },
@@ -387,8 +387,8 @@
       "url": "https://www.nordiskamuseet.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Nordic_Museum",
       "image_file": "Nordiska museet sett från Skansen 2005-07-29.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "每日 10:00–17:00(週三至 20:00)",
+      "cost": "成人 170 SEK(18 歲以下免費)",
       "transit": "電車 7 號 Nordiska museet/Vasamuseet 站",
       "sep_note": null
     },
@@ -543,8 +543,8 @@
       "url": "https://www.fotografiska.com/sto/",
       "wikipedia": "https://en.wikipedia.org/wiki/Fotografiska",
       "image_file": "Fotografiska museet Stockholm 2016 01.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "每日 10:00–23:00(最後入場前 30 分)",
+      "cost": "成人約 225 SEK(週三 18:00 起買一送一)",
       "transit": "T-bana Slussen 步行 10 分",
       "sep_note": null
     },
@@ -569,7 +569,7 @@
       "url": null,
       "wikipedia": "https://sv.wikipedia.org/wiki/Monteliusv%C3%A4gen",
       "image_file": "Monteliusvägen 2015.jpg",
-      "hours": null,
+      "hours": "全天開放",
       "cost": "免費",
       "transit": "T-bana Slussen 或 Mariatorget 步行 8 分",
       "sep_note": null
@@ -673,7 +673,7 @@
       "url": null,
       "wikipedia": "https://sv.wikipedia.org/wiki/Fj%C3%A4llgatan",
       "image_file": "Fjällgatan-Stockholm-March2013.jpg",
-      "hours": null,
+      "hours": "全天開放",
       "cost": "免費",
       "transit": "T-bana Slussen 步行 12 分",
       "sep_note": null
@@ -777,7 +777,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Kungstr%C3%A4dg%C3%A5rden",
       "image_file": "Kungsträdgården 20090712.jpg",
-      "hours": null,
+      "hours": "全天開放",
       "cost": "免費",
       "transit": "T-bana Kungsträdgården 出口即達",
       "sep_note": null
@@ -933,8 +933,8 @@
       "url": "https://www.nationalmuseum.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Nationalmuseum",
       "image_file": "Nationalmuseum July 2025.jpg",
-      "hours": null,
-      "cost": "常設展免費",
+      "hours": "週二至日 11:00–17:00(週二、四至 20:00,週一休)",
+      "cost": "成人 160 SEK(週四 17–20 免費,18 歲以下免費)",
       "transit": "T-bana Kungsträdgården 步行 6 分",
       "sep_note": null
     },
@@ -1011,8 +1011,8 @@
       "url": "https://www.ostermalmshallen.se",
       "wikipedia": "https://en.wikipedia.org/wiki/%C3%96stermalms_saluhall",
       "image_file": "Saluhallen 2007 1.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "週一至五 09:30–19:00、週六 09:30–17:00(週日休)",
+      "cost": "免費入場(各攤位另計)",
       "transit": "T-bana Östermalmstorg 出口即達",
       "sep_note": null
     },
@@ -1037,8 +1037,8 @@
       "url": "https://historiska.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Swedish_History_Museum",
       "image_file": "Historiska museet 2.jpg",
-      "hours": null,
-      "cost": "免費",
+      "hours": "週二至日 11:00–17:00(週三至 20:00,週一休)",
+      "cost": "成人 180 SEK(18 歲以下免費;閉館前一小時 90 SEK)",
       "transit": "T-bana Karlaplan 或 Östermalmstorg 步行 10 分",
       "sep_note": null
     },
@@ -1089,8 +1089,8 @@
       "url": "https://stadshuset.stockholm",
       "wikipedia": "https://en.wikipedia.org/wiki/Stockholm_City_Hall",
       "image_file": "Stockholms Stadshuset City Hall Stockholm 2016 01.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "僅限導覽參觀;9 月英語導覽約每小時一場(10:00–15:00)",
+      "cost": "導覽成人 150 SEK;登塔另計(5–9 月開放)",
       "transit": "T-bana Rådhuset 或 T-Centralen 步行 8 分",
       "sep_note": null
     },
@@ -1115,8 +1115,8 @@
       "url": "https://www.modernamuseet.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Moderna_Museet",
       "image_file": "MODERN MUSEUM MODERNA MUSEET STOCKHOLM (19).jpg",
-      "hours": null,
-      "cost": "常設展免費",
+      "hours": "週二至日開放(週一休);週二、五延長至 20:00",
+      "cost": "成人 170 SEK(週五 18–20 免費,18 歲以下免費)",
       "transit": "T-bana Kungsträdgården 步行 12 分",
       "sep_note": null
     },
@@ -1219,8 +1219,8 @@
       "url": "https://sl.se",
       "wikipedia": "https://en.wikipedia.org/wiki/T-Centralen",
       "image_file": "T Centralen January 2015.jpg",
-      "hours": null,
-      "cost": "需地鐵車票",
+      "hours": "地鐵營運時間(約 05:00–翌 01:00)",
+      "cost": "需持有效地鐵車票",
       "transit": "市中心地鐵樞紐",
       "sep_note": null
     },
@@ -1297,7 +1297,7 @@
       "url": "https://www.kungligaslotten.se/hagaparken",
       "wikipedia": "https://en.wikipedia.org/wiki/Hagaparken",
       "image_file": "Haga lawn.jpg",
-      "hours": null,
+      "hours": "公園全天開放(園內館舍各有時間)",
       "cost": "免費",
       "transit": "巴士 515 號 Haga Södra 站；或 Odenplan 轉乘",
       "sep_note": null
@@ -1349,10 +1349,10 @@
       "url": "https://biblioteket.stockholm.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Stockholm_Public_Library",
       "image_file": "AsplundGunnarBibliotheque.jpg",
-      "hours": null,
+      "hours": "整修閉館中(2024 年 6 月起,預計 2027 秋季重開)",
       "cost": "免費",
       "transit": "T-bana Odenplan 或 Rådmansgatan 步行 5 分",
-      "sep_note": null
+      "sep_note": "Asplund 圓形圖書館主樓自 2024 年 6 月整修至 2027 秋,2026 年 9 月無法入內,僅能看外觀(館藏服務暫移至臨時館 Spelbomskan)"
     },
     {
       "id": "se-sthlm-core-observatorielunden",
@@ -1453,8 +1453,8 @@
       "url": "https://millesgarden.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Millesg%C3%A5rden",
       "image_file": "Millesgården 2007.jpg",
-      "hours": null,
-      "cost": "成人約 150 SEK",
+      "hours": "週二至日 11:00–17:00(週一休)",
+      "cost": "成人 170 SEK(18 歲以下免費)",
       "transit": "T-bana Ropsten 轉 Lidingöbana 至 Torsvik 步行 8 分",
       "sep_note": null
     },
@@ -1479,8 +1479,8 @@
       "url": "https://www.nrm.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Swedish_Museum_of_Natural_History",
       "image_file": "Naturhistoriska Riksmuseet Stockholm (2010).JPG",
-      "hours": null,
-      "cost": "常設展免費(Cosmonova 另計)",
+      "hours": "週二至五 10:00–18:00、週六日 11:00–18:00(週一休)",
+      "cost": "展覽成人 170 SEK(Cosmonova 另計,18 歲以下免費)",
       "transit": "T-bana Universitetet 步行 6 分",
       "sep_note": null
     },
@@ -1505,8 +1505,8 @@
       "url": "https://www.tekniskamuseet.se",
       "wikipedia": "https://en.wikipedia.org/wiki/National_Museum_of_Science_and_Technology_(Sweden)",
       "image_file": "Bell 206 Tekniska museet 2008.jpg",
-      "hours": null,
-      "cost": "成人約 180 SEK",
+      "hours": "每日 09:00–21:00",
+      "cost": "成人 145 SEK 起(浮動定價,線上預購較便宜)",
       "transit": "巴士 69 號 Museiparken 站",
       "sep_note": null
     },
@@ -1531,8 +1531,8 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Avicii_Arena",
       "image_file": "Globen 30 år, febr 2019a.jpg",
-      "hours": null,
-      "cost": "SkyView 成人約 200 SEK",
+      "hours": "SkyView 週一至五 10:00–18:00、週六日 10:00–16:00",
+      "cost": "SkyView 成人 180 SEK",
       "transit": "T-bana Globen/Gullmarsplan 步行 5 分",
       "sep_note": null
     },
@@ -1609,8 +1609,8 @@
       "url": "https://www.armemuseum.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Swedish_Army_Museum",
       "image_file": "Armémuseum 2014 01.JPG",
-      "hours": null,
-      "cost": "常設展免費",
+      "hours": "週二至日 11:00–17:00(週二晚間延長,週一休)",
+      "cost": "成人 140 SEK(週二 17–19 半價,18 歲以下免費)",
       "transit": "T-bana Östermalmstorg 步行 5 分",
       "sep_note": null
     },
@@ -1635,7 +1635,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Skogskyrkog%C3%A5rden",
       "image_file": "Skogskyrk Grav 2006.jpg",
-      "hours": null,
+      "hours": "墓園全天開放;訪客中心 5/1–9/30 每日 11:00–17:00",
       "cost": "免費",
       "transit": "T-bana Skogskyrkogården 出口即達",
       "sep_note": null

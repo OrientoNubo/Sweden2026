@@ -35,9 +35,9 @@
 .day-title { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .day-name { font-weight: 700; font-size: 15px; }
 .eccv-badge {
-  font-size: 10px; font-weight: 700; letter-spacing: .3px;
+  font-size: 12px; font-weight: 700; letter-spacing: .3px;
   color: #fff; background: var(--primary);
-  padding: 1px 6px; border-radius: 999px;
+  padding: 1px 6px; border-radius: var(--radius-pill, 999px);
 }
 .day-meta { font-size: 12px; margin-top: 2px; }
 .day-eye { flex: 0 0 auto; }
@@ -109,9 +109,13 @@
 .route-item:hover { background: var(--bg-hover); }
 .route-top { display: flex; align-items: center; gap: 8px; }
 .route-swatch {
+  position: relative;
   flex: 0 0 auto; width: 20px; height: 20px; border-radius: 6px;
   border: 1px solid var(--border); cursor: pointer; padding: 0;
 }
+/* 視覺維持 20px,以透明 ::after 外擴命中區(桌機 ≥28px,手機 ≥32px);
+   不改變 button 邊框盒,故版面與 popover 定位不受影響 */
+.route-swatch::after { content: ''; position: absolute; inset: -4px; border-radius: inherit; }
 .route-name {
   flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: 14px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -125,8 +129,7 @@
   display: flex; align-items: center; justify-content: space-between;
   gap: 8px; margin-top: 8px;
 }
-.route-actions { display: flex; align-items: center; gap: 2px; }
-.btn-icon.danger:hover { color: var(--danger); background: var(--danger-soft); }
+.route-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; }
 
 /* 顏色 swatch popover */
 .color-popover {
@@ -153,7 +156,7 @@
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   max-width: min(92vw, 640px);
   padding: 8px 12px; background: var(--bg);
-  border: 1px solid var(--border); border-radius: 999px;
+  border: 1px solid var(--border); border-radius: var(--radius-pill, 999px);
   box-shadow: var(--shadow-lg);
 }
 #draw-banner[hidden] { display: none; }
@@ -161,8 +164,7 @@
 #draw-distance { font-size: 12px; font-variant-numeric: tabular-nums; }
 #btn-draw-delnode { color: var(--danger); }
 
-/* 繪製游標 */
-.map-draw, .map-draw .leaflet-container { cursor: crosshair !important; }
+/* 繪製游標(crosshair)由 map.css 統一提供,此處不重複 */
 .route-node-icon, .route-ghost-icon, .route-preview-icon { background: transparent; border: 0; }
 /* 新繪預覽節點不攔截點擊,確保點地圖能持續加點 */
 .route-preview-icon { pointer-events: none; }
@@ -179,6 +181,8 @@
   }
   .color-popover { grid-template-columns: repeat(6, 26px); }
   .color-cell { width: 26px; height: 26px; }
+  /* 觸控:swatch 命中區外擴至 ≥32px(20 + 6*2) */
+  .route-swatch::after { inset: -6px; }
 }
 
 /* ── 路徑模式選單(沿道路規劃) ── */

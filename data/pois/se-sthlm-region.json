@@ -23,9 +23,9 @@
       "url": "https://www.kungligaslotten.se/",
       "wikipedia": "https://en.wikipedia.org/wiki/Drottningholm_Palace",
       "image_file": "Drottningholm June 2013 07.jpg",
-      "hours": null,
-      "cost": null,
-      "transit": "地鐵至 Brommaplan 轉巴士,或夏季搭汽船約 1 小時",
+      "hours": "宮殿每日 10:00–17:00(9 月)",
+      "cost": "成人 170 SEK",
+      "transit": "T-Centralen 地鐵至 Brommaplan 轉巴士約 45 分;或市區搭汽船約 1 小時",
       "sep_note": "夏季往返市區的汽船 9 月起改淡季班表、班次減少,可改搭巴士"
     },
     {
@@ -49,8 +49,8 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Drottningholm_Palace_Theatre",
       "image_file": "Drottningholms slottsteater 2011b.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "劇院導覽 5–9 月每日多場次",
+      "cost": "導覽成人 250 SEK(學生/兒童 200 SEK)",
       "transit": "位於卓寧霍姆宮園區內,同宮殿交通",
       "sep_note": "夏季歌劇季通常於 8 月底至 9 月上旬結束,9 月多僅剩導覽,演出場次請先查官網"
     },
@@ -75,8 +75,8 @@
       "url": "https://www.kungligaslotten.se/",
       "wikipedia": "https://sv.wikipedia.org/wiki/Kina_slott",
       "image_file": "Kina slott October 2016 01.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "僅 5–9 月開放(9 月下旬起逐步冬季閉館)",
+      "cost": "成人 140 SEK",
       "transit": "卓寧霍姆宮庭園內步行約 15 分",
       "sep_note": "9 月下旬起逐步進入冬季閉館,參觀前請確認開放日"
     },
@@ -101,9 +101,9 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Uppsala_Cathedral",
       "image_file": "Uppsala cathedral from southwest 02.jpg",
-      "hours": null,
+      "hours": "每日 08:00–18:00",
       "cost": "免費(珍寶館另收費)",
-      "transit": "Uppsala C 步行 12 分",
+      "transit": "Stockholm C 火車至 Uppsala C 約 40 分,再步行 12 分",
       "sep_note": null
     },
     {
@@ -127,9 +127,9 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Uppsala_Castle",
       "image_file": "0067Uppsala slott.jpg",
-      "hours": null,
-      "cost": null,
-      "transit": "Uppsala C 步行 18 分",
+      "hours": "美術館 週二至日 11:00–17:00(週四至 20:00,週一休)",
+      "cost": "常設展免費(特展約 80 SEK)",
+      "transit": "Stockholm C 火車至 Uppsala C 約 40 分,再步行 18 分",
       "sep_note": null
     },
     {
@@ -153,9 +153,9 @@
       "url": "https://gustavianum.uu.se/",
       "wikipedia": "https://en.wikipedia.org/wiki/Gustavianum",
       "image_file": "GUSTAVIANUM 1.jpg",
-      "hours": null,
-      "cost": null,
-      "transit": "Uppsala C 步行 12 分",
+      "hours": "每日 11:00–17:00",
+      "cost": "成人 150 SEK(19 歲以下免費)",
+      "transit": "Stockholm C 火車至 Uppsala C 約 40 分,再步行 12 分",
       "sep_note": null
     },
     {
@@ -205,9 +205,9 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Linnaeus_Garden",
       "image_file": "CarlvonLinne Garden.jpg",
-      "hours": null,
-      "cost": null,
-      "transit": "Uppsala C 步行 15 分",
+      "hours": "9/1–13 週四至日 11:00–16:00",
+      "cost": "成人 120 SEK(17 歲以下免費)",
+      "transit": "Stockholm C 火車至 Uppsala C 約 40 分,再步行 15 分",
       "sep_note": "9 月花況轉淡,溫室與戶外園區開放時間可能縮短"
     },
     {
@@ -231,9 +231,9 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Gamla_Uppsala",
       "image_file": "Gamla uppsala.jpg",
-      "hours": null,
-      "cost": "遺址免費,博物館另收費",
-      "transit": "Uppsala C 搭巴士約 15 分",
+      "hours": "遺址全天開放;博物館 5–9 月每日 11:00–17:00",
+      "cost": "遺址免費;博物館成人約 150 SEK",
+      "transit": "Stockholm C 火車至 Uppsala 約 40 分,轉市巴士約 15 分",
       "sep_note": null
     },
     {
@@ -257,9 +257,9 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Sigtuna",
       "image_file": "Stora gatan i Sigtuna nr 1.jpg",
-      "hours": null,
+      "hours": "老鎮全天可漫步(店家、教堂各有營業時間)",
       "cost": "免費",
-      "transit": "Märsta 站轉巴士,或自駕",
+      "transit": "Stockholm C 通勤火車至 Märsta 約 35 分,轉巴士 570/575 約 20 分",
       "sep_note": null
     },
     {
@@ -283,8 +283,8 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Skokloster_Castle",
       "image_file": "Skokloster slott, juli 2018aa.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "9 月僅週六日 11:00–16:00",
+      "cost": "成人 140 SEK;導覽 190 SEK(19 歲以下免費)",
       "transit": "梅拉倫湖畔,建議自駕",
       "sep_note": "9 月導覽場次較夏季減少,入內須先查官網時段"
     },
@@ -309,8 +309,8 @@
       "url": "https://www.kungligaslotten.se/",
       "wikipedia": "https://en.wikipedia.org/wiki/Gripsholm_Castle",
       "image_file": "Gripsholms slott view2.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "9 月每日 10:00–16:00",
+      "cost": "成人 170 SEK",
       "transit": "Mariefred 鎮內步行可達",
       "sep_note": null
     },
@@ -335,7 +335,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Mariefred",
       "image_file": "Mariefred2.jpg",
-      "hours": null,
+      "hours": "小鎮全天可漫步(店家各有營業時間)",
       "cost": "免費",
       "transit": "自駕,或夏季搭汽船/古董火車",
       "sep_note": "古董蒸汽船 S/S Mariefred 與蒸汽窄軌鐵路多在 9 月上旬結束當季營運,班次前請查詢"
@@ -361,9 +361,9 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Steninge_Palace",
       "image_file": "Steninge Slott nr 1 Publish.jpg",
-      "hours": null,
-      "cost": null,
-      "transit": "Märsta 站轉巴士,或自駕",
+      "hours": "莊園商城 週一至五 11:00–18:00、週六日 10:00–17:00;庭園每日 12:00–16:30(宮殿本體不對外開放)",
+      "cost": "庭園與商城免費",
+      "transit": "Stockholm C 通勤火車至 Märsta 約 35 分轉巴士,或自駕",
       "sep_note": null
     },
     {
@@ -413,7 +413,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Vaxholm",
       "image_file": "Vaxholm 21 2010.jpg",
-      "hours": null,
+      "hours": "小鎮全天可漫步(店家各有營業時間)",
       "cost": "免費",
       "transit": "Strömkajen 搭渡輪約 1 小時,或搭巴士",
       "sep_note": null
@@ -439,8 +439,8 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Vaxholm_Fortress",
       "image_file": "Vaxholmsleden February 2013 02 (crop).jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "9 月上旬(至 6 日)僅週六日 10:20–17:30,其後閉館",
+      "cost": "博物館成人 120 SEK;接駁小船來回 110 SEK",
       "transit": "Vaxholm 碼頭搭接駁小船上島",
       "sep_note": "上島接駁船與博物館 9 月起進入淡季,班次與開放時間縮減"
     },
@@ -466,7 +466,7 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Sandhamn",
       "image_file": "Sandhamn February 2013 04.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "島嶼免費(渡輪另計)",
       "transit": "Stavsnäs 碼頭搭渡輪約 1.5 小時",
       "sep_note": "9 月渡輪改為淡季班表、班次大減,務必先查 Waxholmsbolaget 時刻"
     },
@@ -518,7 +518,7 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Fj%C3%A4derholmarna",
       "image_file": "Fjäderholmarna February 2013.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "島嶼免費(渡輪另計)",
       "transit": "Strömkajen/Nybrokajen 搭渡輪約 25 分",
       "sep_note": "渡輪與店家 9 月中後陸續轉淡季,班次減少"
     },
@@ -543,8 +543,8 @@
       "url": "https://artipelag.se/",
       "wikipedia": "https://en.wikipedia.org/wiki/Artipelag",
       "image_file": "Artipelag entré 02.JPG",
-      "hours": null,
-      "cost": null,
+      "hours": "每日 11:00–17:00(週五咖啡廳延長至 21:00)",
+      "cost": "館內公共區免費,特展另購票",
       "transit": "夏季有 Artipelag 專船/巴士,或自駕",
       "sep_note": null
     },
@@ -595,7 +595,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Tyresta_National_Park",
       "image_file": "Stensjön, Tyresta national park, 2007-07-31, northern shore on Stensjöborg, view southeast.jpeg",
-      "hours": null,
+      "hours": "國家公園全天開放(自然之家 Naturum 有各自開放時間)",
       "cost": "免費",
       "transit": "市區搭巴士至 Tyresta by,或自駕",
       "sep_note": null
@@ -725,7 +725,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Birka",
       "image_file": "Birka Ansgar 2008.jpg",
-      "hours": null,
+      "hours": "僅 5–9 月隨季節遊船行程參觀(含導覽與博物館,9 月中下旬結束)",
       "cost": null,
       "transit": "Stadshuskajen 搭遊船約 2 小時",
       "sep_note": "前往 Birka 的季節性遊船通常 9 月中下旬結束當季航班,務必先查 Strömma 航期"
@@ -829,7 +829,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Anundsh%C3%B6g",
       "image_file": "Anundshög, Västerås1004.jpg",
-      "hours": null,
+      "hours": "全天開放(露天遺址)",
       "cost": "免費",
       "transit": "Västerås 市區開車約 10 分,建議自駕",
       "sep_note": null
@@ -855,7 +855,7 @@
       "url": "https://salasilvergruva.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Sala_Silver_Mine",
       "image_file": "Queen Christina shaft, Sala Silver mine, Sala, Sweden.JPG",
-      "hours": null,
+      "hours": "6–9 月每日開放,地下導覽採預約制、場次有限",
       "cost": "地下導覽成人約 250 SEK",
       "transit": "Sala 火車站開車約 5 分,建議自駕",
       "sep_note": "9 月地下導覽班次減少,務必先預約確認"

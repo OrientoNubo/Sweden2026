@@ -15,6 +15,8 @@ const TOOLTIP_MAX = 150;       // 視窗內 tooltip 超過此數只留 tier 1–
 const FLY_MIN_ZOOM = 14;       // select 定位時的最小縮放
 const STAR_COLOR = '#f5b301';  // = tokens --star,淺/深主題皆可讀(circleMarker canvas 不能用 var())
 const DEFAULT_ROUTE_COLOR = ROUTE_COLORS[1]; // 藍;F4 建立路線通常已帶色,此為 fallback
+// 行程模式「未排程收藏」小圓點的基準樣式(circleMarker 無 divIcon;選取高亮於 refreshSelection 覆寫)
+const FAV_DOT_STYLE = { radius: 5, weight: 1, color: '#fff', fillColor: STAR_COLOR, fillOpacity: 0.6, opacity: 0.7 };
 
 let map = null;
 let clusterGroup = null;       // 整理模式(非收藏點)
@@ -212,9 +214,7 @@ function renderItinerary() {
   // favorite 未排程點:半透明小圓點(可點;白描邊 + 金填充於淺/深主題皆可讀)
   for (const poi of pois) {
     if (poi._day || poi._status !== 'favorite') continue;
-    const dot = L.circleMarker([poi.lat, poi.lng], {
-      radius: 5, weight: 1, color: '#fff', fillColor: STAR_COLOR, fillOpacity: 0.6, opacity: 0.7,
-    });
+    const dot = L.circleMarker([poi.lat, poi.lng], FAV_DOT_STYLE);
     dot._noTip = true;
     bindMarkerInteractions(dot, poi);
     dot.addTo(itineraryLayer);
@@ -296,8 +296,14 @@ function refreshSelection() {
   for (const id of [lastSelected, cur]) {
     if (!id) continue;
     const m = markerById.get(id);
-    if (m && m._poi && typeof m.setIcon === 'function') {
+    if (!m || !m._poi) continue;
+    if (typeof m.setIcon === 'function') {
       m.setIcon(iconForMarker(m));
+    } else if (typeof m.setStyle === 'function') {
+      // 未排程收藏是 L.circleMarker(無 divIcon):以加大半徑 + primary 描邊表示選取,取消時還原
+      m.setStyle(id === cur
+        ? { radius: 8, weight: 3, color: cssVar('--primary', '#328a97'), opacity: 1, fillOpacity: 0.85 }
+        : FAV_DOT_STYLE);
     }
   }
   lastSelected = cur;

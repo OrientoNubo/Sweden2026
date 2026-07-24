@@ -1,0 +1,21 @@
+{
+  "name": "Sweden2026 行程地圖",
+  "short_name": "Sweden2026",
+  "description": "ECCV 2026 丹麥+瑞典行程規劃互動地圖:824+ 景點刪去法選點、日程規劃、自訂路線",
+  "lang": "zh-Hant",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#f8f8f6",
+  "background_color": "#f8f8f6",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ]
+}

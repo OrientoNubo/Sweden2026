@@ -23,7 +23,7 @@
 
   --radius-sm: 6px;
   --radius: 8px;
-  --radius-lg: 14px;
+  --radius-pill: 999px;        /* 膠囊/圓角徽章(badge、pill 按鈕) */
   --shadow: 0 2px 10px rgba(31, 30, 29, .08);
   --shadow-lg: 0 6px 24px rgba(31, 30, 29, .14);
 
@@ -39,12 +39,12 @@
   --z-detail: 1150;
   --z-toast: 1300;
 
+  --scrim: rgba(0, 0, 0, .35);  /* modal/overlay 半透明遮罩底 */
+
   --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
 
-  /* 12 天日程色(2026-09-04 → 09-15,順序即 config.TRIP_DAYS) */
-  --day-0: #e6194b; --day-1: #f58231; --day-2: #d9a400; --day-3: #3cb44b;
-  --day-4: #00a86b; --day-5: #17a2b8; --day-6: #4363d8; --day-7: #7b5be6;
-  --day-8: #911eb4; --day-9: #f032e6; --day-10: #a0522d; --day-11: #556b2f;
+  /* 12 天日程色的單一真值來源在 js/config.js 的 DAY_COLORS;
+     marker/卡片色一律由 JS 取用,CSS 不再重複定義 --day-N。 */
 }
 
 :root[data-theme="dark"] {

@@ -15,6 +15,7 @@ let mode = 'view';        // 'view' | 'edit' | 'new'
 let objectUrls = [];      // 需要 revoke 的 idb objectURL
 let panelOpen = false;    // 面板是否開啟(供 detailtoggle 去重)
 let lastTrigger = null;   // 開啟前的觸發元素,關閉時還原焦點
+let lastTriggerInList = false; // 觸發元素是否來自景點列表(關閉時列可能已重繪移除,退回列表容器)
 let lastImgKey = '';      // 上次解析的圖片指紋(currentId + refs);未變則不重 resolve
 let lastUrls = [];        // 上次解析結果(對應 lastImgKey)
 
@@ -36,6 +37,8 @@ function setPanelOpen(open) {
     // 記住觸發元素(尚未搶焦點前),再把焦點移到關閉鈕
     const active = document.activeElement;
     lastTrigger = (active && active !== document.body) ? active : null;
+    // 觸發元素若來自景點列表,關閉時該列可能已因重繪移除 → 記住以退回列表容器
+    lastTriggerInList = !!(lastTrigger && lastTrigger.closest && lastTrigger.closest('#poi-list'));
     const cb = $('#detail-close');
     if (cb) cb.focus({ preventScroll: true });
   } else {
@@ -44,8 +47,13 @@ function setPanelOpen(open) {
     panel.removeAttribute('aria-label');
     if (lastTrigger && document.contains(lastTrigger) && typeof lastTrigger.focus === 'function') {
       lastTrigger.focus({ preventScroll: true });
+    } else if (lastTriggerInList) {
+      // 觸發列已不存在:退回列表容器(#poi-list tabindex=-1,由 sidebar.js 設定)
+      const list = $('#poi-list');
+      if (list) list.focus({ preventScroll: true });
     }
     lastTrigger = null;
+    lastTriggerInList = false;
   }
 }
 
@@ -79,7 +87,7 @@ function close() {
 }
 
 function catInfo(cat) {
-  return CATEGORIES[cat] || { zh: cat || '其他', glyph: '📍', color: '#888888' };
+  return CATEGORIES[cat] || { zh: cat || '其他', glyph: '📍', color: '#888' };
 }
 
 /** 把圖片 ref 設到 <img>:https 直接;idb 走 db.getImage → objectURL */

@@ -80,9 +80,16 @@ async function onImportFile(e) {
   if (!confirm('將覆蓋目前所有本地資料，確定？')) return;
 
   try {
-    // importAll 為原子操作：成功回傳 true；落盤失敗（如 quota）回傳 false 且舊資料不動。
-    const ok = await store.importAll(obj);
-    toast(ok ? '匯入完成' : '匯入失敗：本地儲存空間不足，資料未變更');
+    // importAll 為原子操作，回傳 {ok, staleBase}：ok=false（如 quota 落盤失敗）舊資料不動；
+    // staleBase=true 表備份的 baseVersion 與現行資料版本不同，少數標註可能已失效。
+    const res = await store.importAll(obj);
+    if (res.ok) {
+      toast(res.staleBase
+        ? '匯入完成（備份來自較舊資料版本，少數標註可能已失效）'
+        : '匯入完成');
+    } else {
+      toast('匯入失敗：本地儲存空間不足，資料未變更');
+    }
   } catch (err) {
     console.error('[io] 匯入失敗', err);
     toast('匯入失敗');

@@ -6,7 +6,8 @@ export const TRIP_DAYS = [
   '2026-09-12', '2026-09-13', '2026-09-14', '2026-09-15',
 ];
 
-// 與 css/tokens.css 的 --day-N 一致
+// 12 天日程色(2026-09-04 → 09-15,順序即 TRIP_DAYS)。
+// 單一真值來源(single source of truth):CSS 不再定義 --day-N,marker/卡片色一律走此常數。
 export const DAY_COLORS = [
   '#e6194b', '#f58231', '#d9a400', '#3cb44b',
   '#00a86b', '#17a2b8', '#4363d8', '#7b5be6',
@@ -24,7 +25,7 @@ export function dayLabel(iso) {
 
 export function dayColor(iso) {
   const i = TRIP_DAYS.indexOf(iso);
-  return i >= 0 ? DAY_COLORS[i] : '#888888';
+  return i >= 0 ? DAY_COLORS[i] : '#888';
 }
 
 export const CATEGORIES = {

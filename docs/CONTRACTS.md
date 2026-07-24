@@ -41,6 +41,12 @@
 | `themechange` | `{theme:'light'\|'dark'}` | theme.js | mapview 換底圖(使用者手動選過底圖後不再自動聯動);**首次套用為 silent 不派發**(no-flash script 已設好 `data-theme`) |
 | `detailtoggle` | `{open:boolean}` | detail.js | mapview `map.invalidateSize()`(立即一次 + 過場結束再一次) |
 
+### draw 模式的 cluster 點擊攔截(F1;markercluster 版本相依)
+
+`draw:start` 進入繪製模式後,mapview 需停用 markercluster 的 cluster 點擊行為(否則點到 cluster 會 zoomToBounds / spiderfy,干擾路線繪製)。實作(`js/mapview.js` 的 `setClusterDrawMode`)只在執行期切 `clusterGroup.options.zoomToBoundsOnClick` / `spiderfyOnMaxZoom`,**不重建 cluster group**——這依賴 **markercluster 1.5.3** 的 `_zoomOrSpiderfy` 於**點擊當下**才動態讀取這兩個 `options`(已核對 vendor 原始碼)。
+
+**升級 markercluster 前必須回歸測試 draw 模式下的 cluster 點擊**:若新版改為在建構時快取這兩個 flag,執行期切 options 將失效,draw 模式點 cluster 會意外觸發 zoom / spiderfy。
+
 ## 中央狀態(js/state.js,唯讀約定:只有標注的 owner 可寫)
 
 ```js
@@ -98,7 +104,8 @@ restoreFromTrash(id) / purgeFromTrash(id)  // purge:custom 真刪+清圖;base �
 getTrash() -> [poi]                // _status==='deleted' 且未 hiddenInTrash
 getSetting(k, def) / setSetting(k, v)
 exportAll() -> Promise<object>     // io.js 內部用
-importAll(obj) / resetAll()
+importAll(obj) -> Promise<{ok, staleBase}>  // ok=false 舊資料不動;staleBase=true 表備份 baseVersion 與現行版本不同
+resetAll()
 ```
 
 所有 mutation:更新 overlay → 重算 `state.pois` → debounce 300ms 存 localStorage → `emit('overlay:changed', {type,…})`。

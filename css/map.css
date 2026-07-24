@@ -213,7 +213,7 @@
   align-items: center;
   gap: 2px;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
   font-size: 11px;
   color: #fff;
   background: var(--c, #888);
@@ -277,7 +277,7 @@
 /* ── 新增地點確認 chip(雙擊/長按防誤觸) ── */
 .place-chip-wrap .leaflet-popup-content-wrapper {
   padding: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
   overflow: hidden;
   background: var(--primary);
   box-shadow: var(--shadow-lg);
@@ -296,7 +296,7 @@
   min-height: 44px;
   padding: 0 16px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
   background: var(--primary);
   color: #fff;
   font-family: var(--font);
@@ -391,10 +391,18 @@
 .legend-item.is-active .legend-dot {
   box-shadow: 0 0 0 2px var(--accent-border);
 }
-/* 行程模式:分類篩選不適用 → 淡化圖例並阻擋點擊(收合鈕仍可用) */
+/* 行程模式:分類篩選不適用 → 明顯降階(灰階 + 淡化)並阻擋點擊(收合鈕仍可用) */
 .map-legend.is-disabled .legend-body {
   opacity: .45;
   pointer-events: none;
+  filter: grayscale(1);
+}
+.map-legend.is-disabled .legend-item {
+  color: var(--text-faint);
+}
+.map-legend.is-disabled .legend-dot {
+  background: var(--text-faint);
+  border-color: transparent;
 }
 
 /* ── 定位 / 縮放至可見點 工具鈕(左上) ── */

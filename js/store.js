@@ -616,15 +616,20 @@ function stripIdbRefs(idSet) {
 export async function importAll(obj) {
   if (!obj || obj.app !== 'sweden2026') {
     toast('匯入失敗：檔案格式不符');
-    return false;
+    return { ok: false };
   }
   // P1：overlay 主體必須是非空 object。缺失 / 非物件 / 空殼時直接失敗，否則 normalizeOverlay
   // 會回傳空 skeleton，讓後續 saveNow 成功→clearImages 把資料全清卻誤報「匯入完成」。
   if (!obj.overlay || typeof obj.overlay !== 'object' || Array.isArray(obj.overlay)
       || Object.keys(obj.overlay).length === 0) {
     toast('匯入失敗：備份檔缺少資料主體');
-    return false;
+    return { ok: false };
   }
+  // 備份 baseVersion 與現行資料版本不同 → 標記 stale(僅 baseVersion 存在且不等):匯入照常
+  // 成功,由 io.js 改用一次性「少數標註可能已失效」提醒。version 可能為 string/number,轉字串比對。
+  const rawBaseVersion = obj.overlay.baseVersion;
+  const staleBase = !!manifestVersion && rawBaseVersion != null && rawBaseVersion !== ''
+    && String(rawBaseVersion) !== String(manifestVersion);
   const newOverlay = normalizeOverlay(obj.overlay);
 
   // 先把新 overlay 落盤（saveNow 讀 module-level overlay）；失敗則還原，舊資料與圖片零損。
@@ -633,7 +638,7 @@ export async function importAll(obj) {
   overlay = newOverlay;
   if (!saveNow()) {
     overlay = prevOverlay;
-    return false;
+    return { ok: false };
   }
 
   // 落盤成功 → 圖片：清空舊庫後寫回，保留原 uuid 以維持 'idb:<uuid>' 引用。
@@ -658,7 +663,7 @@ export async function importAll(obj) {
   rebuild();
   emit('overlay:changed', { type: 'import' });
   if (imageFailCount > 0) toast(`${imageFailCount} 張圖片未能還原（瀏覽器限制）`);
-  return true;
+  return { ok: true, staleBase };
 }
 
 export function resetAll() {

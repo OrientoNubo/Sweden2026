@@ -327,7 +327,7 @@
   line-height: 1;
   color: #fff;
   background: var(--danger);
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
 }
 
 .muted { color: var(--text-sub); }
@@ -350,7 +350,7 @@
   color: var(--text);
   background: var(--bg-soft);        /* fallback(不支援 color-mix 時) */
   border: 1px solid var(--border);   /* fallback */
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
   cursor: default;
   user-select: none;
   white-space: nowrap;
@@ -409,6 +409,14 @@
   box-shadow: inset 3px 0 0 var(--primary);
 }
 .list-item.is-deleted { opacity: .6; }
+/* 列主體(tabindex=0,role=button)鍵盤聚焦環;僅 :focus-visible 顯示,不干擾滑鼠點選 */
+.list-item:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--focus);
+}
+/* R2-5 焦點回退:詳情關閉且觸發列已被重繪移除時,退回列表容器(tabindex=-1)。
+   容器僅作程式化 focus 落點,不顯示整框 outline。 */
+#poi-list:focus { outline: none; }
 
 .li-thumb {
   flex: 0 0 auto;
@@ -601,7 +609,7 @@
   width: 34px;
   height: 34px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
   background: rgba(0, 0, 0, .45);
   color: #fff;
   font-size: 18px;
@@ -625,7 +633,7 @@
 .dc-dot {
   width: 7px;
   height: 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
   background: rgba(255, 255, 255, .55);
 }
 .dc-dot.on { background: #fff; }
@@ -775,7 +783,7 @@
   width: 20px;
   height: 20px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
   background: rgba(0, 0, 0, .6);
   color: #fff;
   font-size: 12px;
@@ -801,7 +809,7 @@
   color: #fff;
   font-size: 13.5px;
   line-height: 1.4;
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
   box-shadow: var(--shadow-lg);
   z-index: var(--z-toast);
   text-align: center;
@@ -820,7 +828,7 @@
   color: #fff;
   background: var(--primary);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
   cursor: pointer;
   vertical-align: middle;
   white-space: nowrap;
@@ -837,7 +845,7 @@
 .sheet-handle-bar {
   width: 40px;
   height: 4px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill, 999px);
   background: var(--text-faint);
   opacity: .7;
 }
@@ -912,7 +920,7 @@
     display: block;
     position: fixed;
     inset: var(--toolbar-h) 0 0 0;
-    background: rgba(0, 0, 0, .35);
+    background: var(--scrim, rgba(0, 0, 0, .35));
     z-index: calc(var(--z-sidebar) - 1);
     opacity: 0;
     pointer-events: none;
@@ -960,7 +968,7 @@
     display: block;
     position: fixed;
     inset: var(--toolbar-h) 0 0 0;
-    background: rgba(0, 0, 0, .35);
+    background: var(--scrim, rgba(0, 0, 0, .35));
     z-index: calc(var(--z-detail) - 1);
     opacity: 0;
     pointer-events: none;

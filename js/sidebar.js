@@ -11,7 +11,7 @@ const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 function closeSidebar() { document.body.classList.remove('sidebar-open'); }
 
 function catInfo(cat) {
-  return CATEGORIES[cat] || { zh: cat || '其他', glyph: '📍', color: '#888888' };
+  return CATEGORIES[cat] || { zh: cat || '其他', glyph: '📍', color: '#888' };
 }
 
 function thumb(p) {
@@ -73,14 +73,24 @@ function listItem(p) {
     onclick: (e) => { e.stopPropagation(); select(p.id); },
   }, iconEl(ICON.locate));
 
+  const name = p.name?.zh || p.name?.local || '(未命名)';
   const item = el('div', {
     class: 'list-item' + (p.id === state.selectedId ? ' active' : ''),
     dataset: { id: p.id },
+    tabindex: '0',
+    role: 'button',
+    'aria-label': `查看「${name}」詳情`,
     onclick: () => select(p.id),
+    // 列主體為單一可聚焦點(Enter/Space 開啟詳情);li-actions 內按鈕自帶 tab 與鍵盤啟用。
+    // e.target !== currentTarget 時放行給內層按鈕自理,避免其鍵盤事件冒泡到此重複觸發。
+    onkeydown: (e) => {
+      if (e.target !== e.currentTarget) return;
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(p.id); }
+    },
   },
     thumb(p),
     el('div', { class: 'li-body' },
-      el('div', { class: 'li-title' }, p.name?.zh || p.name?.local || '(未命名)'),
+      el('div', { class: 'li-title' }, name),
       el('div', { class: 'li-sub' }, subParts.join(' · ')),
     ),
     el('div', { class: 'li-actions' }, favBtn, delBtn, locateBtn, daySelect(p)),
@@ -226,6 +236,11 @@ export function init() {
     if (source === 'list') { highlight(id, false); return; }
     highlight(id, true);
   });
+
+  // 詳情面板關閉時,若觸發列已因重繪移除,焦點退回此容器(見 detail.js)。
+  // tabindex=-1:僅接受程式化 focus,不進 Tab 序。
+  const poiList = $('#poi-list');
+  if (poiList) poiList.tabIndex = -1;
 
   render();
 }
