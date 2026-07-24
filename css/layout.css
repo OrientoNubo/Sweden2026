@@ -307,7 +307,6 @@
 .btn-icon svg,
 .li-actions svg,
 .toast-action svg,
-.tab svg,
 #sidebar-tabs button svg,
 #mode-toggle button svg {
   width: 15px;
@@ -582,6 +581,10 @@
   display: block;
   cursor: zoom-in;
 }
+.detail-carousel .dc-img:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 3px var(--focus);
+}
 .detail-carousel .dc-placeholder {
   width: 100%;
   height: 100%;
@@ -790,6 +793,7 @@
   position: fixed;
   left: 50%;
   bottom: 28px;
+  bottom: max(28px, env(safe-area-inset-bottom, 0px));   /* 避開手機底部 home indicator */
   transform: translateX(-50%);
   max-width: min(88vw, 420px);
   padding: 11px 18px;
@@ -838,6 +842,7 @@
   opacity: .7;
 }
 .detail-scrim { display: none; }
+.sidebar-scrim { display: none; }
 
 /* ============================================================
    桌機:漢堡鍵隱藏
@@ -845,10 +850,34 @@
 #btn-sidebar { display: none; }
 
 /* ============================================================
-   中等桌機:詳情面板窄一點(手機另走 bottom sheet)
+   中等桌機 / 平板(手機另走 bottom sheet)
+   下界用 768.02px:與手機段(max-width:768px,亦即 JS isMobile)無縫接續,
+   消除舊 768–769 落回桌機三欄佈局的縫隙。
    ============================================================ */
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 768.02px) and (max-width: 1024px) {
   :root { --detail-w: 320px; }
+
+  /* sidebar 360 + detail 320 同時佔位會把地圖擠到約 89px。
+     改讓 detail 以 overlay 疊在地圖右側(絕對定位於 position:relative 的 #main),
+     地圖維持自然寬度。detailtoggle 仍照常派出(F1 的 invalidateSize 在 overlay
+     模式下不改變地圖尺寸,為無害操作)。 */
+  #detail-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex: none;
+    width: var(--detail-w);
+    max-width: 100%;
+    z-index: var(--z-detail);
+    border-left: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%);              /* 關閉:滑出右側,被 #main overflow:hidden 裁切 */
+    transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+    will-change: transform;
+  }
+  #detail-panel:not([hidden]) { transform: translateX(0); }
+  #detail-content { width: var(--detail-w); }
 }
 
 /* ============================================================
@@ -878,17 +907,18 @@
   }
   body.sidebar-open #sidebar { transform: translateX(0); }
 
-  /* 半透明遮罩 */
-  body.sidebar-open::before {
-    content: "";
+  /* 側欄背景遮罩(真實元素,比照 .detail-scrim:點擊 / Esc 關閉,見 sidebar.js) */
+  .sidebar-scrim {
+    display: block;
     position: fixed;
-    top: var(--toolbar-h);
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: var(--toolbar-h) 0 0 0;
     background: rgba(0, 0, 0, .35);
     z-index: calc(var(--z-sidebar) - 1);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .24s;
   }
+  body.sidebar-open .sidebar-scrim { opacity: 1; pointer-events: auto; }
 
   /* Detail → 底部 sheet(自下滑入;覆蓋在地圖上,非佔位) */
   #detail-panel {
@@ -908,7 +938,8 @@
     z-index: var(--z-detail);
   }
   #detail-panel:not([hidden]) { transform: translateY(0); }
-  #detail-content { width: 100%; padding-top: 4px; }
+  /* sheet 底部保留 safe-area,最後一顆按鈕不被 home indicator 蓋住 */
+  #detail-content { width: 100%; padding-top: 4px; padding-bottom: env(safe-area-inset-bottom, 0px); }
   #detail-close { top: 10px; right: 10px; }
 
   /* 拖曳把手:44px 命中區 + 置中膠囊(視覺條) */
@@ -948,12 +979,53 @@
   .li-actions select { min-height: 44px; max-width: 92px; }
   .list-item { padding: 12px; }
   .chip { padding: 8px 12px; font-size: 13px; }
-  .chip.toggle { min-height: 40px; }
+  .chip.toggle { min-height: 44px; }
   .toast-action { min-height: 44px; padding: 10px 18px; }
   #detail-panel .detail-actions .btn { min-height: 44px; }
+
+  /* 輪播左右鍵放大命中區;縮圖刪除鍵在 60px 縮圖內取 28px 折衷 */
+  .dc-nav { width: 44px; height: 44px; }
+  .img-thumb .img-del { width: 28px; height: 28px; font-size: 14px; }
+
+  /* 可聚焦輸入元件字級 ≥16px:iOS Safari 聚焦時不自動放大頁面。
+     選擇器與各基礎規則等特異度且位置在後,可穩定覆蓋。 */
+  #search-input,
+  #filter-bar .filter-select,
+  .li-actions select,
+  .detail-note,
+  .detail-day-select,
+  .field input[type="text"],
+  .field input[type="url"],
+  .field input[type="number"],
+  .field textarea,
+  .field select {
+    font-size: 16px;
+  }
 }
 
 /* 極窄:堆疊操作列 */
 @media (max-width: 380px) {
   .detail-actions { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   全域 placeholder:用次級文字色且不透明(部分瀏覽器預設半透明過淡)
+   ============================================================ */
+::placeholder {
+  color: var(--text-sub);
+  opacity: 1;
+}
+
+/* ============================================================
+   降低動態偏好:關閉過場 / 動畫(尊重系統無障礙設定)
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }

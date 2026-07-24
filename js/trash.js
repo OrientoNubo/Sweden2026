@@ -7,10 +7,21 @@ import { CATEGORIES } from './config.js';
 import { ICON, iconEl } from './icons.js';
 import * as store from './store.js';
 
+// 只有這些 overlay:changed 類型會影響回收站內容（含 badge 計數）：
+// status（刪除/還原/purge base）、custom（purge/更新自訂點）、import/reset/external（整包換資料）。
+// patch/itinerary/daynote/route/settings 不動回收站，直接略過以免無謂重繪。
+const TRASH_RELEVANT = new Set(['status', 'custom', 'import', 'reset', 'external']);
+
 export function init() {
   on('pois:ready', render);
-  on('overlay:changed', render);
+  on('overlay:changed', onOverlayChanged);
   on('tab:changed', render);
+  render();
+}
+
+function onOverlayChanged(payload) {
+  const type = payload && payload.type;
+  if (type && !TRASH_RELEVANT.has(type)) return; // 型別已知且不相關 → 不 render（badge 亦不更新）
   render();
 }
 

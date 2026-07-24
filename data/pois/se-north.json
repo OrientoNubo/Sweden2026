@@ -425,9 +425,9 @@
         "local": "Abisko nationalpark",
         "en": "Abisko National Park"
       },
-      "lat": 68.31666,
-      "lng": 18.68333,
-      "coord_source": "wikipedia-en",
+      "lat": 68.3243,
+      "lng": 18.6807,
+      "coord_source": "wikidata",
       "country": "SE",
       "region": "se-north",
       "city": "Abisko",
@@ -477,8 +477,8 @@
         "local": "Kebnekaise",
         "en": "Kebnekaise"
       },
-      "lat": 67.90444,
-      "lng": 18.52833,
+      "lat": 67.8908,
+      "lng": 18.5115,
       "coord_source": "wikipedia-en",
       "country": "SE",
       "region": "se-north",

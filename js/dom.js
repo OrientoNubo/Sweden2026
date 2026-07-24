@@ -28,6 +28,11 @@ export function escapeHtml(s) {
   ));
 }
 
+/** safeUrl(u) — 僅放行 http(s) 絕對網址,其餘(javascript:、data: 等)回傳 '#' */
+export function safeUrl(u) {
+  return /^https?:\/\//i.test(String(u ?? '')) ? String(u) : '#';
+}
+
 let toastTimer = null;
 /** toast(msg) | toast(msg, ms) | toast(msg, {actionLabel, onAction, duration})
  *  帶 action 時顯示一顆行內按鈕,點擊執行 onAction 並關閉。無 action 行為與舊版相同。 */

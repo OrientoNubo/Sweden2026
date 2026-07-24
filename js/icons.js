@@ -1,7 +1,8 @@
 // icons.js — inline SVG 圖示(Feather 風格線條;尺寸由 CSS 控)
 
 const ATTR = 'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"'
-  + ' stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+  + ' stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"'
+  + ' aria-hidden="true" focusable="false"';
 
 const wrap = (inner) => `<svg ${ATTR}>${inner}</svg>`;
 
@@ -27,7 +28,7 @@ export const ICON = {
 
   star: wrap(`<polygon points="${STAR_PTS}"/>`),
   starOutline: wrap(`<polygon points="${STAR_PTS}"/>`),
-  starFill: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="${STAR_PTS}"/></svg>`,
+  starFill: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" focusable="false"><polygon points="${STAR_PTS}"/></svg>`,
 
   edit: wrap('<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>'),
 

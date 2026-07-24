@@ -97,7 +97,7 @@ function dayCard(day, ids) {
   // POI 排序清單
   const list = el('div', { class: 'day-pois', dataset: { day } });
   pois.forEach((p, i) => list.append(poiRow(day, p, i, color)));
-  if (!pois.length) list.append(el('div', { class: 'day-empty muted small' }, '拖曳景點到這裡,或用下方「未排程收藏」指派'));
+  if (!pois.length) list.append(el('div', { class: 'day-empty muted small' }, '拖曳景點到這裡，或用下方「未排程收藏」指派'));
 
   card.append(head, note, list);
   const mapsLink = dayMapsLink(coords);
@@ -152,7 +152,7 @@ function dayMapsLink(coords) {
     }, iconEl(ICON.gmaps), '在 Google Maps 開啟此日路線');
   }
   const wrap = el('div', { class: 'day-maps-multi' },
-    el('div', { class: 'muted small' }, `此日路線超過上限,分 ${urls.length} 段開啟:`));
+    el('div', { class: 'muted small' }, `此日路線分 ${urls.length} 段開啟：`));
   urls.forEach((u, i) => wrap.append(
     el('button', { class: 'btn btn-sm', onclick: () => window.open(u, '_blank', 'noopener') }, `第 ${i + 1} 段`)));
   return wrap;
@@ -205,7 +205,7 @@ function unscheduledSection() {
 
   if (!favs.length) {
     sec.append(el('div', { class: 'muted small pad' },
-      '把景點加入收藏(★)後會出現在這裡,方便指派到某一天。'));
+      '把景點加入收藏(★)後會出現在這裡，方便指派到某一天。'));
     return sec;
   }
 

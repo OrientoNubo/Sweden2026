@@ -10,7 +10,7 @@ import { ICON } from './icons.js';
 
 const L = window.L;
 
-const TOOLTIP_ZOOM = 13;       // 此縮放以上開 permanent tooltip
+const TOOLTIP_ZOOM = 14;       // 此縮放以上開 permanent tooltip(對齊 disableClusteringAtZoom)
 const TOOLTIP_MAX = 150;       // 視窗內 tooltip 超過此數只留 tier 1–2
 const FLY_MIN_ZOOM = 14;       // select 定位時的最小縮放
 const STAR_COLOR = '#f5b301';  // = tokens --star,淺/深主題皆可讀(circleMarker canvas 不能用 var())
@@ -30,13 +30,23 @@ let userPickedBase = false;    // 使用者本 session 是否手動換過底圖
 let autoSwitching = false;     // 自動聯動底圖中,避免 baselayerchange 誤判為手動
 let hiddenDrawRouteId = null;  // 繪製中、暫時隱藏的常規路線
 let lastSelected = null;
-let placeChipPopup = null;     // 新增地點確認 chip
+let placeChipPopup = null;     // 新增景點確認 chip
 let locateMarker = null;       // 定位結果 marker
 const legendItems = [];        // 分類圖例的按鈕(供 active 狀態同步)
+let legendEl = null;           // 圖例容器(供 mode 切換停用/恢復)
 
 const isDesktop = () => window.matchMedia('(min-width: 769px)').matches;
+const prefersReducedMotion = () =>
+  window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const poiLabel = (poi) => poi.name?.zh || poi.name?.local || poi.name?.en || '';
 const cssVar = (name, fallback) =>
   getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+
+// 尊重減少動態偏好:reduced-motion 時瞬移(不做飛行動畫)
+function panTo(latlng, zoom) {
+  if (prefersReducedMotion()) map.setView(latlng, zoom, { animate: false });
+  else map.flyTo(latlng, zoom);
+}
 
 // ── 篩選 predicate(對 state.filters;規則以 CONTRACTS 為準,為 curate 模式唯一真值來源) ──
 function textMatch(poi, q) {
@@ -77,7 +87,11 @@ function bindMarkerInteractions(marker, poi) {
 }
 
 function makePoiMarker(poi, mode) {
-  const m = L.marker([poi.lat, poi.lng], { icon: buildIcon(poi, { mode }) });
+  // title/alt:給滑鼠 hover 原生提示與螢幕閱讀器可讀名稱(divIcon 無 <img>,alt 由 Leaflet 掛在容器上)
+  const label = poiLabel(poi);
+  const m = L.marker([poi.lat, poi.lng], {
+    icon: buildIcon(poi, { mode }), title: label, alt: label, keyboard: true,
+  });
   bindMarkerInteractions(m, poi);
   return m;
 }
@@ -85,7 +99,10 @@ function makePoiMarker(poi, mode) {
 function makeFavoriteMarker(poi) {
   // zIndexOffset:1000 → 恆顯星形永遠疊在 cluster 泡泡之上(低 zoom 兩者重疊時,
   // Leaflet 的 pane z-index = 螢幕 y + offset;重疊點 y 差僅 ~icon 尺寸,offset 1000 必勝)
-  const m = L.marker([poi.lat, poi.lng], { icon: buildFavoriteIcon(poi), zIndexOffset: 1000 });
+  const label = poiLabel(poi);
+  const m = L.marker([poi.lat, poi.lng], {
+    icon: buildFavoriteIcon(poi), zIndexOffset: 1000, title: label, alt: label, keyboard: true,
+  });
   m._fav = true;
   bindMarkerInteractions(m, poi);
   return m;
@@ -121,6 +138,46 @@ function renderCurate() {
   clusterGroup.addLayers(clustered);
   if (!map.hasLayer(clusterGroup)) map.addLayer(clusterGroup);
   if (!map.hasLayer(favoriteLayer)) map.addLayer(favoriteLayer);
+}
+
+// ── 增量更新(僅 curate 模式):只重建/搬移受影響的單一 marker,避免整批重繪 ──
+function removeCurateMarker(m) {
+  if (m._fav) favoriteLayer.removeLayer(m);
+  else clusterGroup.removeLayer(m);
+}
+function addCurateMarker(poi) {
+  if (poi._status === 'favorite') {
+    const m = makeFavoriteMarker(poi);
+    m.addTo(favoriteLayer);
+    markerById.set(poi.id, m);
+  } else {
+    const m = makePoiMarker(poi, 'curate');
+    clusterGroup.addLayer(m);
+    markerById.set(poi.id, m);
+  }
+}
+// 依 store 最新資料把單一 id 的 marker 對齊到應有狀態(顯示/隱藏、收藏星形↔一般 pin、圖示/名稱)
+function reconcileCurate(id, type) {
+  const poi = store.getPoi(id);
+  const existing = markerById.get(id);
+  const shouldShow = !!poi && passesFilter(poi);
+  if (!shouldShow) {
+    if (existing) { removeCurateMarker(existing); markerById.delete(id); }
+    return;
+  }
+  const wantFav = poi._status === 'favorite';
+  // patch / 備註:座標與型別未變 → 原地更新圖示與(已顯示的)tooltip 文字;
+  // custom(可能改座標/分類)與收藏切換(型別變)→ 重建以確保 cluster 位置與圖層正確。
+  if (type !== 'custom' && existing && (!!existing._fav === wantFav)) {
+    existing._poi = poi;
+    existing.setIcon(iconForMarker(existing));
+    if (existing.getTooltip && existing.getTooltip()) {
+      existing.setTooltipContent(escapeHtml(poi.name?.zh || poi.name?.local || ''));
+    }
+    return;
+  }
+  if (existing) { removeCurateMarker(existing); markerById.delete(id); }
+  addCurateMarker(poi);
 }
 
 function renderItinerary() {
@@ -170,7 +227,7 @@ function renderPois() {
   if (state.viewMode === 'itinerary') renderItinerary();
   else renderCurate();
   lastSelected = state.selectedId;
-  updateTooltips();
+  updateTooltipsDebounced();
 }
 
 function renderRoutes() {
@@ -202,7 +259,7 @@ function renderRoutes() {
   }
 }
 
-// ── permanent tooltip(zoom≥13;視窗內超過上限時只顯示 tier 1–2) ──
+// ── permanent tooltip(zoom≥14;視窗內超過上限時只顯示 tier 1–2) ──
 function updateTooltips() {
   if (!map) return;
   const z = map.getZoom();
@@ -251,13 +308,13 @@ function focusPoi(id) {
   const m = markerById.get(id);
   if (!m) return;
   const targetZoom = Math.max(map.getZoom(), FLY_MIN_ZOOM);
-  if (state.viewMode === 'curate' && clusterGroup.hasLayer(m)) {
-    clusterGroup.zoomToShowLayer(m, () => {
-      map.setView(m.getLatLng(), Math.max(map.getZoom(), FLY_MIN_ZOOM), { animate: true });
-    });
-  } else {
-    map.flyTo(m.getLatLng(), targetZoom);
+  // cluster 內的點:交給 markercluster 展開定位(單段動畫,不再二次 setView)。
+  // reduced-motion 時走 panTo 的瞬移分支(targetZoom≥14=disableClusteringAtZoom,直接可見)。
+  if (!prefersReducedMotion() && state.viewMode === 'curate' && clusterGroup.hasLayer(m)) {
+    clusterGroup.zoomToShowLayer(m);
+    return;
   }
+  panTo(m.getLatLng(), targetZoom);
 }
 
 // ── 底圖 + 主題聯動 ──
@@ -321,6 +378,7 @@ function setupBaseLayers() {
 
 // ── 分類圖例 control(左下;點某分類 → toggle state.filters.categories) ──
 function onLegendClick(catKey) {
+  if (state.viewMode === 'itinerary') return;   // 行程模式:分類篩選無意義,停用
   const cats = state.filters.categories;
   const i = cats.indexOf(catKey);
   if (i >= 0) cats.splice(i, 1);   // 再點取消
@@ -334,11 +392,16 @@ function updateLegendActive() {
     btn.classList.toggle('is-active', cats.includes(btn.dataset.cat));
   }
 }
+// 行程模式:分類篩選不適用 → 整體標記為停用(CSS 淡化 + 阻擋點擊)
+function updateLegendMode() {
+  if (legendEl) legendEl.classList.toggle('is-disabled', state.viewMode === 'itinerary');
+}
 function addLegendControl() {
   const Legend = L.Control.extend({
     options: { position: 'bottomleft' },
     onAdd() {
       const c = L.DomUtil.create('div', 'map-legend');
+      legendEl = c;
       if (!isDesktop()) c.classList.add('is-collapsed'); // 手機預設收合
 
       const toggle = L.DomUtil.create('button', 'legend-toggle', c);
@@ -370,6 +433,7 @@ function addLegendControl() {
       L.DomEvent.disableClickPropagation(c);
       L.DomEvent.disableScrollPropagation(c);
       updateLegendActive();
+      updateLegendMode();
       return c;
     },
   });
@@ -387,10 +451,10 @@ function locateUser() {
         radius: 8, weight: 3, color: '#fff',
         fillColor: cssVar('--primary', '#328a97'), fillOpacity: 0.95,
       }).addTo(map);
-      map.flyTo(ll, Math.max(map.getZoom(), 13));
+      panTo(ll, Math.max(map.getZoom(), 13));
     },
     (err) => {
-      toast(err.code === err.PERMISSION_DENIED ? '定位權限被拒絕,請於瀏覽器開啟' : '無法取得您的位置');
+      toast(err.code === err.PERMISSION_DENIED ? '定位權限被拒絕，請於瀏覽器開啟' : '無法取得您的位置');
     },
     { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
   );
@@ -400,8 +464,8 @@ function fitToVisible() {
   for (const m of markerById.values()) {
     if (typeof m.getLatLng === 'function') pts.push(m.getLatLng());
   }
-  if (!pts.length) { toast('目前沒有可顯示的地點'); return; }
-  map.fitBounds(L.latLngBounds(pts), { padding: [48, 48], maxZoom: 15 });
+  if (!pts.length) { toast('目前沒有可顯示的景點'); return; }
+  map.fitBounds(L.latLngBounds(pts), { padding: [48, 48], maxZoom: 15, animate: !prefersReducedMotion() });
 }
 function addMapTools() {
   const mkBtn = (svg, title, handler) => {
@@ -420,7 +484,7 @@ function addMapTools() {
     onAdd() {
       const bar = L.DomUtil.create('div', 'leaflet-bar map-tools');
       bar.appendChild(mkBtn(ICON.locate, '定位我的位置', locateUser));
-      bar.appendChild(mkBtn(ICON.fit, '縮放至目前可見的地點', fitToVisible));
+      bar.appendChild(mkBtn(ICON.fit, '縮放至目前可見的景點', fitToVisible));
       L.DomEvent.disableClickPropagation(bar);
       return bar;
     },
@@ -429,11 +493,12 @@ function addMapTools() {
 }
 
 // ── 雙擊 / 長按:開確認 chip,點按鈕才真正新增(防誤觸) ──
+// 關閉路徑統一:closePlaceChip 只負責觸發關閉並解除 movestart;placeChipPopup 一律由
+// popupclose 事件歸零(涵蓋手動關、autoClose、closeOnClick 等所有路徑,避免殘留 stale 參照)。
+function onPlaceChipMovestart() { closePlaceChip(); }
 function closePlaceChip() {
-  if (placeChipPopup) {
-    map.closePopup(placeChipPopup);
-    placeChipPopup = null;
-  }
+  map.off('movestart', onPlaceChipMovestart);
+  if (placeChipPopup) map.closePopup(placeChipPopup);
 }
 function openPlaceChip(latlng) {
   closePlaceChip();
@@ -447,7 +512,7 @@ function openPlaceChip(latlng) {
   })
     .setLatLng(latlng)
     .setContent(
-      `<button type="button" class="place-chip-btn">${ICON.plus}<span>在此新增地點</span></button>`)
+      `<button type="button" class="place-chip-btn">${ICON.plus}<span>在此新增景點</span></button>`)
     .openOn(map);
   placeChipPopup = popup;
   const elm = popup.getElement();
@@ -459,7 +524,13 @@ function openPlaceChip(latlng) {
       emit('custom:place', { lat: latlng.lat, lng: latlng.lng });
     });
   }
-  map.once('movestart', closePlaceChip);   // 地圖 move 自動關
+  map.on('movestart', onPlaceChipMovestart);   // 地圖 move 自動關(具名 handler,關閉時 off)
+}
+
+// 繪製模式的 cluster 點擊行為切換:進入停用、離開恢復(冪等,可安全重入)
+function setClusterDrawMode(drawing) {
+  clusterGroup.options.zoomToBoundsOnClick = !drawing;
+  clusterGroup.options.spiderfyOnMaxZoom = !drawing;
 }
 
 // ── 入口 ──
@@ -480,6 +551,8 @@ export function init() {
     disableClusteringAtZoom: 14,
     spiderfyOnMaxZoom: true,
     iconCreateFunction: clusterIcon,
+    // 分批載入完成後再更新 tooltip(避免後段 chunk 尚未進 cluster 就綁 tooltip)
+    chunkProgress: (processed, total) => { if (processed >= total) updateTooltipsDebounced(); },
     // zoomToBoundsOnClick 預設 true;draw 模式改於執行期切 options(vendor 點擊時動態讀)
   });
   favoriteLayer = L.layerGroup();
@@ -489,6 +562,13 @@ export function init() {
   bindPopupEvents(map);
   addLegendControl();
   addMapTools();
+
+  // place chip 任何關閉路徑(手動 / autoClose / closeOnClick)都在此歸零並解除 movestart
+  map.on('popupclose', (e) => {
+    if (e.popup !== placeChipPopup) return;
+    map.off('movestart', onPlaceChipMovestart);
+    placeChipPopup = null;
+  });
 
   // 地圖互動:雙擊 / 長按(contextmenu)→ 確認 chip
   const placeHandler = (e) => {
@@ -524,13 +604,29 @@ export function init() {
 
   // ── 事件匯流排 ──
   on('pois:ready', () => { renderPois(); renderRoutes(); });
-  on('overlay:changed', ({ type } = {}) => {
+  // 依變更型別做最小重繪:route 只重畫路線;import/reset 全量;settings/daynote 不動 marker;
+  // curate 模式下 itinerary 變更不影響 marker,小量 status/patch/custom 走增量,其餘保守全量。
+  on('overlay:changed', (payload = {}) => {
+    const { type, ids } = payload;
     if (type === 'route') { renderRoutes(); return; }
-    renderPois();
-    if (type === 'import' || type === 'reset') renderRoutes();
+    if (type === 'import' || type === 'reset') { renderPois(); renderRoutes(); return; }
+    if (type === 'settings' || type === 'daynote') return;   // 不影響任何 marker
+
+    if (state.viewMode === 'curate') {
+      if (type === 'itinerary') return;                      // curate marker 不依賴 _day/_order
+      if (Array.isArray(ids) && ids.length
+          && (type === 'status' || type === 'patch' || type === 'custom')) {
+        for (const id of ids) reconcileCurate(id, type);     // 增量:只動受影響的 marker
+        updateTooltipsDebounced();
+        return;
+      }
+      renderPois();                                          // 拿不準 → 保守全量
+      return;
+    }
+    renderPois();                                            // itinerary 模式:序號/連線牽連廣,全量
   });
   on('filter:changed', () => { renderPois(); updateLegendActive(); });
-  on('mode:changed', () => renderPois());
+  on('mode:changed', () => { renderPois(); updateLegendMode(); });
   on('day:visibility', () => { if (state.viewMode === 'itinerary') renderPois(); });
 
   on('select', ({ id, source } = {}) => {
@@ -543,16 +639,14 @@ export function init() {
   on('draw:start', ({ routeId } = {}) => {
     document.body.classList.add('map-draw');
     hiddenDrawRouteId = routeId ?? null;
-    clusterGroup.options.zoomToBoundsOnClick = false;
-    clusterGroup.options.spiderfyOnMaxZoom = false;
+    setClusterDrawMode(true);
     closePlaceChip();
     renderRoutes();
   });
   on('draw:end', () => {
     document.body.classList.remove('map-draw');
     hiddenDrawRouteId = null;
-    clusterGroup.options.zoomToBoundsOnClick = true;
-    clusterGroup.options.spiderfyOnMaxZoom = true;
+    setClusterDrawMode(false);   // 無條件恢復,避免異常退出後 cluster 點擊卡死
     renderRoutes();
   });
 

@@ -42,18 +42,23 @@ function buildSegUrl(seg, travelmode) {
 
 /**
  * 多點路線 URL 陣列。points: [[lat,lng],…]。
- * 單段最多 11 點(origin + 9 waypoints + destination);超過自動切段,
- * 相鄰段以共同點銜接(前段末點 = 後段首點),回傳 [url,…]。
- * 少於 2 點回傳 []。
+ * 一般模式(driving/walking/bicycling):單段最多 11 點,超過自動切段,
+ * 相鄰段以共同點銜接(前段末點 = 後段首點)。
+ * 大眾運輸(transit):Google 的 transit 不支援 waypoints,帶中途點只會回 origin→destination
+ * 並略過中途站,故一律拆成相鄰兩點一段,逐段給正確轉乘路線(沿用既有分段 UI)。
+ * 回傳 [url,…];少於 2 點回傳 []。
  */
 export function multiStopUrl(points, { travelmode = 'transit' } = {}) {
   const pts = (points || []).filter((p) => Array.isArray(p) && p.length >= 2);
   if (pts.length < 2) return [];
-  const MAX = 11;          // 單段最大點數
-  const STEP = MAX - 1;    // 相鄰段重疊 1 點
+  // 一般模式單段最大點數 = origin + 9 中途點 + destination = 11。
+  // 9 是 Google Maps「api=1」dir URL 的 waypoints 中途點上限(逾此多餘點會被忽略),為外部服務限制,勿調高。
+  // transit 不支援中途點,故每段僅 2 點(origin→destination);相鄰段重疊 1 點串起整條路線。
+  const segMax = travelmode === 'transit' ? 2 : 11;
+  const step = segMax - 1; // 相鄰段重疊 1 點
   const urls = [];
-  for (let i = 0; i < pts.length - 1; i += STEP) {
-    urls.push(buildSegUrl(pts.slice(i, i + MAX), travelmode));
+  for (let i = 0; i < pts.length - 1; i += step) {
+    urls.push(buildSegUrl(pts.slice(i, i + segMax), travelmode));
   }
   return urls;
 }

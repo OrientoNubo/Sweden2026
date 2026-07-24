@@ -58,9 +58,17 @@
   position: absolute;
   top: -7px;
   right: -7px;
-  font-size: 12px;
-  line-height: 1;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .4));
+  width: 13px;
+  height: 13px;
+  line-height: 0;
+  color: var(--star);
+  /* 白色暈邊:金星在任何分類色 pin 上皆可辨識 */
+  filter: drop-shadow(0 0 1px #fff) drop-shadow(0 1px 1px rgba(0, 0, 0, .4));
+}
+.mk-star svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 /* 選中:外圈高亮 */
 .mk-sel {
@@ -383,6 +391,11 @@
 .legend-item.is-active .legend-dot {
   box-shadow: 0 0 0 2px var(--accent-border);
 }
+/* 行程模式:分類篩選不適用 → 淡化圖例並阻擋點擊(收合鈕仍可用) */
+.map-legend.is-disabled .legend-body {
+  opacity: .45;
+  pointer-events: none;
+}
 
 /* ── 定位 / 縮放至可見點 工具鈕(左上) ── */
 .leaflet-bar a.map-tool-btn {
@@ -440,4 +453,18 @@
     height: 34px;
   }
   .mk-glyph { font-size: 17px; }
+  /* 觸控目標 ≥44px(WCAG 2.5.5) */
+  .legend-toggle {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+  .legend-item {
+    min-height: 44px;
+    padding: 8px 10px;
+  }
+  .leaflet-bar a.map-tool-btn {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+  }
 }

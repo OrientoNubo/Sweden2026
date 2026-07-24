@@ -8,7 +8,7 @@
 ```json
 {
   "region": "se-malmo",
-  "version": "2026-07-24",
+  "version": "2026-07-25",
   "pois": [ { …見下… } ]
 }
 ```

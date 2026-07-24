@@ -31,7 +31,7 @@ async function boot() {
     await store.init();          // emit 'pois:ready'
   } catch (e) {
     console.error(e);
-    toast('資料載入失敗,請重新整理頁面');
+    toast('資料載入失敗，請重新整理頁面');
     return;
   }
   initTheme();

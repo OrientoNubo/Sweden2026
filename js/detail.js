@@ -1,7 +1,7 @@
 // detail.js — 右側詳情面板:檢視 / 編輯 / 新增自訂點(F3 擁有)
 // 合約見 docs/CONTRACTS.md。Google Maps URL 直接組,不 import gmaps.js 以免耦合。
 import { state, emit, on } from './state.js';
-import { $, el, toast } from './dom.js';
+import { $, el, toast, safeUrl } from './dom.js';
 import {
   CATEGORIES, TIER_LABELS, COUNTRY_LABELS, TRIP_DAYS, dayLabel, commonsPage, fmtStay,
 } from './config.js';
@@ -14,10 +14,15 @@ let currentId = null;
 let mode = 'view';        // 'view' | 'edit' | 'new'
 let objectUrls = [];      // 需要 revoke 的 idb objectURL
 let panelOpen = false;    // 面板是否開啟(供 detailtoggle 去重)
+let lastTrigger = null;   // 開啟前的觸發元素,關閉時還原焦點
+let lastImgKey = '';      // 上次解析的圖片指紋(currentId + refs);未變則不重 resolve
+let lastUrls = [];        // 上次解析結果(對應 lastImgKey)
 
 function revokeUrls() {
   for (const u of objectUrls) URL.revokeObjectURL(u);
   objectUrls = [];
+  lastImgKey = '';
+  lastUrls = [];
 }
 
 /** 開關狀態變化時派 detailtoggle(供 F1 mapview invalidateSize)+ 切 scrim。
@@ -27,6 +32,29 @@ function setPanelOpen(open) {
   panelOpen = open;
   document.body.classList.toggle('detail-open', open);
   window.dispatchEvent(new CustomEvent('detailtoggle', { detail: { open } }));
+  if (open) {
+    // 記住觸發元素(尚未搶焦點前),再把焦點移到關閉鈕
+    const active = document.activeElement;
+    lastTrigger = (active && active !== document.body) ? active : null;
+    const cb = $('#detail-close');
+    if (cb) cb.focus({ preventScroll: true });
+  } else {
+    panel.removeAttribute('role');
+    panel.removeAttribute('aria-modal');
+    panel.removeAttribute('aria-label');
+    if (lastTrigger && document.contains(lastTrigger) && typeof lastTrigger.focus === 'function') {
+      lastTrigger.focus({ preventScroll: true });
+    }
+    lastTrigger = null;
+  }
+}
+
+/** 面板以非 modal dialog 呈現(aria-modal=false:不困住焦點,但輔助技術可辨識為對話框) */
+function setDialogAria(label) {
+  if (!panel) return;
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'false');
+  if (label) panel.setAttribute('aria-label', label);
 }
 
 /** 使用者要求關閉:統一由 select(null) 路徑收斂到 close() */
@@ -104,16 +132,23 @@ function buildCarousel(p, urls) {
   }
 
   let idx = 0;
-  const img = el('img', { class: 'dc-img', alt: p.name?.zh || '' });
+  const img = el('img', {
+    class: 'dc-img', alt: p.name?.zh || '',
+    tabindex: '0', role: 'button', 'aria-label': '開啟圖片來源',
+  });
   wrap.append(img);
 
   const update = () => {
     img.src = urls[idx].href;
     dots.forEach((d, i) => d.classList.toggle('on', i === idx));
   };
-  img.addEventListener('click', () => {
+  const openSource = () => {
     const href = (idx === 0 && baseFirst && p.image_file) ? commonsPage(p.image_file) : urls[idx].href;
-    window.open(href, '_blank', 'noopener');
+    window.open(safeUrl(href), '_blank', 'noopener');
+  };
+  img.addEventListener('click', openSource);
+  img.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSource(); }
   });
 
   let dots = [];
@@ -141,6 +176,7 @@ function metaRow(key, val) {
 function detailDaySelect(p) {
   const sel = el('select', {
     class: 'detail-day-select' + (p._day ? ' assigned' : ''),
+    'aria-label': '指派日期',
     onchange: () => store.assignToDay(p.id, sel.value || null),
   }, el('option', { value: '' }, '未指派日期'),
     ...TRIP_DAYS.map((d) => el('option', { value: d }, dayLabel(d))));
@@ -185,8 +221,8 @@ function buildView(p, urls) {
 
   // 連結
   const links = el('div', { class: 'detail-links' });
-  if (p.url) links.append(el('a', { href: p.url, target: '_blank', rel: 'noopener' }, '官方網站 ↗'));
-  if (p.wikipedia) links.append(el('a', { href: p.wikipedia, target: '_blank', rel: 'noopener' }, 'Wikipedia ↗'));
+  if (p.url) links.append(el('a', { href: safeUrl(p.url), target: '_blank', rel: 'noopener' }, '官方網站 ↗'));
+  if (p.wikipedia) links.append(el('a', { href: safeUrl(p.wikipedia), target: '_blank', rel: 'noopener' }, 'Wikipedia ↗'));
   if (p.image_file) links.append(el('a', { href: commonsPage(p.image_file), target: '_blank', rel: 'noopener' }, '圖片來源 ↗'));
   if (links.childNodes.length) body.append(links);
 
@@ -200,7 +236,8 @@ function buildView(p, urls) {
   // 操作列
   const favBtn = el('button', {
     class: 'btn' + (fav ? ' btn-primary' : ''),
-    title: fav ? '取消收藏' : '收藏', 'aria-label': fav ? '取消收藏' : '收藏',
+    title: fav ? '已收藏,點擊取消收藏' : '收藏',
+    'aria-label': fav ? '已收藏,點擊取消收藏' : '收藏',
     onclick: () => store.setStatus(p.id, fav ? null : 'favorite'),
   }, iconEl(fav ? ICON.starFill : ICON.starOutline), fav ? '已收藏' : '收藏');
   const delBtn = el('button', {
@@ -275,7 +312,7 @@ function buildImageEditor(refs, hooks = {}) {
     refs.forEach((ref) => {
       const img = el('img', { alt: '' });
       setImgSrc(img, ref);
-      const del = el('button', { class: 'img-del', type: 'button', title: '移除',
+      const del = el('button', { class: 'img-del', type: 'button', title: '刪除圖片', 'aria-label': '刪除圖片',
         onclick: () => {
           const i = refs.indexOf(ref);
           if (i >= 0) refs.splice(i, 1);
@@ -301,7 +338,7 @@ function buildImageEditor(refs, hooks = {}) {
       refs.push(ref); hooks.onAdd?.(ref); draw();
     } catch (e) {
       console.error('[detail] 圖片上傳失敗', e);
-      toast('圖片上傳失敗,可能是瀏覽器無痕模式限制');
+      toast('圖片上傳失敗，可能是瀏覽器無痕模式限制');
     }
     fileInput.value = '';
   });
@@ -380,6 +417,7 @@ function renderEdit(id) {
 
   content.textContent = '';
   content.append(form);
+  setDialogAria('編輯景點');
   resetSheetTransform();
   panel.hidden = false;
   setPanelOpen(true);
@@ -398,7 +436,7 @@ function renderNewCustom({ lat, lng }) {
   const descInput = el('textarea', {});
   const latInput = el('input', { type: 'number', step: 'any' }); latInput.value = lat;
   const lngInput = el('input', { type: 'number', step: 'any' }); lngInput.value = lng;
-  const daySel = el('select', {}, el('option', { value: '' }, '未指派日期'),
+  const daySel = el('select', { 'aria-label': '指派日期' }, el('option', { value: '' }, '未指派日期'),
     ...TRIP_DAYS.map((d) => el('option', { value: d }, dayLabel(d))));
 
   const staged = [];
@@ -432,6 +470,7 @@ function renderNewCustom({ lat, lng }) {
 
   content.textContent = '';
   content.append(form);
+  setDialogAria('新增自訂景點');
   resetSheetTransform();
   panel.hidden = false;
   setPanelOpen(true);
@@ -446,11 +485,24 @@ async function openPoi(id) {
   currentId = id;
   mode = 'view';
   const prevScroll = (!panel.hidden && content) ? content.scrollTop : 0;
-  revokeUrls();
-  const urls = await resolveImages(p._images || []);
-  if (currentId !== id) return; // 期間被切換,放棄
+
+  // 圖片 refs 未變(同一 POI、同一組 refs)則重用上次解析的 objectURL,不重 resolve
+  const refs = p._images || [];
+  const imgKey = id + '|' + refs.join('\n');
+  let urls;
+  if (imgKey === lastImgKey) {
+    urls = lastUrls;
+  } else {
+    revokeUrls();
+    urls = await resolveImages(refs);
+    if (currentId !== id) return; // 期間被切換,放棄
+    lastImgKey = imgKey;
+    lastUrls = urls;
+  }
+
   content.textContent = '';
   content.append(buildView(p, urls));
+  setDialogAria(p.name?.zh || p.name?.local || '景點詳情');
   resetSheetTransform();
   panel.hidden = false;
   setPanelOpen(true);
@@ -523,6 +575,17 @@ export function init() {
   const closeBtn = $('#detail-close');
   if (closeBtn) closeBtn.addEventListener('click', requestClose);
 
+  // Escape:面板開啟時關閉;若焦點在輸入框內先 blur(第一下不關,避免搶掉輸入框的 Esc)
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || panel.hidden) return;
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
+      t.blur();
+      return;
+    }
+    requestClose();
+  });
+
   on('select', ({ id }) => {
     if (id == null) close();
     else openPoi(id);
@@ -532,11 +595,13 @@ export function init() {
     if (payload && Number.isFinite(payload.lat) && Number.isFinite(payload.lng)) renderNewCustom(payload);
   });
 
-  // 資料變更時,若正在檢視則同步刷新(編輯/新增中不打斷)
-  on('overlay:changed', () => {
-    if (!panel.hidden && mode === 'view' && currentId != null) {
-      if (store.getPoi(currentId)) openPoi(currentId);
-      else close();
-    }
+  // 資料變更時,若正在檢視則同步刷新(編輯/新增中不打斷)。
+  // 僅在變更影響目前 POI 時重繪(payload.ids 含 currentId;無 ids 視為全域變更)。
+  on('overlay:changed', (payload) => {
+    if (panel.hidden || mode !== 'view' || currentId == null) return;
+    const ids = payload && payload.ids;
+    if (Array.isArray(ids) && !ids.includes(currentId)) return;
+    if (store.getPoi(currentId)) openPoi(currentId);
+    else close();
   });
 }

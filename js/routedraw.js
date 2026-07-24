@@ -14,6 +14,7 @@ let editRouteId = null;
 let workColor = ROUTE_COLORS[0];
 let points = [];            // 工作中的節點 [[lat,lng],…]
 let selectedIdx = null;     // 編輯模式選中的節點索引
+let starting = false;       // startNew/startEdit await getMapSafe 期間的重入保護(此時 state.uiMode 尚未切 draw)
 
 let layer = null;           // 所有暫時圖層的容器
 let poly = null;
@@ -45,9 +46,10 @@ export function init() {
 }
 
 export async function startNew() {
-  if (state.uiMode === 'draw') return;
+  if (state.uiMode === 'draw' || starting) return;
+  starting = true; // 在 await 前同步設旗標,擋住 await 期間的重入
   map = await getMapSafe();
-  if (!map) { toast('地圖尚未就緒,請稍候再試'); return; }
+  if (!map) { starting = false; toast('地圖尚未就緒，請稍候再試'); return; }
   mode = 'new';
   editRouteId = null;
   points = [];
@@ -57,14 +59,16 @@ export async function startNew() {
   setupLayer();
   bindNewHandlers();
   updateBanner();
+  starting = false;
 }
 
 export async function startEdit(routeId) {
-  if (state.uiMode === 'draw') return;
+  if (state.uiMode === 'draw' || starting) return;
   const route = store.getRoutes().find((r) => r.id === routeId);
   if (!route) { toast('找不到此路線'); return; }
+  starting = true; // 在 await 前同步設旗標,擋住 await 期間的重入
   map = await getMapSafe();
-  if (!map) { toast('地圖尚未就緒,請稍候再試'); return; }
+  if (!map) { starting = false; toast('地圖尚未就緒，請稍候再試'); return; }
   mode = 'edit';
   editRouteId = routeId;
   workColor = route.color || ROUTE_COLORS[0];
@@ -78,6 +82,7 @@ export async function startEdit(routeId) {
   const b = boundsOf(points);
   if (b) map.fitBounds(b, { padding: [50, 50] });
   updateBanner();
+  starting = false;
 }
 
 // ---- 進入 / 離開繪製模式 ----
@@ -202,7 +207,7 @@ function finishNew() {
   store.addRoute({ waypoints: points.slice(), name, color });
   exitDraw();
   switchToRoutesTab();
-  toast('路線已建立,可在清單中改名');
+  toast('路線已建立，可在清單中改名');
 }
 
 function switchToRoutesTab() {
@@ -226,19 +231,27 @@ function midpoint(a, b) {
   return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
 }
 
+// workColor 會內插進節點 divIcon 的 inline style(sink);限定為 hex 色碼,避免非法或外來值
+// (route.color 可能來自匯入資料)破壞 style 屬性或注入標記。非 hex 一律退回預設色。
+function safeColor(c) {
+  return (typeof c === 'string'
+    && /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(c))
+    ? c : ROUTE_COLORS[0];
+}
+
 function nodeIcon(selected) {
   const size = selected ? 18 : 13;
   // 選中=高對比 --text 邊框;未選=與介面表面同色的 --bg 邊框,外加 --border 細描邊定義輪廓(兩主題皆可讀)
   const border = selected ? 'var(--text)' : 'var(--bg)';
   const html = `<span style="display:block;width:${size}px;height:${size}px;border-radius:50%;`
-    + `background:${workColor};border:2px solid ${border};box-shadow:0 0 0 1px var(--border)"></span>`;
+    + `background:${safeColor(workColor)};border:2px solid ${border};box-shadow:0 0 0 1px var(--border)"></span>`;
   return L().divIcon({ className: 'route-node-icon', html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 }
 
 function ghostIcon() {
   const s = 11;
   const html = `<span style="display:block;width:${s}px;height:${s}px;border-radius:50%;`
-    + `background:${workColor};opacity:.55;border:1px dashed var(--bg)"></span>`;
+    + `background:${safeColor(workColor)};opacity:.55;border:1px dashed var(--bg)"></span>`;
   return L().divIcon({ className: 'route-ghost-icon', html, iconSize: [s, s], iconAnchor: [s / 2, s / 2] });
 }
 
@@ -246,7 +259,7 @@ function ghostIcon() {
 function previewIcon() {
   const s = 11;
   const html = `<span style="display:block;width:${s}px;height:${s}px;border-radius:50%;`
-    + `background:${workColor};border:2px solid var(--bg);box-shadow:0 0 0 1px var(--border)"></span>`;
+    + `background:${safeColor(workColor)};border:2px solid var(--bg);box-shadow:0 0 0 1px var(--border)"></span>`;
   return L().divIcon({ className: 'route-preview-icon', html, iconSize: [s, s], iconAnchor: [s / 2, s / 2] });
 }
 
@@ -345,11 +358,17 @@ function deleteNode(i) {
 function finishEdit() {
   if (points.length < 2) { toast('路線至少需 2 個節點'); return; }
   const id = editRouteId;
-  store.updateRoute(id, { waypoints: points.slice() });
+  const route = store.getRoutes().find((r) => r.id === id);
+  const routed = !!(route && route.mode && route.mode !== 'straight');
+  // routed 路線:連同 waypoints 一起先樂觀清掉舊道路幾何(暫以新節點的直線顯示),
+  // 避免重算完成前殘留沿舊節點的道路路徑造成數秒錯位
+  const patch = { waypoints: points.slice() };
+  if (routed) { patch.geometry = null; patch.road_distance = null; patch.road_duration = null; }
+  store.updateRoute(id, patch);
   exitDraw();
   toast('路線已更新');
   // 非直線模式的路線,節點變更後自動沿道路重算
-  import('./routing.js').then((m) => m.recomputeIfRouted(id)).catch(() => {});
+  if (routed) import('./routing.js').then((m) => m.recomputeIfRouted(id)).catch(() => {});
 }
 
 function cancelEdit() {
@@ -426,7 +445,9 @@ function onCancel() {
 function onKeydown(e) {
   if (state.uiMode !== 'draw') return;
   const tag = (e.target && e.target.tagName) || '';
-  if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || (e.target && e.target.isContentEditable)) return;
+  // 排除 BUTTON:banner 上按鈕(完成/取消/刪除節點)聚焦時按 Enter 會觸發原生 click,
+  // 若不排除,全域 Enter→onDone 會與按鈕原生點擊重複觸發
+  if (/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(tag) || (e.target && e.target.isContentEditable)) return;
   if (e.key === 'Escape') { e.preventDefault(); onCancel(); }
   else if (e.key === 'Enter') { e.preventDefault(); onDone(); }
   else if (e.key === 'Backspace') {

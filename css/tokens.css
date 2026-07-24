@@ -7,8 +7,8 @@
   --bg-hover: #e2e2dc;         /* hover 底 */
   --border: #d7d7d5;
   --text: #0b0b0b;
-  --text-sub: #898781;         /* muted / 次級文字 */
-  --text-faint: #adaba4;       /* 更淡的第三級文字 */
+  --text-sub: #6f6d67;         /* muted / 次級文字(對 --bg 4.87:1,正文 AA) */
+  --text-faint: #8a887f;       /* 更淡的第三級文字(對 --bg 3.34:1,大字/非文字 AA) */
   --primary: #328a97;          /* accent(teal) */
 
   --danger: #d93025;
@@ -31,7 +31,9 @@
   --sidebar-w: 360px;
   --detail-w: 400px;
 
-  --z-map: 1;
+  /* 全域(shell 級)z-index 疊層。layout 內部堆疊情境用的小數字 z-index
+     (如 map-wrap 內 10/5/4)為各元件 shell-local 慣例,只在該 stacking
+     context 內比較,不與這些全域 token 共用刻度。 */
   --z-banner: 700;   /* Leaflet controls 約 1000 之下、地圖之上 */
   --z-sidebar: 1100;
   --z-detail: 1150;

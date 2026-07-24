@@ -29,6 +29,7 @@ function daySelect(p) {
   const sel = el('select', {
     class: p._day ? 'assigned' : '',
     title: '指派日期',
+    'aria-label': '指派日期',
     onclick: (e) => e.stopPropagation(),
     onchange: (e) => { e.stopPropagation(); store.assignToDay(p.id, sel.value || null); },
   }, el('option', { value: '' }, '未指派'),
@@ -94,15 +95,24 @@ function select(id) {
   if (isMobile()) closeSidebar();
 }
 
-function render() {
-  const listEl = $('#poi-list');
-  const countEl = $('#poi-count');
-  if (!listEl) return;
-
-  const scrollTop = listEl.scrollTop;
+function computeShown() {
   const all = store.getPois();
   const shown = applyFilters(all).sort((a, b) =>
     (a.tier - b.tier) || (a.name?.zh || '').localeCompare(b.name?.zh || '', 'zh-Hant'));
+  return { all, shown };
+}
+
+function updateCount(shownLen, allLen) {
+  const countEl = $('#poi-count');
+  if (countEl) countEl.textContent = `顯示 ${shownLen} / 共 ${allLen}`;
+}
+
+function render() {
+  const listEl = $('#poi-list');
+  if (!listEl) return;
+
+  const scrollTop = listEl.scrollTop;
+  const { all, shown } = computeShown();
 
   const frag = document.createDocumentFragment();
   if (shown.length === 0) {
@@ -115,7 +125,32 @@ function render() {
   listEl.append(frag);
   listEl.scrollTop = scrollTop;
 
-  if (countEl) countEl.textContent = `顯示 ${shown.length} / 共 ${all.length}`;
+  updateCount(shown.length, all.length);
+}
+
+/** 增量更新:僅當篩選後的成員與排序完全不變時,就地重建受影響的 [data-id] 列
+ *  (收藏星、狀態、日期 select 值等一次到位),避免每次 mutation 重建整份列表。
+ *  回傳 true=已增量處理;false=成員/順序有變動,需交回 render() 全量重繪。 */
+function patchRows(ids) {
+  const listEl = $('#poi-list');
+  if (!listEl) return false;
+
+  const { all, shown } = computeShown();
+  const domRows = $$('.list-item', listEl);
+  if (domRows.length !== shown.length) return false;         // 成員數變動 → 全量
+  for (let i = 0; i < shown.length; i++) {
+    if (domRows[i].dataset.id !== shown[i].id) return false;  // 順序變動 → 全量
+  }
+
+  const byId = new Map(shown.map((p) => [p.id, p]));
+  for (const id of ids) {
+    const p = byId.get(id);
+    if (!p) continue;                        // 非本列表項目(如 route/settings 的 id)
+    const old = listEl.querySelector(`.list-item[data-id="${CSS.escape(id)}"]`);
+    if (old) old.replaceWith(listItem(p));   // listItem 依 state.selectedId 自帶 active
+  }
+  updateCount(shown.length, all.length);
+  return true;
 }
 
 /** 高亮某項(doScroll 時捲入視野) */
@@ -133,13 +168,24 @@ export function init() {
   // ---- Tab 切換 ----
   const tabs = $('#sidebar-tabs');
   if (tabs) {
+    // ARIA tabs 模式(index.html 不可改,一律 JS 補上)
+    tabs.setAttribute('role', 'tablist');
+    const tabBtns = $$('#sidebar-tabs button');
+    tabBtns.forEach((b) => {
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', String(b.classList.contains('active')));
+    });
     tabs.addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-tab]');
       if (!btn) return;
       const tab = btn.dataset.tab;
       if (tab === state.activeTab) return;
       state.activeTab = tab;
-      $$('#sidebar-tabs button').forEach((b) => b.classList.toggle('active', b === btn));
+      tabBtns.forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', String(on));
+      });
       ['pois', 'days', 'routes', 'trash'].forEach((t) => {
         const pane = document.getElementById(`tab-${t}`);
         if (pane) pane.classList.toggle('active', t === tab);
@@ -148,13 +194,31 @@ export function init() {
     });
   }
 
-  // ---- 手機漢堡 ----
+  // ---- 手機漢堡 + 背景遮罩 ----
   const burger = $('#btn-sidebar');
   if (burger) burger.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
 
+  // 手機側欄背景遮罩(桌機由 CSS 隱藏);點擊或 Esc 關閉。比照 detail-scrim 為真實元素。
+  const scrim = el('div', { class: 'sidebar-scrim', 'aria-hidden': 'true', onclick: closeSidebar });
+  document.body.appendChild(scrim);
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !document.body.classList.contains('sidebar-open')) return;
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) { t.blur(); return; }
+    closeSidebar();
+  });
+
   // ---- 重繪觸發 ----
   on('pois:ready', render);
-  on('overlay:changed', render);
+  // overlay:changed 帶 ids 且非成員變動類(custom/import/reset)→ 嘗試增量更新;失敗才全量重繪
+  on('overlay:changed', (payload) => {
+    const ids = payload && payload.ids;
+    const type = payload && payload.type;
+    if (Array.isArray(ids) && ids.length && type !== 'custom' && type !== 'import' && type !== 'reset') {
+      if (patchRows(ids)) return;
+    }
+    render();
+  });
   on('filter:changed', render);
 
   // ---- 選取高亮(非列表來源才捲動) ----

@@ -22,7 +22,7 @@ export function on(event, fn) {
 export function emit(event, payload) {
   const set = listeners.get(event);
   if (!set) return;
-  for (const fn of set) {
+  for (const fn of [...set]) {   // 快照迭代:回呼內 on()/off() 不影響本輪派發
     try { fn(payload); }
     catch (e) { console.error(`[state] listener for "${event}" threw`, e); }
   }

@@ -4,12 +4,17 @@
 // 每個 mutation：改 overlay → rebuild() → debounce 存 localStorage → emit('overlay:changed',{type,ids})。
 import { state, emit } from './state.js';
 import { STORAGE_KEY, commonsImg, ROUTE_COLORS } from './config.js';
-import { debounce, toast, uuid } from './dom.js';
+import { toast, uuid } from './dom.js';
 import * as db from './db.js';
 
 let manifestVersion = '';
 let base = [];        // base POIs（分片原始資料）
 let overlay = null;   // 使用者 overlay（持久化到 localStorage）
+
+// 原型污染防護：任何來自 JSON 的鍵若命中這些名字一律丟棄，避免污染 Object.prototype。
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+// poiState.status 合法列舉（null = active，不落盤）。其餘值於正規化時丟棄。
+const VALID_STATUS = new Set(['favorite', 'deleted']);
 
 // ---------- overlay 骨架 / 正規化 ----------
 
@@ -27,13 +32,61 @@ function emptyOverlay() {
   };
 }
 
-// 只保留 value 為陣列的 day 條目,避免匯入/損毀資料讓下游（rebuild/getItinerary/
-// removeFromItinerary）在非陣列上呼叫陣列方法而崩潰。
+// 只保留 value 為陣列的 day 條目，避免匯入/損毀資料讓下游（rebuild/getItinerary/
+// removeFromItinerary）在非陣列上呼叫陣列方法而崩潰。同時丟棄原型污染鍵與非字串 id。
 function sanitizeItinerary(obj) {
   if (!obj || typeof obj !== 'object') return {};
   const out = {};
   for (const [day, ids] of Object.entries(obj)) {
-    if (Array.isArray(ids)) out[day] = ids;
+    if (DANGEROUS_KEYS.has(day)) continue;
+    if (Array.isArray(ids)) out[day] = ids.filter((id) => typeof id === 'string');
+  }
+  return out;
+}
+
+function sanitizeDayNotes(obj) {
+  if (!obj || typeof obj !== 'object') return {};
+  const out = {};
+  for (const [day, text] of Object.entries(obj)) {
+    if (DANGEROUS_KEYS.has(day)) continue;
+    if (typeof text === 'string' && text) out[day] = text;
+  }
+  return out;
+}
+
+function sanitizeSettings(obj) {
+  if (!obj || typeof obj !== 'object') return {};
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (DANGEROUS_KEYS.has(k)) continue;
+    out[k] = v;
+  }
+  return out;
+}
+
+// poiState 逐點型別 coercion：status 走列舉、note 需字串、patch.name_zh 需非空字串、
+// extraImages 需字串陣列。無效欄位一律丟棄；清空後的空殼不保留（等同 cleanupPoiState）。
+function sanitizePoiState(obj) {
+  const out = {};
+  if (!obj || typeof obj !== 'object') return out;
+  for (const [id, ps] of Object.entries(obj)) {
+    if (DANGEROUS_KEYS.has(id)) continue;
+    if (!ps || typeof ps !== 'object') continue;
+    const clean = {};
+    if (typeof ps.status === 'string' && VALID_STATUS.has(ps.status)) clean.status = ps.status;
+    if (typeof ps.note === 'string' && ps.note) clean.note = ps.note;
+    if (ps.patch && typeof ps.patch === 'object') {
+      const patch = {};
+      if (typeof ps.patch.name_zh === 'string' && ps.patch.name_zh !== '') patch.name_zh = ps.patch.name_zh;
+      if (typeof ps.patch.desc === 'string') patch.desc = ps.patch.desc;
+      if (Object.keys(patch).length) clean.patch = patch;
+    }
+    if (Array.isArray(ps.extraImages)) {
+      const imgs = ps.extraImages.filter((r) => typeof r === 'string');
+      if (imgs.length) clean.extraImages = imgs;
+    }
+    if (ps.hiddenInTrash === true) clean.hiddenInTrash = true;
+    if (Object.keys(clean).length) out[id] = clean;
   }
   return out;
 }
@@ -45,13 +98,17 @@ function normalizeOverlay(obj) {
     version: obj.version || 1,
     baseVersion: obj.baseVersion || manifestVersion,
     updatedAt: obj.updatedAt || skel.updatedAt,
-    poiState: (obj.poiState && typeof obj.poiState === 'object') ? obj.poiState : {},
-    // 濾掉 null / 非物件元素,否則 rebuild(effectivePoi 讀 c.id)與 getRoutes(讀 r.waypoints)會崩潰。
-    customPois: Array.isArray(obj.customPois) ? obj.customPois.filter((c) => c && typeof c === 'object') : [],
+    poiState: sanitizePoiState(obj.poiState),
+    // 濾掉 null / 非物件元素、缺 id 與原型污染鍵，否則 rebuild(effectivePoi 讀 c.id)
+    // 與 getRoutes(讀 r.waypoints)會崩潰或污染原型。
+    customPois: Array.isArray(obj.customPois)
+      ? obj.customPois.filter((c) => c && typeof c === 'object'
+          && typeof c.id === 'string' && !DANGEROUS_KEYS.has(c.id))
+      : [],
     itinerary: sanitizeItinerary(obj.itinerary),
-    dayNotes: (obj.dayNotes && typeof obj.dayNotes === 'object') ? obj.dayNotes : {},
+    dayNotes: sanitizeDayNotes(obj.dayNotes),
     routes: Array.isArray(obj.routes) ? obj.routes.filter((r) => r && typeof r === 'object') : [],
-    settings: (obj.settings && typeof obj.settings === 'object') ? obj.settings : {},
+    settings: sanitizeSettings(obj.settings),
   };
 }
 
@@ -86,10 +143,14 @@ export async function init() {
 }
 
 function onStorageEvent(e) {
-  // 只在其他分頁改動同一把 key 時觸發（同分頁的寫入不會派發 storage 事件）
-  if (e.key === STORAGE_KEY) {
-    toast('其他分頁已修改資料，請重新整理');
-  }
+  // 只在其他分頁改動同一把 key 時觸發（同分頁的寫入不會派發 storage 事件）。
+  // 採即時同步：先取消本分頁尚未落盤的排程存檔，避免它稍後用「舊 overlay」整包覆寫
+  // 他分頁剛寫入的新資料；再重載他分頁的 overlay、rebuild，並廣播 external 讓 UI 重新同步。
+  if (e.key !== STORAGE_KEY) return;
+  cancelScheduledSave();
+  overlay = loadOverlay();          // e.newValue 為 null（removeItem/reset）時→空 overlay，同步 reset
+  rebuild();
+  emit('overlay:changed', { type: 'external' });
 }
 
 // ---------- 合併：base + overlay → state.pois ----------
@@ -135,22 +196,49 @@ function effectivePoi(src, ps, isCustom, dayOf, orderOf) {
 
 // ---------- 持久化 ----------
 
+let quotaToastShown = false; // quota toast 節流：成功寫入前不重複提示
+
+// 回傳是否成功寫入 localStorage。quota/例外 → false（呼叫端如 importAll 可據此保留舊資料）。
 function saveNow() {
-  if (!overlay) return;
+  if (!overlay) return false;
   overlay.updatedAt = new Date().toISOString();
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(overlay));
+    quotaToastShown = false;
+    return true;
   } catch (e) {
     if (e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014)) {
-      toast('本地儲存空間已滿，請盡快「匯出」備份後再繼續');
+      if (!quotaToastShown) {
+        toast('本地儲存空間已滿，請盡快「匯出」備份後再繼續');
+        quotaToastShown = true;
+      }
     } else {
       console.error('[store] 儲存失敗', e);
       toast('資料儲存失敗，請嘗試匯出備份');
     }
+    return false;
   }
 }
 
-const scheduleSave = debounce(saveNow, 300);
+// 本地 debounce（取代 dom.js 的版本，額外提供 cancel）：跨分頁同步時需丟棄未落盤的排程存檔。
+let saveTimer = null;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { saveTimer = null; saveNow(); }, 300);
+}
+function cancelScheduledSave() {
+  if (saveTimer != null) { clearTimeout(saveTimer); saveTimer = null; }
+}
+
+// 深淺相等：primitives 走 ===，陣列/物件走 JSON 比對（供 R1-10 早退判斷用）。
+// 只用於「值相同 → 早退免全站重繪」；最壞情況（鍵序不同）僅多一次無害 commit，絕不漏更新。
+function valueEquals(a, b) {
+  if (a === b) return true;
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    try { return JSON.stringify(a) === JSON.stringify(b); } catch (e) { return false; }
+  }
+  return false;
+}
 
 function commit(type, ids) {
   rebuild();
@@ -176,6 +264,9 @@ export function getPoi(id) { return state.pois.find((p) => p.id === id) ?? null;
 // ---------- 狀態 / 備註 ----------
 
 export function setStatus(id, status) {
+  const next = status ?? null;
+  const cur = overlay.poiState[id]?.status ?? null;
+  if (next === cur) return; // 值未變 → 免全站重繪（cur 非 deleted 時 hiddenInTrash 必不存在，無漏清問題）
   const ps = ensurePoiState(id);
   if (status == null) delete ps.status;
   else ps.status = status;
@@ -185,6 +276,8 @@ export function setStatus(id, status) {
 }
 
 export function setNote(id, text) {
+  const cur = overlay.poiState[id]?.note ?? '';
+  if ((text || '') === cur) return; // 值未變（含空↔空）→ 早退，杜絕 blur 觸發的無謂重繪
   const ps = ensurePoiState(id);
   if (text) ps.note = text;
   else delete ps.note;
@@ -193,8 +286,8 @@ export function setNote(id, text) {
 }
 
 export function patchPoi(id, patch) {
-  const ps = ensurePoiState(id);
-  const p = ps.patch || {};
+  const cur = overlay.poiState[id]?.patch || {};
+  const p = { ...cur };
   if ('name_zh' in patch) {
     if (patch.name_zh == null || patch.name_zh === '') delete p.name_zh;
     else p.name_zh = patch.name_zh;
@@ -203,6 +296,8 @@ export function patchPoi(id, patch) {
     if (patch.desc == null) delete p.desc;
     else p.desc = patch.desc;
   }
+  if (valueEquals(cur, p)) return; // patch 無實質變更 → 早退，免全站重繪
+  const ps = ensurePoiState(id);
   if (Object.keys(p).length) ps.patch = p;
   else delete ps.patch;
   cleanupPoiState(id);
@@ -215,7 +310,7 @@ export function addCustomPoi({ lat, lng, name_zh, category, desc, day } = {}) {
   const id = `custom-${uuid()}`;
   overlay.customPois.push({
     id,
-    name: { zh: name_zh || '未命名地點', local: '', en: null },
+    name: { zh: name_zh || '未命名景點', local: '', en: null },
     lat, lng,
     category: category || 'landmark',
     tier: 2,
@@ -246,11 +341,13 @@ export function addCustomPoi({ lat, lng, name_zh, category, desc, day } = {}) {
 export function updateCustomPoi(id, fields = {}) {
   const c = overlay.customPois.find((x) => x.id === id);
   if (!c) return;
-  if (fields.name_zh != null) c.name.zh = fields.name_zh;
-  if (fields.category != null) c.category = fields.category;
-  if (fields.desc != null) c.desc = fields.desc;
-  if (fields.lat != null) c.lat = fields.lat;
-  if (fields.lng != null) c.lng = fields.lng;
+  let changed = false;
+  if (fields.name_zh != null && c.name.zh !== fields.name_zh) { c.name.zh = fields.name_zh; changed = true; }
+  if (fields.category != null && c.category !== fields.category) { c.category = fields.category; changed = true; }
+  if (fields.desc != null && c.desc !== fields.desc) { c.desc = fields.desc; changed = true; }
+  if (fields.lat != null && c.lat !== fields.lat) { c.lat = fields.lat; changed = true; }
+  if (fields.lng != null && c.lng !== fields.lng) { c.lng = fields.lng; changed = true; }
+  if (!changed) return; // 無欄位實際變更 → 早退
   commit('custom', [id]);
 }
 
@@ -303,6 +400,8 @@ export function reorderDay(day, orderedIds) {
 }
 
 export function setDayNote(day, text) {
+  const cur = overlay.dayNotes[day] ?? '';
+  if ((text || '') === cur) return; // 值未變 → 早退，杜絕 blur 觸發的無謂重繪
   if (text) overlay.dayNotes[day] = text;
   else delete overlay.dayNotes[day];
   commit('daynote');
@@ -348,10 +447,13 @@ export function addRoute({ name, color, note, day, waypoints } = {}) {
 export function updateRoute(id, fields = {}) {
   const r = overlay.routes.find((x) => x.id === id);
   if (!r) return;
+  let changed = false;
   for (const k of ['name', 'color', 'note', 'day', 'visible', 'waypoints',
                    'mode', 'geometry', 'road_distance', 'road_duration']) {
-    if (k in fields) r[k] = fields[k];
+    if (!(k in fields)) continue;
+    if (!valueEquals(r[k], fields[k])) { r[k] = fields[k]; changed = true; }
   }
+  if (!changed) return; // 無欄位實際變更 → 早退，免整站重繪（如 blur 未改動的名稱欄）
   commit('route', [id]);
 }
 
@@ -361,7 +463,7 @@ export function deleteRoute(id) {
 }
 
 export function getRoutes() {
-  // 填預設再展開 r：匯入舊/不完整備份時,缺的欄位(mode/visible/geometry…)有合理值,
+  // 填預設再展開 r：匯入舊/不完整備份時，缺的欄位(mode/visible/geometry…)有合理值，
   // 下游(F4 routes/routedraw)不會讀到 undefined。真實值一律以 r 為準。
   return overlay.routes.map((r) => ({
     name: '未命名路線',
@@ -427,6 +529,7 @@ export function getSetting(k, def) {
 }
 
 export function setSetting(k, v) {
+  if (valueEquals(overlay.settings[k], v)) return; // 值未變 → 早退
   overlay.settings[k] = v;
   commit('settings', [k]);
 }
@@ -485,33 +588,85 @@ export async function exportAll() {
   };
 }
 
+// 從所有 poiState.extraImages 移除指向 idSet 的 'idb:<id>' 引用（清掉還原不了的破圖引用）。
+// 回傳是否有任何引用被移除。清空後的空 extraImages / 空殼 poiState 一併收斂。
+function stripIdbRefs(idSet) {
+  if (!idSet.size) return false;
+  let removed = false;
+  for (const [id, ps] of Object.entries(overlay.poiState)) {
+    if (!ps || !Array.isArray(ps.extraImages)) continue;
+    const kept = ps.extraImages.filter((ref) => {
+      const hit = typeof ref === 'string' && ref.startsWith('idb:') && idSet.has(ref.slice(4));
+      if (hit) removed = true;
+      return !hit;
+    });
+    if (kept.length === ps.extraImages.length) continue;
+    if (kept.length) ps.extraImages = kept;
+    else {
+      delete ps.extraImages;
+      if (Object.keys(ps).length === 0) delete overlay.poiState[id];
+    }
+  }
+  return removed;
+}
+
+// 原子匯入：先驗證 overlay 主體存在、正規化並嘗試把新 overlay 落盤；若失敗（如 quota）→
+// 完全還原舊 overlay，既有圖片庫也不動，回傳 false 讓 io.js 顯示失敗。落盤成功後才清空並
+// 寫回圖片、rebuild。回傳 true=成功、false=失敗（含格式不符 / 缺資料主體）。
 export async function importAll(obj) {
   if (!obj || obj.app !== 'sweden2026') {
     toast('匯入失敗：檔案格式不符');
-    return;
+    return false;
   }
-  // 圖片：清空舊庫後寫回，保留原 uuid 以維持 'idb:<uuid>' 引用
+  // P1：overlay 主體必須是非空 object。缺失 / 非物件 / 空殼時直接失敗，否則 normalizeOverlay
+  // 會回傳空 skeleton，讓後續 saveNow 成功→clearImages 把資料全清卻誤報「匯入完成」。
+  if (!obj.overlay || typeof obj.overlay !== 'object' || Array.isArray(obj.overlay)
+      || Object.keys(obj.overlay).length === 0) {
+    toast('匯入失敗：備份檔缺少資料主體');
+    return false;
+  }
+  const newOverlay = normalizeOverlay(obj.overlay);
+
+  // 先把新 overlay 落盤（saveNow 讀 module-level overlay）；失敗則還原，舊資料與圖片零損。
+  cancelScheduledSave();
+  const prevOverlay = overlay;
+  overlay = newOverlay;
+  if (!saveNow()) {
+    overlay = prevOverlay;
+    return false;
+  }
+
+  // 落盤成功 → 圖片：清空舊庫後寫回，保留原 uuid 以維持 'idb:<uuid>' 引用。
+  let imageFailCount = 0;
+  const corruptImageIds = new Set(); // dataUrl 損壞而跳過的圖片 id（其 idb: 引用之後清掉）
   try { await db.clearImages(); } catch (e) { /* 降級忽略 */ }
   if (obj.images && typeof obj.images === 'object') {
     for (const [id, img] of Object.entries(obj.images)) {
-      if (!img || typeof img.dataUrl !== 'string') continue;
+      if (!img || typeof img.dataUrl !== 'string') { corruptImageIds.add(id); continue; }
       try {
         await db.putImageWithId(id, dataUrlToBlob(img.dataUrl));
       } catch (e) {
+        imageFailCount++;
         console.warn('[store] 匯入圖片失敗', id, e);
       }
     }
   }
-  overlay = normalizeOverlay(obj.overlay);
+  // 損壞圖片（dataUrl 非字串，資料本身不可還原）→ 清掉 overlay 對應的 idb: 引用避免永久破圖。
+  // 只變小的 overlay 不會新觸發 quota；重存為 best-effort。寫入失敗（imageFailCount，多屬環境
+  // 限制而非資料損壞）則保留引用，讓使用者在正常環境重匯可還原。
+  if (stripIdbRefs(corruptImageIds)) saveNow();
   rebuild();
-  saveNow();
   emit('overlay:changed', { type: 'import' });
+  if (imageFailCount > 0) toast(`${imageFailCount} 張圖片未能還原（瀏覽器限制）`);
+  return true;
 }
 
 export function resetAll() {
+  cancelScheduledSave(); // 丟棄未落盤的排程存檔，避免它稍後把舊 overlay 又寫回
   try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* 忽略 */ }
   db.clearImages().catch(() => {});
   overlay = emptyOverlay();
+  quotaToastShown = false;
   rebuild();
   emit('overlay:changed', { type: 'reset' });
 }

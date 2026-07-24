@@ -128,13 +128,13 @@ export function init() {
     state.filters.country = v;
     // 城市清單依國家過濾,重建並校正
     rebuildCities();
-    changed(true);
+    changed();
   }
   function toggleIn(field, value) {
     const arr = state.filters[field];
     const i = arr.indexOf(value);
     if (i >= 0) arr.splice(i, 1); else arr.push(value);
-    changed(true);
+    changed();
   }
   function clearAll() {
     Object.assign(state.filters, {
@@ -143,12 +143,11 @@ export function init() {
     });
     const si = $('#search-input');
     if (si) si.value = '';
-    render();
-    emit('filter:changed');
+    emit('filter:changed');   // 重繪交由 filter:changed 訂閱單次執行
   }
-  // rerender=true 時重繪 chips 以更新 on 狀態
-  function changed(rerender) {
-    if (rerender) render();
+  // 只 emit,不直接 render:chips 的 on 狀態由下方 on('filter:changed', render) 統一重繪,
+  // 避免直接 render + 訂閱 render 造成雙重渲染。
+  function changed() {
     emit('filter:changed');
   }
 

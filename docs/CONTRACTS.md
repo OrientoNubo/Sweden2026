@@ -10,7 +10,8 @@
 | F1 地圖核心 | `js/mapview.js`、`js/markers.js`、`js/popup.js`、`css/map.css` |
 | F2 資料層 | `js/store.js`、`js/db.js`、`js/io.js`、`js/trash.js` |
 | F3 UI 層 | `js/sidebar.js`、`js/filters.js`、`js/detail.js`、`css/layout.css` |
-| F4 規劃層 | `js/itinerary.js`、`js/gmaps.js`、`js/routes.js`、`js/routedraw.js`、`css/planner.css` |
+| F4 規劃層 | `js/itinerary.js`、`js/gmaps.js`、`js/routes.js`、`js/routedraw.js`、`js/routing.js`、`css/planner.css` |
+| 共用資產 | `js/icons.js`(跨層 inline SVG 圖示庫)、`js/theme.js`(主題切換,由 `app.js` 接線 `initTheme()`) |
 | 凍結(僅整合階段可調) | `index.html`、`js/app.js`、`js/config.js`、`js/state.js`、`js/dom.js`、`js/geo.js`、`css/tokens.css` |
 
 ## 事件匯流排(js/state.js)
@@ -29,6 +30,16 @@
 | `draw:start` | `{routeId?}` | routedraw | 進入繪製/編輯模式,`state.uiMode='draw'`;mapview/popup 須 guard 停用點擊互動 |
 | `draw:end` | — | routedraw | 離開繪製模式,`state.uiMode='normal'` |
 | `day:visibility` | `{day, visible}` | itinerary | 行程模式下切某天顯示;mapview 讀 `state.dayVisibility` |
+| `app:ready` | — | app | boot 尾端(各模組 init 完成)emit;目前無訂閱者,保留給後續掛載鉤子 |
+
+### window 事件(原生 CustomEvent,非 state bus)
+
+主題與面板開合不走 `js/state.js`,改用 `window.dispatchEvent` / `addEventListener`:
+
+| 事件 | detail | 派發者 | 訂閱者 |
+|---|---|---|---|
+| `themechange` | `{theme:'light'\|'dark'}` | theme.js | mapview 換底圖(使用者手動選過底圖後不再自動聯動);**首次套用為 silent 不派發**(no-flash script 已設好 `data-theme`) |
+| `detailtoggle` | `{open:boolean}` | detail.js | mapview `map.invalidateSize()`(立即一次 + 過場結束再一次) |
 
 ## 中央狀態(js/state.js,唯讀約定:只有標注的 owner 可寫)
 
@@ -80,9 +91,9 @@ reorderDay(day, orderedIds)        // 整天重排(跨天拖曳=先 assignToDay 
 setDayNote(day, text) / getDayNote(day)
 getItinerary() -> {day: [id,…]}    // 依序
 addRoute({name?,color?,note?,day?,waypoints}) -> id
-updateRoute(id, fields)            // fields 任意子集:name/color/note/day/visible/waypoints
+updateRoute(id, fields)            // fields 任意子集:name/color/note/day/visible/waypoints/mode/geometry/road_distance/road_duration
 deleteRoute(id)
-getRoutes() -> [route]             // {id,name,color,note,day,visible,waypoints:[[lat,lng],…]}
+getRoutes() -> [route]             // {id,name,color,note,day,visible,mode,geometry,road_distance,road_duration,waypoints:[[lat,lng],…],createdAt}
 restoreFromTrash(id) / purgeFromTrash(id)  // purge:custom 真刪+清圖;base 點=隱藏(hiddenInTrash)
 getTrash() -> [poi]                // _status==='deleted' 且未 hiddenInTrash
 getSetting(k, def) / setSetting(k, v)
@@ -92,11 +103,14 @@ importAll(obj) / resetAll()
 
 所有 mutation:更新 overlay → 重算 `state.pois` → debounce 300ms 存 localStorage → `emit('overlay:changed', {type,…})`。
 
+route 的 `mode`(`straight`/`foot`/`bike`/`car`)、`geometry`、`road_distance`、`road_duration` 由 `js/routing.js` 管線維護:非直線模式時依 waypoints 呼叫 FOSSGIS 營運的 OSRM 公共服務(免 API key)取道路幾何與距離時間,再經 `updateRoute` 寫回;失敗則清空這些欄位並退回直線顯示(distance 自行以 waypoints 估算)。大眾運輸不在此管線,由 Google Maps 深連結承接。
+
 ## db.js API(F2 實作)
 
 ```js
 openDb(); putImage(blob) -> uuid; getImage(uuid) -> Blob|null;
-deleteImage(uuid); listImages() -> [uuid]; clearImages()
+deleteImage(uuid); listImages() -> [uuid]; clearImages();
+putImageWithId(id, blob) -> id     // 以指定 uuid 寫入(匯入還原時保留原 uuid,讓 overlay 的 'idb:<uuid>' 引用仍能解析);僅 store.js 匯入流程使用
 ```
 
 ## gmaps.js API(F4 實作,純函式)
@@ -109,7 +123,7 @@ multiStopUrl(points, {travelmode='transit'}) -> [string]  // points: [[lat,lng],
 
 ## DOM id(index.html 凍結;各 agent 只在自己的容器內生成內容)
 
-- Toolbar:`#toolbar`、`#mode-toggle`(內含 `button[data-mode="curate"]`、`button[data-mode="itinerary"]`,app.js 綁)、`#btn-export`、`#btn-import`、`#file-import`(hidden input,io.js 綁)、`#btn-sidebar`(手機漢堡,F3 綁)
+- Toolbar:`#toolbar`、`#mode-toggle`(內含 `button[data-mode="curate"]`、`button[data-mode="itinerary"]`,app.js 綁)、`#theme-btn`(三段主題切換,theme.js 綁)、`#btn-export`、`#btn-import`、`#file-import`(hidden input,io.js 綁)、`#btn-sidebar`(手機漢堡,F3 綁)
 - Sidebar:`#sidebar`、`#sidebar-tabs`(`button[data-tab]` ×4 + `#trash-badge`,F3 綁 tab 切換;`.tab-pane` 顯隱由 F3 控)
   - `#tab-pois`:`#search-input`、`#filter-bar`、`#poi-count`、`#poi-list`(F3)
   - `#tab-days`:`#day-list`(F4)
@@ -124,6 +138,14 @@ multiStopUrl(points, {travelmode='transit'}) -> [string]  // points: [[lat,lng],
 - 只寫自己的 css 檔;共用變數一律用 `css/tokens.css` 的 custom properties。
 - 共用元件 class 由 F3 在 `layout.css` 定義,其他人直接用:`.list-item`(含 `.li-thumb`、`.li-body`、`.li-title`、`.li-sub`、`.li-actions`)、`.chip`、`.btn`、`.btn-icon`、`.badge`。
 - 分類色/日程色:`config.js` 有 `CATEGORIES[k].color` 與 `DAY_COLORS`;需要在 CSS 用時以 inline style 或 `style.setProperty('--c', …)` 傳入。
+
+## 儲存 key
+
+| 儲存 | key | 擁有者 | 說明 |
+|---|---|---|---|
+| localStorage | `sweden2026:userdata:v1` | store.js | 整包 overlay(刪選/日程/自訂點/路線/設定);每次 mutation debounce 300ms 寫入 |
+| localStorage | `sweden2026:theme` | theme.js | 主題偏好 `system`/`light`/`dark`;獨立於 store,不入備份 |
+| IndexedDB | DB `sweden2026` / store `images` | db.js | 上傳圖片 blob,key 為 uuid;overlay 以 `idb:<uuid>` 引用 |
 
 ## 其他鐵則
 

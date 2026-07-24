@@ -23,3 +23,10 @@ curl -fsSL -o leaflet.markercluster/MarkerCluster.css         https://unpkg.com/
 curl -fsSL -o leaflet.markercluster/MarkerCluster.Default.css https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css
 curl -fsSL -o sortablejs/Sortable.min.js https://unpkg.com/sortablejs@1.15.6/Sortable.min.js
 ```
+
+## 執行期外部服務(非 vendored)
+
+以下服務在執行期直接呼叫,不打包進 vendor,亦不需 API key:
+
+- **沿道路規劃**:呼叫 FOSSGIS 營運的 OSRM 公共 API(`routing.openstreetmap.de`),供路線的步行/單車/開車距離時間計算。
+- **大眾運輸**:走 Google Maps 深連結(在瀏覽器開啟外部頁面),不呼叫 API。

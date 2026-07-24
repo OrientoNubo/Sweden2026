@@ -4,6 +4,7 @@ import { $, toast } from './dom.js';
 import * as store from './store.js';
 
 const SIZE_CONFIRM_BYTES = 20 * 1024 * 1024; // 含圖片且超過此體積先確認
+const MAX_IMPORT_BYTES = 80 * 1024 * 1024;   // 匯入檔上限，超過直接拒絕（避免大檔解析卡死分頁）
 
 export function init() {
   const btnExport = $('#btn-export');
@@ -53,6 +54,12 @@ async function onImportFile(e) {
   e.target.value = ''; // 重置，讓同一檔可再次選取
   if (!file) return;
 
+  if (file.size > MAX_IMPORT_BYTES) {
+    const mb = (MAX_IMPORT_BYTES / (1024 * 1024)).toFixed(0);
+    toast(`匯入失敗：檔案過大（上限 ${mb} MB）`);
+    return;
+  }
+
   let obj;
   try {
     obj = JSON.parse(await file.text());
@@ -64,11 +71,18 @@ async function onImportFile(e) {
     toast('匯入失敗：非 Sweden2026 備份檔');
     return;
   }
+  // overlay 主體必須是非空 object：帶對 sentinel 但缺 overlay 的檔會讓匯入清空全部資料，須先擋下。
+  if (!obj.overlay || typeof obj.overlay !== 'object' || Array.isArray(obj.overlay)
+      || Object.keys(obj.overlay).length === 0) {
+    toast('匯入失敗：備份檔缺少資料主體');
+    return;
+  }
   if (!confirm('將覆蓋目前所有本地資料，確定？')) return;
 
   try {
-    await store.importAll(obj);
-    toast('匯入完成');
+    // importAll 為原子操作：成功回傳 true；落盤失敗（如 quota）回傳 false 且舊資料不動。
+    const ok = await store.importAll(obj);
+    toast(ok ? '匯入完成' : '匯入失敗：本地儲存空間不足，資料未變更');
   } catch (err) {
     console.error('[io] 匯入失敗', err);
     toast('匯入失敗');

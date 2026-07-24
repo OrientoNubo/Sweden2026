@@ -33,7 +33,7 @@ export function buildIcon(poi, ctx = {}) {
 
   const cat = CATEGORIES[poi.category] || { color: '#888', glyph: '📍' };
   const customCls = poi._custom ? ' mk-custom' : '';
-  const star = poi._status === 'favorite' ? '<span class="mk-star">⭐</span>' : '';
+  const star = poi._status === 'favorite' ? `<span class="mk-star">${ICON.starFill}</span>` : '';
   const html =
     `<div class="mk mk-poi${selCls}${customCls}" style="--mk:${escapeHtml(cat.color)}">` +
     `<span class="mk-glyph">${cat.glyph || '📍'}</span>${star}</div>`;

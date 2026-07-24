@@ -127,6 +127,7 @@ function routeRow(r) {
 // ---- 路徑模式切換 ----
 function setRouteMode(r, mode) {
   if (mode === 'straight') {
+    routing.abortRoute(r.id); // 中止在途規劃,免晚到回應把道路幾何寫回覆蓋直線
     store.updateRoute(r.id, { mode, geometry: null, road_distance: null, road_duration: null });
     return;
   }
@@ -182,7 +183,7 @@ function openInMaps(r) {
   openSegmentsSequential(urls);
 }
 
-// 超過 Google Maps 單段上限(>9 waypoints)時 multiStopUrl 會回多段。
+// 大眾運輸不支援 waypoints,故 multiStopUrl 對 transit 一律回相鄰兩點一段,多站路線即有多段。
 // 同步連續 window.open 多個分頁會被彈窗攔截(只有第 1 個在使用者手勢內成功),
 // 故改為一次只開一段:先開第 1 段,其餘用 toast 行內按鈕逐段引導 —— 每次點擊
 // 「開下一段」都是新的使用者手勢,window.open 不會被攔截。
@@ -225,8 +226,10 @@ function beginRename(nameEl, r) {
 
 // ---- 顏色 swatch popover ----
 let openPop = null;
+let popTimer = null;
 
 function closePopover() {
+  if (popTimer) { clearTimeout(popTimer); popTimer = null; }
   if (openPop) { openPop.remove(); openPop = null; }
   document.removeEventListener('click', closePopover);
 }
@@ -247,6 +250,6 @@ function openColorPopover(anchor, r) {
   pop.style.left = `${rect.left}px`;
   pop.style.top = `${rect.bottom + 4}px`;
   openPop = pop;
-  // 下一個 tick 起監聽外點關閉(避免本次 click 立即觸發)
-  setTimeout(() => document.addEventListener('click', closePopover), 0);
+  // 下一個 tick 起監聽外點關閉(避免本次 click 立即觸發);存 timer,popover 提前關閉時取消,免遺留監聽
+  popTimer = setTimeout(() => { popTimer = null; document.addEventListener('click', closePopover); }, 0);
 }

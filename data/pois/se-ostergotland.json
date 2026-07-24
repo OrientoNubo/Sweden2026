@@ -31,7 +31,7 @@
     {
       "id": "se-ostergotland-linkopings-domkyrka",
       "name": {
-        "zh": "林雪坪主教座堂",
+        "zh": "林雪平主教座堂",
         "local": "Linköpings domkyrka",
         "en": "Linköping Cathedral"
       },
@@ -473,7 +473,7 @@
     {
       "id": "se-ostergotland-sankt-laurentii-kyrka",
       "name": {
-        "zh": "聖勞倫蒂教堂",
+        "zh": "聖勞倫斯教堂",
         "local": "Sankt Laurentii kyrka",
         "en": "St. Lawrence Church, Söderköping"
       },
@@ -485,7 +485,7 @@
       "city": "Söderköping",
       "category": "church",
       "tier": 3,
-      "desc": "南雪平的中世紀磚造教堂,主保為聖勞倫蒂,內部保有中世紀壁畫殘跡。免費,~~趕行程者可略過~~。位於老城,順訪 20–30 分。",
+      "desc": "南雪平的中世紀磚造教堂,主保為聖勞倫斯,內部保有中世紀壁畫殘跡。免費,~~趕行程者可略過~~。位於老城,順訪 20–30 分。",
       "stay_min": 20,
       "stay_max": 30,
       "url": null,
