@@ -266,11 +266,17 @@ function setupBaseLayers() {
     .then((gj) => {
       L.geoJSON(gj, {
         interactive: false,
-        attribution: '國界 &copy; EuroGeographics',
-        style: (f) => ({
-          color: f.properties.iso === 'DK' ? '#c8102e' : '#005293',
-          weight: 2, dashArray: '8 6', opacity: 0.7, fill: false,
-        }),
+        renderer: L.canvas({ padding: 0.5 }), // 大面積填色用 canvas,避免 SVG 重繪卡頓
+        attribution: '國界 &copy; EuroGeographics、OSM',
+        style: (f) => {
+          const color = f.properties.iso === 'DK' ? '#c8102e' : '#005293';
+          return f.properties.kind === 'sea'
+            // 領海界線:較細較淡 + 一點點同色水域染色,呈現「海域也屬國土」
+            ? { color, weight: 1.5, dashArray: '3 6', opacity: 0.5,
+                fillColor: color, fillOpacity: 0.04 }
+            // 海岸國土輪廓
+            : { color, weight: 2, dashArray: '8 6', opacity: 0.7, fill: false };
+        },
       }).addTo(bordersLayer);
       if (store.getSetting('showBorders', true)) bordersLayer.addTo(map);
     })
