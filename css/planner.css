@@ -1,0 +1,171 @@
+/* planner.css — 規劃層樣式(F4)
+   行程卡 / 未排程收藏 / 路線清單 / 顏色 popover / 繪製 banner。
+   共用元件(.btn/.btn-icon/.badge/.list-item/.chip)由 F3 layout.css 提供;
+   共用變數一律取自 tokens.css。 */
+
+/* 私有小工具(限本模組容器,避免與 F3 utility 衝突) */
+#day-list .small, #route-list .small, #draw-banner .small { font-size: 12px; }
+#day-list .pad, #route-list .pad { padding: 12px; }
+
+/* ============================ 行程:單日卡 ============================ */
+#day-list { padding: 8px; display: flex; flex-direction: column; gap: 10px; }
+
+.day-card {
+  --day-c: #888;
+  position: relative;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--day-c);
+  border-radius: var(--radius);
+  background: var(--bg);
+  padding: 10px 10px 10px 12px;
+  box-shadow: var(--shadow);
+}
+.day-card.day-dimmed { opacity: .55; }
+
+.day-head { display: flex; align-items: flex-start; gap: 8px; }
+.day-swatch {
+  flex: 0 0 auto; width: 12px; height: 12px; margin-top: 3px;
+  border-radius: 50%; background: var(--day-c);
+}
+.day-head-main { flex: 1 1 auto; min-width: 0; }
+.day-title { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.day-name { font-weight: 700; font-size: 15px; }
+.eccv-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .3px;
+  color: #fff; background: var(--primary);
+  padding: 1px 6px; border-radius: 999px;
+}
+.day-meta { font-size: 12px; margin-top: 2px; }
+.day-eye { flex: 0 0 auto; }
+
+.day-note {
+  width: 100%; margin: 8px 0 6px; resize: vertical; min-height: 30px;
+  font: inherit; font-size: 13px; color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 6px 8px; background: var(--bg-soft);
+}
+.day-note:focus { outline: none; border-color: var(--primary); background: var(--bg); }
+
+/* 單日 POI 清單 */
+.day-pois { display: flex; flex-direction: column; gap: 4px; min-height: 8px; }
+.day-empty {
+  border: 1px dashed var(--border); border-radius: var(--radius-sm);
+  padding: 10px; text-align: center;
+}
+
+.itin-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 6px; border-radius: var(--radius-sm);
+  background: var(--bg-soft); cursor: grab;
+}
+.itin-item:hover { background: var(--bg-hover); }
+.itin-num {
+  flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px; font-weight: 700; background: #888;
+}
+.itin-body { flex: 1 1 auto; min-width: 0; cursor: pointer; }
+.itin-name { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.itin-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* SortableJS 拖曳中 */
+.sortable-ghost { opacity: .4; background: var(--primary-soft); outline: 1px dashed var(--primary); }
+.sortable-chosen { cursor: grabbing; }
+
+/* 此日 Google Maps 連結 */
+.day-maps-btn { width: 100%; margin-top: 8px; font-size: 13px; }
+.day-maps-multi { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.btn-sm { padding: 3px 10px; font-size: 12px; }
+
+/* ============================ 未排程收藏 ============================ */
+.unscheduled {
+  margin-top: 6px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-soft); padding: 8px 10px;
+}
+.unscheduled-head {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 700; font-size: 14px; margin-bottom: 6px;
+}
+.unscheduled-list { display: flex; flex-direction: column; gap: 4px; }
+.unsched-item { cursor: default; background: var(--bg); }
+.unsched-item:hover { background: var(--bg-hover); }
+.day-assign, .route-day {
+  flex: 0 0 auto; font: inherit; font-size: 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 3px 6px; background: var(--bg); color: var(--text); max-width: 45%;
+}
+
+/* ============================ 路線清單 ============================ */
+#route-list { padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+
+.route-item {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg); padding: 8px 10px; box-shadow: var(--shadow); cursor: pointer;
+}
+.route-item:hover { background: var(--bg-hover); }
+.route-top { display: flex; align-items: center; gap: 8px; }
+.route-swatch {
+  flex: 0 0 auto; width: 20px; height: 20px; border-radius: 6px;
+  border: 1px solid rgba(0,0,0,.25); cursor: pointer; padding: 0;
+}
+.route-name {
+  flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: 14px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.route-rename {
+  flex: 1 1 auto; min-width: 0; font: inherit; font-size: 14px;
+  border: 1px solid var(--primary); border-radius: var(--radius-sm); padding: 2px 6px;
+}
+.route-meta { flex: 0 0 auto; }
+.route-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; margin-top: 8px;
+}
+.route-actions { display: flex; align-items: center; gap: 2px; }
+.btn-icon.danger:hover { color: var(--danger); background: var(--danger-soft); }
+
+/* 顏色 swatch popover */
+.color-popover {
+  position: fixed; z-index: var(--z-detail);
+  display: grid; grid-template-columns: repeat(6, 22px); gap: 6px;
+  padding: 8px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+.color-cell {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid transparent; cursor: pointer; padding: 0;
+}
+.color-cell.active { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--text); }
+
+/* ============================ 繪製 banner ============================ */
+#draw-banner {
+  position: fixed; top: calc(var(--toolbar-h) + 10px);
+  left: calc(50% + var(--sidebar-w) / 2); transform: translateX(-50%);
+  z-index: var(--z-banner);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  max-width: min(92vw, 640px);
+  padding: 8px 12px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 999px;
+  box-shadow: var(--shadow-lg);
+}
+#draw-banner[hidden] { display: none; }
+#draw-hint { font-size: 13px; font-weight: 600; }
+#draw-distance { font-size: 12px; font-variant-numeric: tabular-nums; }
+#btn-draw-delnode { color: var(--danger); }
+
+/* 繪製游標 */
+.map-draw, .map-draw .leaflet-container { cursor: crosshair !important; }
+.route-node-icon, .route-ghost-icon { background: transparent; border: 0; }
+
+/* ============================ 手機(≤768px) ============================ */
+@media (max-width: 768px) {
+  #draw-banner {
+    top: auto; bottom: 0; left: 0; right: 0; transform: none;
+    max-width: none; width: 100%;
+    border-radius: 0; border-left: 0; border-right: 0; border-bottom: 0;
+    justify-content: center;
+  }
+  .color-popover { grid-template-columns: repeat(6, 26px); }
+  .color-cell { width: 26px; height: 26px; }
+}

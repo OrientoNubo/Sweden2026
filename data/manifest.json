@@ -1,0 +1,19 @@
+{
+  "version": "2026-07-24",
+  "files": [
+    "pois/dk-bornholm.json",
+    "pois/dk-cph-core.json",
+    "pois/dk-cph-greater.json",
+    "pois/dk-funen-jutland.json",
+    "pois/dk-nzealand.json",
+    "pois/dk-szealand.json",
+    "pois/se-gbg-west.json",
+    "pois/se-lund-nw.json",
+    "pois/se-malmo.json",
+    "pois/se-north.json",
+    "pois/se-skane-se.json",
+    "pois/se-smaland-gotland.json",
+    "pois/se-sthlm-core.json",
+    "pois/se-sthlm-region.json"
+  ]
+}

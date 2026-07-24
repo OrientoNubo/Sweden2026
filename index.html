@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sweden2026 · ECCV 2026 行程地圖</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="./vendor/leaflet.markercluster/MarkerCluster.css">
+<link rel="stylesheet" href="./vendor/leaflet.markercluster/MarkerCluster.Default.css">
+<link rel="stylesheet" href="./css/tokens.css">
+<link rel="stylesheet" href="./css/layout.css">
+<link rel="stylesheet" href="./css/map.css">
+<link rel="stylesheet" href="./css/planner.css">
+</head>
+<body>
+<div id="app">
+
+  <header id="toolbar">
+    <button id="btn-sidebar" class="btn-icon" title="選單" aria-label="開關側欄">☰</button>
+    <div class="brand">
+      <span class="brand-title">Sweden2026</span>
+      <span class="brand-sub">ECCV 2026 · 9/4–9/15 · 丹麥+瑞典</span>
+    </div>
+    <div id="mode-toggle" role="group" aria-label="檢視模式">
+      <button data-mode="curate" class="active">整理</button>
+      <button data-mode="itinerary">行程</button>
+    </div>
+    <div class="toolbar-actions">
+      <button id="btn-export" class="btn" title="下載備份 JSON">匯出</button>
+      <button id="btn-import" class="btn" title="還原備份 JSON">匯入</button>
+      <input type="file" id="file-import" accept="application/json" hidden>
+    </div>
+  </header>
+
+  <div id="main">
+    <aside id="sidebar">
+      <nav id="sidebar-tabs">
+        <button data-tab="pois" class="active">景點</button>
+        <button data-tab="days">行程</button>
+        <button data-tab="routes">路線</button>
+        <button data-tab="trash">回收站 <span id="trash-badge" class="badge" hidden>0</span></button>
+      </nav>
+
+      <section id="tab-pois" class="tab-pane active">
+        <div class="pane-sticky">
+          <input id="search-input" type="search" placeholder="搜尋名稱 / 城市…" autocomplete="off">
+          <div id="filter-bar"></div>
+          <div id="poi-count" class="muted"></div>
+        </div>
+        <div id="poi-list" class="pane-scroll"></div>
+      </section>
+
+      <section id="tab-days" class="tab-pane">
+        <div id="day-list" class="pane-scroll"></div>
+      </section>
+
+      <section id="tab-routes" class="tab-pane">
+        <div class="pane-sticky">
+          <button id="btn-new-route" class="btn btn-primary">＋ 繪製新路線</button>
+        </div>
+        <div id="route-list" class="pane-scroll"></div>
+      </section>
+
+      <section id="tab-trash" class="tab-pane">
+        <div id="trash-actions" class="pane-sticky"></div>
+        <div id="trash-list" class="pane-scroll"></div>
+      </section>
+    </aside>
+
+    <div id="map-wrap">
+      <div id="map"></div>
+      <div id="draw-banner" hidden>
+        <span id="draw-hint">點擊地圖加入節點</span>
+        <span id="draw-distance" class="muted"></span>
+        <button id="btn-draw-undo" class="btn">撤銷</button>
+        <button id="btn-draw-done" class="btn btn-primary">完成</button>
+        <button id="btn-draw-cancel" class="btn">取消</button>
+      </div>
+    </div>
+
+    <aside id="detail-panel" hidden>
+      <button id="detail-close" class="btn-icon" aria-label="關閉">✕</button>
+      <div id="detail-content"></div>
+    </aside>
+  </div>
+
+  <div id="toast" hidden></div>
+</div>
+
+<script src="./vendor/leaflet/leaflet.js"></script>
+<script src="./vendor/leaflet.markercluster/leaflet.markercluster.js"></script>
+<script src="./vendor/sortablejs/Sortable.min.js"></script>
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>

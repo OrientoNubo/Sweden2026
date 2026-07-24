@@ -1,0 +1,232 @@
+/* map.css — divIcon / cluster / tooltip / popup 卡片 / draw 游標(所有權見 docs/CONTRACTS.md) */
+
+/* ── 地圖容器 ── */
+#map {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-soft);
+}
+
+/* 繪製模式:十字游標 */
+.map-draw #map,
+.map-draw #map .leaflet-grab,
+.map-draw #map .leaflet-interactive {
+  cursor: crosshair;
+}
+
+/* ── POI divIcon ── */
+.mk-wrap {
+  background: none;
+  border: 0;
+}
+.mk {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mk, #888);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+  position: relative;
+  transition: transform .1s ease;
+}
+.mk-wrap:hover .mk {
+  transform: scale(1.12);
+  z-index: 500;
+}
+.mk-glyph {
+  font-size: 15px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35));
+}
+.mk-poi .mk-glyph { /* emoji 置中微調 */
+  transform: translateY(.5px);
+}
+.mk-day {
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: var(--font);
+}
+.mk-custom {
+  border-style: dashed;
+  border-color: #fff;
+}
+.mk-star {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  font-size: 12px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .4));
+}
+/* 選中:外圈高亮 */
+.mk-sel {
+  box-shadow: 0 0 0 3px var(--primary), 0 2px 8px rgba(0, 0, 0, .45);
+  z-index: 600;
+}
+
+/* ── cluster ── */
+.cl-wrap {
+  background: none;
+  border: 0;
+}
+.cl {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-family: var(--font);
+  border: 2px solid rgba(255, 255, 255, .9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+}
+.cl-sm { background: #4a80c4; font-size: 13px; width: 34px; height: 34px; }
+.cl-md { background: #3665a8; font-size: 14px; width: 40px; height: 40px; }
+.cl-lg { background: #244a80; font-size: 15px; width: 48px; height: 48px; }
+
+/* ── permanent tooltip(名稱小字,白底陰影) ── */
+.leaflet-tooltip.poi-tip {
+  background: rgba(255, 255, 255, .95);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+.leaflet-tooltip.poi-tip::before {
+  border-top-color: rgba(255, 255, 255, .95);
+}
+
+/* ── popup 迷你卡 ── */
+.poi-popup-wrap .leaflet-popup-content-wrapper {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 0;
+  overflow: hidden;
+}
+.poi-popup-wrap .leaflet-popup-content {
+  margin: 0;
+  width: 260px !important;
+}
+.poi-popup {
+  font-family: var(--font);
+  color: var(--text);
+}
+.pp-media {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.pp-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.pp-media-ph span {
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .35));
+}
+.pp-body {
+  padding: 8px 12px 4px;
+}
+.pp-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.pp-local {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-sub);
+  margin-left: 6px;
+}
+.pp-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.pp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: #fff;
+  background: var(--c, #888);
+}
+.pp-tier,
+.pp-stay {
+  white-space: nowrap;
+}
+.pp-actions {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px 12px;
+}
+.pp-btn {
+  flex: 1;
+  padding: 6px 4px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s ease, border-color .12s ease;
+}
+.pp-btn:hover {
+  background: var(--bg-hover);
+}
+.pp-fav.is-on {
+  color: var(--star);
+  border-color: var(--star);
+}
+.pp-del:hover {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* ── 路線點擊 popup ── */
+.route-pop {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--font);
+  min-width: 120px;
+}
+.route-pop .muted {
+  color: var(--text-sub);
+  font-size: 12px;
+}
+
+/* ── 手機(≤768px):不顯示 popup(JS 不 bind),放大 cluster 觸控目標 ── */
+@media (max-width: 768px) {
+  .cl-sm { width: 40px; height: 40px; font-size: 14px; }
+  .cl-md { width: 46px; height: 46px; font-size: 15px; }
+  .cl-lg { width: 54px; height: 54px; font-size: 16px; }
+  .mk {
+    width: 34px;
+    height: 34px;
+  }
+  .mk-glyph { font-size: 17px; }
+}

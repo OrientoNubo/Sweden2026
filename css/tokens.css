@@ -1,0 +1,41 @@
+/* tokens.css — 全站設計變數(Phase 0 凍結) */
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f6f7f9;
+  --bg-hover: #eef1f4;
+  --border: #dde2e8;
+  --text: #1f2933;
+  --text-sub: #5f6b76;
+  --text-faint: #9aa5b1;
+  --primary: #1a73e8;
+  --primary-soft: #e8f0fe;
+  --danger: #d93025;
+  --danger-soft: #fdecea;
+  --star: #f5b301;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 2px 10px rgba(0,0,0,.12);
+  --shadow-lg: 0 6px 24px rgba(0,0,0,.18);
+
+  --toolbar-h: 52px;
+  --sidebar-w: 360px;
+  --detail-w: 400px;
+
+  --z-map: 1;
+  --z-banner: 700;   /* Leaflet controls 約 1000 之下、地圖之上 */
+  --z-sidebar: 1100;
+  --z-detail: 1150;
+  --z-toast: 1300;
+
+  --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+
+  /* 12 天日程色(2026-09-04 → 09-15,順序即 config.TRIP_DAYS) */
+  --day-0: #e6194b; --day-1: #f58231; --day-2: #d9a400; --day-3: #3cb44b;
+  --day-4: #00a86b; --day-5: #17a2b8; --day-6: #4363d8; --day-7: #7b5be6;
+  --day-8: #911eb4; --day-9: #f032e6; --day-10: #a0522d; --day-11: #556b2f;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body { font-family: var(--font); color: var(--text); background: var(--bg); }

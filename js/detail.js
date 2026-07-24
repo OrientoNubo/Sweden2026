@@ -1,0 +1,456 @@
+// detail.js — 右側詳情面板:檢視 / 編輯 / 新增自訂點(F3 擁有)
+// 合約見 docs/CONTRACTS.md。Google Maps URL 直接組,不 import gmaps.js 以免耦合。
+import { state, emit, on } from './state.js';
+import { $, el, toast } from './dom.js';
+import {
+  CATEGORIES, TIER_LABELS, COUNTRY_LABELS, TRIP_DAYS, dayLabel, commonsPage,
+} from './config.js';
+import * as store from './store.js';
+import * as db from './db.js';
+
+let panel, content;
+let currentId = null;
+let mode = 'view';        // 'view' | 'edit' | 'new'
+let objectUrls = [];      // 需要 revoke 的 idb objectURL
+
+function revokeUrls() {
+  for (const u of objectUrls) URL.revokeObjectURL(u);
+  objectUrls = [];
+}
+
+function close() {
+  if (panel) panel.hidden = true;
+  currentId = null;
+  mode = 'view';
+  revokeUrls();
+}
+
+function catInfo(cat) {
+  return CATEGORIES[cat] || { zh: cat || '其他', glyph: '📍', color: '#888888' };
+}
+
+/** 把圖片 ref 設到 <img>:https 直接;idb 走 db.getImage → objectURL */
+async function setImgSrc(img, ref) {
+  if (/^https?:/.test(ref)) { img.src = ref; return; }
+  if (ref.startsWith('idb:')) {
+    try {
+      const blob = await db.getImage(ref.slice(4));
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      objectUrls.push(url);
+      img.src = url;
+    } catch (e) { console.error('[detail] getImage', e); }
+  }
+}
+
+/** 解析 _images 為可顯示 URL 陣列(idb 轉 objectURL) */
+async function resolveImages(refs) {
+  const out = [];
+  for (const ref of refs || []) {
+    if (/^https?:/.test(ref)) { out.push({ href: ref, base: false }); continue; }
+    if (ref.startsWith('idb:')) {
+      try {
+        const blob = await db.getImage(ref.slice(4));
+        if (blob) { const u = URL.createObjectURL(blob); objectUrls.push(u); out.push({ href: u, base: false }); }
+      } catch (e) { console.error(e); }
+    }
+  }
+  return out;
+}
+
+function fmtStay(p) {
+  const a = p.stay_min, b = p.stay_max;
+  if (a == null && b == null) return null;
+  if (a != null && b != null && a !== b) return `${a}–${b} 分鐘`;
+  return `${a ?? b} 分鐘`;
+}
+
+function gmapsSearch(lat, lng) {
+  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+}
+function gmapsDir(lat, lng) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`;
+}
+
+// ============================================================
+// 檢視卡
+// ============================================================
+function buildCarousel(p, urls) {
+  const wrap = el('div', { class: 'detail-carousel' });
+  // base 圖(image_file)排在最前;其連結指向 Commons 描述頁
+  const baseFirst = !!p.image_file;
+  if (urls.length === 0) {
+    const c = catInfo(p.category);
+    wrap.append(el('div', { class: 'dc-placeholder', style: { background: c.color } }, c.glyph));
+    return wrap;
+  }
+
+  let idx = 0;
+  const img = el('img', { class: 'dc-img', alt: p.name?.zh || '' });
+  wrap.append(img);
+
+  const update = () => {
+    img.src = urls[idx].href;
+    dots.forEach((d, i) => d.classList.toggle('on', i === idx));
+  };
+  img.addEventListener('click', () => {
+    const href = (idx === 0 && baseFirst && p.image_file) ? commonsPage(p.image_file) : urls[idx].href;
+    window.open(href, '_blank', 'noopener');
+  });
+
+  let dots = [];
+  if (urls.length > 1) {
+    const prev = el('button', { class: 'dc-nav dc-prev', 'aria-label': '上一張',
+      onclick: () => { idx = (idx - 1 + urls.length) % urls.length; update(); } }, '‹');
+    const next = el('button', { class: 'dc-nav dc-next', 'aria-label': '下一張',
+      onclick: () => { idx = (idx + 1) % urls.length; update(); } }, '›');
+    const dotWrap = el('div', { class: 'dc-dots' });
+    dots = urls.map(() => el('span', { class: 'dc-dot' }));
+    dots.forEach((d) => dotWrap.append(d));
+    wrap.append(prev, next, dotWrap);
+  }
+  update();
+  return wrap;
+}
+
+function metaRow(key, val) {
+  if (val == null || val === '') return null;
+  return el('div', { class: 'dm-row' },
+    el('div', { class: 'dm-key' }, key),
+    el('div', { class: 'dm-val' }, val));
+}
+
+function detailDaySelect(p) {
+  const sel = el('select', {
+    class: 'detail-day-select' + (p._day ? ' assigned' : ''),
+    onchange: () => store.assignToDay(p.id, sel.value || null),
+  }, el('option', { value: '' }, '未指派日期'),
+    ...TRIP_DAYS.map((d) => el('option', { value: d }, dayLabel(d))));
+  sel.value = p._day || '';
+  return sel;
+}
+
+function buildView(p, urls) {
+  const c = catInfo(p.category);
+  const fav = p._status === 'favorite';
+  const root = el('div', {});
+  root.append(buildCarousel(p, urls));
+
+  const body = el('div', { class: 'detail-body' });
+
+  // 標題
+  body.append(el('div', { class: 'detail-title' }, p.name?.zh || p.name?.local || '(未命名)'));
+  if (p.name?.local) body.append(el('div', { class: 'detail-local' }, p.name.local));
+  if (p.name?.en && p.name.en !== p.name?.local) body.append(el('div', { class: 'detail-en' }, p.name.en));
+
+  // chips:國家 / 城市 / 分類 / tier
+  const chips = el('div', { class: 'detail-chips' });
+  if (p.country) chips.append(el('span', { class: 'chip static' }, COUNTRY_LABELS[p.country] || p.country));
+  if (p.city) chips.append(el('span', { class: 'chip static' }, p.city));
+  chips.append(el('span', { class: 'chip static', style: `--c:${c.color}` }, `${c.glyph} ${c.zh}`));
+  if (p.tier) chips.append(el('span', { class: 'chip static' }, `Tier ${p.tier} · ${TIER_LABELS[p.tier] || ''}`));
+  if (p._custom) chips.append(el('span', { class: 'chip static' }, '自訂'));
+  body.append(chips);
+
+  // 描述
+  if (p.desc) body.append(el('div', { class: 'detail-desc' }, p.desc));
+
+  // meta
+  const meta = el('div', { class: 'detail-meta' },
+    metaRow('停留', fmtStay(p)),
+    metaRow('開放', p.hours),
+    metaRow('費用', p.cost),
+    metaRow('交通', p.transit),
+    metaRow('注意', p.sep_note),
+  );
+  if (meta.childNodes.length) body.append(meta);
+
+  // 連結
+  const links = el('div', { class: 'detail-links' });
+  if (p.url) links.append(el('a', { href: p.url, target: '_blank', rel: 'noopener' }, '官方網站 ↗'));
+  if (p.wikipedia) links.append(el('a', { href: p.wikipedia, target: '_blank', rel: 'noopener' }, 'Wikipedia ↗'));
+  if (p.image_file) links.append(el('a', { href: commonsPage(p.image_file), target: '_blank', rel: 'noopener' }, '圖片來源 ↗'));
+  if (links.childNodes.length) body.append(links);
+
+  // 備註
+  body.append(el('div', { class: 'detail-section-label' }, '我的備註'));
+  const note = el('textarea', { class: 'detail-note', placeholder: '寫點筆記…(離開輸入框自動儲存)' });
+  note.value = p._note || '';
+  note.addEventListener('blur', () => store.setNote(p.id, note.value));
+  body.append(note);
+
+  // 操作列
+  const favBtn = el('button', { class: 'btn' + (fav ? ' btn-primary' : ''),
+    onclick: () => store.setStatus(p.id, fav ? null : 'favorite') },
+    fav ? '⭐ 已收藏' : '☆ 收藏');
+  const delBtn = el('button', { class: 'btn btn-danger', onclick: () => doDelete(p.id) }, '🗑 刪除');
+  const gmBtn = el('button', { class: 'btn',
+    onclick: () => window.open(gmapsSearch(p.lat, p.lng), '_blank', 'noopener') }, '在 Google Maps 開啟');
+  const navBtn = el('button', { class: 'btn',
+    onclick: () => window.open(gmapsDir(p.lat, p.lng), '_blank', 'noopener') }, '導航(大眾運輸)');
+  const editBtn = el('button', { class: 'btn full', onclick: () => renderEdit(p.id) }, '✎ 編輯');
+
+  body.append(el('div', { class: 'detail-actions' },
+    favBtn, delBtn,
+    withFull(detailDaySelect(p)),
+    gmBtn, navBtn,
+    editBtn,
+  ));
+
+  root.append(body);
+  return root;
+}
+
+function withFull(node) {
+  return el('div', { class: 'full' }, node);
+}
+
+function doDelete(id) {
+  close();
+  store.setStatus(id, 'deleted');
+  state.selectedId = null;
+  toast('已移入回收站,可在回收站還原');
+  emit('select', { id: null, source: 'other' });
+}
+
+// ============================================================
+// 圖片編輯器(編輯 / 新增共用)
+// ============================================================
+function compressImage(file, maxEdge = 1600, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const scale = Math.min(1, maxEdge / Math.max(w, h));
+      w = Math.round(w * scale); h = Math.round(h * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob((b) => b ? resolve(b) : reject(new Error('toBlob 失敗')), 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('圖片載入失敗')); };
+    img.src = url;
+  });
+}
+
+/** refs 為 live 陣列(就地增刪);hooks.onAdd/onRemove 用於即時持久化(編輯模式) */
+function buildImageEditor(refs, hooks = {}) {
+  const thumbs = el('div', { class: 'img-thumbs' });
+  const urlInput = el('input', { type: 'url', placeholder: '貼上圖片網址…' });
+  const addUrlBtn = el('button', { class: 'btn', type: 'button' }, '加入');
+  const fileInput = el('input', { type: 'file', accept: 'image/*' });
+
+  function draw() {
+    thumbs.textContent = '';
+    refs.forEach((ref) => {
+      const img = el('img', { alt: '' });
+      setImgSrc(img, ref);
+      const del = el('button', { class: 'img-del', type: 'button', title: '移除',
+        onclick: () => {
+          const i = refs.indexOf(ref);
+          if (i >= 0) refs.splice(i, 1);
+          hooks.onRemove?.(ref);
+          draw();
+        } }, '✕');
+      thumbs.append(el('div', { class: 'img-thumb' }, img, del));
+    });
+  }
+
+  addUrlBtn.addEventListener('click', () => {
+    const u = urlInput.value.trim();
+    if (!/^https?:\/\//.test(u)) { toast('請輸入 http(s) 開頭的圖片網址'); return; }
+    refs.push(u); hooks.onAdd?.(u); urlInput.value = ''; draw();
+  });
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+    try {
+      const blob = await compressImage(file);
+      const uuid = await db.putImage(blob);
+      const ref = 'idb:' + uuid;
+      refs.push(ref); hooks.onAdd?.(ref); draw();
+    } catch (e) {
+      console.error('[detail] 圖片上傳失敗', e);
+      toast('圖片上傳失敗,可能是瀏覽器無痕模式限制');
+    }
+    fileInput.value = '';
+  });
+
+  draw();
+  return el('div', { class: 'field' },
+    el('label', {}, '圖片'),
+    thumbs,
+    el('div', { class: 'img-add-row' }, urlInput, addUrlBtn),
+    el('div', { class: 'img-add-row' }, fileInput),
+  );
+}
+
+function categorySelect(current) {
+  const sel = el('select', {});
+  for (const [k, c] of Object.entries(CATEGORIES)) sel.append(el('option', { value: k }, `${c.glyph} ${c.zh}`));
+  sel.value = (current && CATEGORIES[current]) ? current : 'landmark';
+  return sel;
+}
+
+function field(labelText, inputEl, hint) {
+  const f = el('div', { class: 'field' }, el('label', {}, labelText), inputEl);
+  if (hint) f.append(el('div', { class: 'hint' }, hint));
+  return f;
+}
+
+// ============================================================
+// 編輯模式
+// ============================================================
+function renderEdit(id) {
+  const p = store.getPoi(id);
+  if (!p) return;
+  mode = 'edit';
+  revokeUrls();
+
+  const nameInput = el('input', { type: 'text' }); nameInput.value = p.name?.zh || '';
+  const descInput = el('textarea', {}); descInput.value = p.desc || '';
+
+  const form = el('div', { class: 'detail-form' }, el('h3', {}, '編輯景點'));
+  form.append(field('中文名稱', nameInput));
+
+  let catSel, latInput, lngInput;
+  if (p._custom) {
+    catSel = categorySelect(p.category);
+    latInput = el('input', { type: 'number', step: 'any' }); latInput.value = p.lat;
+    lngInput = el('input', { type: 'number', step: 'any' }); lngInput.value = p.lng;
+    form.append(field('分類', catSel));
+    form.append(el('div', { class: 'filter-row' },
+      field('緯度 lat', latInput), field('經度 lng', lngInput)));
+  }
+  form.append(field('描述', descInput));
+
+  // 圖片(即時持久化)
+  const refs = [...(p._images || [])];
+  form.append(buildImageEditor(refs, {
+    onAdd: (ref) => store.addImage(id, ref),
+    onRemove: (ref) => store.removeImage(id, ref),
+  }));
+
+  const save = el('button', { class: 'btn btn-primary', onclick: () => {
+    const name_zh = nameInput.value.trim();
+    if (!name_zh) { toast('名稱不可空白'); return; }
+    if (p._custom) {
+      store.updateCustomPoi(id, {
+        name_zh, category: catSel.value, desc: descInput.value.trim(),
+        lat: Number(latInput.value), lng: Number(lngInput.value),
+      });
+    } else {
+      store.patchPoi(id, { name_zh, desc: descInput.value.trim() });
+    }
+    toast('已儲存');
+    openPoi(id);
+  } }, '儲存');
+  const cancel = el('button', { class: 'btn', onclick: () => openPoi(id) }, '取消');
+  form.append(el('div', { class: 'form-actions' }, cancel, save));
+
+  content.textContent = '';
+  content.append(form);
+  panel.hidden = false;
+}
+
+// ============================================================
+// 新增自訂點
+// ============================================================
+function renderNewCustom({ lat, lng }) {
+  mode = 'new';
+  currentId = null;
+  revokeUrls();
+
+  const nameInput = el('input', { type: 'text', placeholder: '必填' });
+  const catSel = categorySelect('landmark');
+  const descInput = el('textarea', {});
+  const latInput = el('input', { type: 'number', step: 'any' }); latInput.value = lat;
+  const lngInput = el('input', { type: 'number', step: 'any' }); lngInput.value = lng;
+  const daySel = el('select', {}, el('option', { value: '' }, '未指派日期'),
+    ...TRIP_DAYS.map((d) => el('option', { value: d }, dayLabel(d))));
+
+  const staged = [];
+  const imgEditor = buildImageEditor(staged); // 延後持久化
+
+  const form = el('div', { class: 'detail-form' },
+    el('h3', {}, '新增自訂景點'),
+    field('中文名稱 *', nameInput),
+    field('分類', catSel),
+    el('div', { class: 'filter-row' }, field('緯度 lat', latInput), field('經度 lng', lngInput)),
+    field('描述', descInput),
+    field('指派日期', daySel),
+    imgEditor,
+  );
+
+  const create = el('button', { class: 'btn btn-primary', onclick: () => {
+    const name_zh = nameInput.value.trim();
+    if (!name_zh) { toast('請輸入中文名稱'); return; }
+    const id = store.addCustomPoi({
+      lat: Number(latInput.value), lng: Number(lngInput.value),
+      name_zh, category: catSel.value, desc: descInput.value.trim(),
+      day: daySel.value || null,
+    });
+    for (const ref of staged) if (id) store.addImage(id, ref);
+    toast('已新增自訂景點');
+    if (id) { state.selectedId = id; emit('select', { id, source: 'other' }); }
+    else close();
+  } }, '新增');
+  const cancel = el('button', { class: 'btn', onclick: () => close() }, '取消');
+  form.append(el('div', { class: 'form-actions' }, cancel, create));
+
+  content.textContent = '';
+  content.append(form);
+  panel.hidden = false;
+}
+
+// ============================================================
+// 開啟檢視(async:需解析圖片)
+// ============================================================
+async function openPoi(id) {
+  const p = store.getPoi(id);
+  if (!p) { close(); return; }
+  currentId = id;
+  mode = 'view';
+  const prevScroll = (!panel.hidden && content) ? content.scrollTop : 0;
+  revokeUrls();
+  const urls = await resolveImages(p._images || []);
+  if (currentId !== id) return; // 期間被切換,放棄
+  content.textContent = '';
+  content.append(buildView(p, urls));
+  panel.hidden = false;
+  content.scrollTop = prevScroll;
+}
+
+// ============================================================
+// init
+// ============================================================
+export function init() {
+  panel = $('#detail-panel');
+  content = $('#detail-content');
+  if (!panel || !content) return;
+
+  const closeBtn = $('#detail-close');
+  if (closeBtn) closeBtn.addEventListener('click', () => {
+    state.selectedId = null;
+    emit('select', { id: null, source: 'other' });
+  });
+
+  on('select', ({ id }) => {
+    if (id == null) close();
+    else openPoi(id);
+  });
+
+  on('custom:place', (payload) => {
+    if (payload && Number.isFinite(payload.lat) && Number.isFinite(payload.lng)) renderNewCustom(payload);
+  });
+
+  // 資料變更時,若正在檢視則同步刷新(編輯/新增中不打斷)
+  on('overlay:changed', () => {
+    if (!panel.hidden && mode === 'view' && currentId != null) {
+      if (store.getPoi(currentId)) openPoi(currentId);
+      else close();
+    }
+  });
+}

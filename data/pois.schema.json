@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sweden2026 POI shard",
+  "type": "object",
+  "required": ["region", "version", "pois"],
+  "properties": {
+    "region": { "type": "string" },
+    "version": { "type": "string" },
+    "pois": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "lat", "lng", "coord_source", "country", "region", "city", "category", "tier", "desc", "stay_min", "stay_max"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z]{2}-[a-z0-9-]+$" },
+          "name": {
+            "type": "object",
+            "required": ["zh", "local"],
+            "properties": {
+              "zh": { "type": "string" },
+              "local": { "type": "string" },
+              "en": { "type": ["string", "null"] }
+            }
+          },
+          "lat": { "type": "number", "minimum": 54.4, "maximum": 69.2 },
+          "lng": { "type": "number", "minimum": 7.9, "maximum": 24.3 },
+          "coord_source": { "enum": ["wikipedia-en", "wikipedia-sv", "wikipedia-da", "wikipedia-zh", "wikidata", "osm", "official"] },
+          "country": { "enum": ["SE", "DK"] },
+          "region": { "enum": ["sample", "se-malmo", "se-lund-nw", "se-skane-se", "se-gbg-west", "se-sthlm-core", "se-sthlm-region", "se-smaland-gotland", "se-north", "dk-cph-core", "dk-cph-greater", "dk-nzealand", "dk-szealand", "dk-bornholm", "dk-funen-jutland"] },
+          "city": { "type": "string" },
+          "category": { "enum": ["castle", "church", "museum", "oldtown", "landmark", "nature", "park", "coast", "history", "themepark", "market", "experience", "transport"] },
+          "tier": { "enum": [1, 2, 3] },
+          "desc": { "type": "string", "minLength": 20 },
+          "stay_min": { "type": "number", "minimum": 5 },
+          "stay_max": { "type": "number", "minimum": 5 },
+          "url": { "type": ["string", "null"] },
+          "wikipedia": { "type": ["string", "null"] },
+          "image_file": { "type": ["string", "null"] },
+          "hours": { "type": ["string", "null"] },
+          "cost": { "type": ["string", "null"] },
+          "transit": { "type": ["string", "null"] },
+          "sep_note": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}
