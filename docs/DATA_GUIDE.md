@@ -48,7 +48,7 @@
   - **所有 API 一律 shell out 用 `curl`**:本環境 Python urllib 無法出網(DNS fail);**WebFetch 不可用於 JSON API**(摘要模型會靜默遺漏欄位),WebFetch 只用於讀 Wikivoyage/旅遊局等敘述性網頁。
   - `coord_source` 據實填:`wikipedia-en|wikipedia-sv|wikipedia-da|wikipedia-zh|wikidata|osm|official`。
   - 寫完後自查:每筆座標必須落在你的區塊 bbox 內(見下表);落在外面 = 你抄錯或 lat/lng 對調。
-- **`category`**(單選):`castle`(城堡宮殿要塞)、`church`(教堂修道院)、`museum`(博物館美術館)、`oldtown`(老城/街區/廣場)、`landmark`(現代建築地標/觀景塔)、`nature`(自然/國家公園/健行)、`park`(城市公園/植物園)、`coast`(海灘/燈塔/港灣/海岸)、`history`(史前遺跡/維京/軍事遺跡)、`themepark`(樂園/動物園/親子)、`market`(市場/美食街區/fika)、`experience`(遊船/浴場/特殊體驗)、`transport`(機場/樞紐車站/渡輪港)。
+- **`category`**(單選):`castle`(城堡宮殿要塞)、`church`(教堂修道院)、`museum`(博物館美術館)、`oldtown`(老城/街區/廣場)、`landmark`(現代建築地標/觀景塔)、`nature`(自然/國家公園/健行)、`route`(景觀公路/長程步道/景觀環道:整條路線用單一代表性錨點,desc 說明全程)、`park`(城市公園/植物園)、`coast`(海灘/燈塔/港灣/海岸)、`history`(史前遺跡/維京/軍事遺跡)、`themepark`(樂園/動物園/親子)、`market`(市場/美食街區/fika)、`experience`(遊船/浴場/特殊體驗)、`transport`(機場/樞紐車站/渡輪港)。
 - **`tier`**:1=國際級地標(此生必看等級)、2=主要景點(該城市值得專程)、3=小眾/順路(散步順訪、在地人去處)。
 - **`desc`**:繁體中文 2–4 句,**必含三要素**:(1) 是什麼;(2) 為何值得去——或誠實的缺點(「門票貴」「展品少」「觀光化嚴重」這類刪除線索特別有價值);(3) 大約停留時間。技術名詞、店名保留原文。
 - **`stay_min`/`stay_max`**:建議停留分鐘數。

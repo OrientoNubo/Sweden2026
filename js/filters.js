@@ -15,6 +15,42 @@ const STATUS_OPTIONS = [
 let citySelect = null;
 let catsExpanded = false; // 分類 chips 展開狀態(跨 render 保存)
 
+// ---- 搜尋正規化(多語言 + 去變音符) ----
+// 目標:輸入中/英/瑞典·丹麥原文任一語言,且不帶變音符也能命中。
+//   "malmo"→Malmö、"goteborg"→Göteborg、"aro"→ARoS/Fårö、"aero"→Ærø、"kobenhavn"→København
+// 作法:toLowerCase → NFD 拆出並移除 combining marks(涵蓋 å ä ö é 等);
+//   再顯式映射「非 combining」的獨立字母(ø æ 等 NFD 不會拆);最後壓縮空白。
+const CHAR_MAP = {
+  ø: 'o', æ: 'ae', œ: 'oe', ð: 'd', þ: 'th', đ: 'd', ł: 'l', ß: 'ss', ı: 'i',
+};
+const CHAR_RE = new RegExp('[' + Object.keys(CHAR_MAP).join('') + ']', 'g');
+
+/** 將任意字串正規化為可比對的搜尋鍵(小寫、無變音符、壓縮空白)。 */
+export function normalizeSearch(s) {
+  return String(s ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')          // 移除 combining diacritical marks
+    .replace(CHAR_RE, (ch) => CHAR_MAP[ch])   // 映射獨立特殊字母
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** POI 的搜尋索引字串:惰性建立並快取於 p._searchKey。
+ *  失效機制:store.rebuild() 於每次 mutation(含改名 patch)都以 effectivePoi 產生
+ *  全新 POI 物件替換 state.pois,新物件無 _searchKey,故快取隨之自動失效——毋須掛事件。 */
+function searchKey(p) {
+  if (p._searchKey != null) return p._searchKey;
+  const raw = [p.name?.zh, p.name?.local, p.name?.en, p.city].filter(Boolean).join(' ');
+  return (p._searchKey = normalizeSearch(raw));
+}
+
+/** 單一 POI 是否命中已正規化的查詢字串(空查詢視為命中)。列表與地圖共用此比對。 */
+export function searchMatches(p, normalizedQuery) {
+  if (!normalizedQuery) return true;
+  return searchKey(p).includes(normalizedQuery);
+}
+
 /** 依目前選定國家彙整城市清單 */
 function citiesForCountry(country) {
   const set = new Set();
@@ -65,7 +101,7 @@ export function init() {
       chip(COUNTRY_LABELS.DK, { on: f.country === 'DK', onClick: () => setCountry('DK') }),
     );
 
-    // ---- 分類(13 類,可摺疊) ----
+    // ---- 分類(14 類,可摺疊) ----
     const cats = el('div', { class: 'filter-cats' + (catsExpanded ? '' : ' collapsed') });
     for (const [key, c] of Object.entries(CATEGORIES)) {
       cats.append(chip(c.zh, {
@@ -178,7 +214,7 @@ export function init() {
 /** 純函式:依 state.filters 篩選 POI 陣列 */
 export function applyFilters(pois) {
   const f = state.filters;
-  const q = (f.q || '').trim().toLowerCase();
+  const nq = normalizeSearch(f.q); // 查詢正規化一次;各 POI 側於 searchKey 惰性正規化並快取
   return pois.filter((p) => {
     // 狀態
     switch (f.status) {
@@ -193,11 +229,7 @@ export function applyFilters(pois) {
     if (f.city && p.city !== f.city) return false;
     if (f.categories.length && !f.categories.includes(p.category)) return false;
     if (f.tiers.length && !f.tiers.includes(p.tier)) return false;
-    if (q) {
-      const hay = [p.name?.zh, p.name?.local, p.name?.en, p.city]
-        .filter(Boolean).join(' ').toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
+    if (nq && !searchMatches(p, nq)) return false;
     return true;
   });
 }

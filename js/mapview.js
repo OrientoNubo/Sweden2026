@@ -1,6 +1,7 @@
 // mapview.js — 地圖核心:底圖、marker/cluster、行程圖層、自訂路線、互動(合約見 docs/CONTRACTS.md)
 import { state, on, emit } from './state.js';
 import * as store from './store.js';
+import { searchMatches, normalizeSearch } from './filters.js';
 import { debounce, escapeHtml, toast } from './dom.js';
 import { BASE_LAYERS, MAP_CENTER, MAP_ZOOM, dayColor, CATEGORIES, ROUTE_COLORS } from './config.js';
 import { routeDistance, fmtDistance, fmtDuration } from './geo.js';
@@ -51,15 +52,10 @@ function panTo(latlng, zoom) {
 }
 
 // ── 篩選 predicate(對 state.filters;規則以 CONTRACTS 為準,為 curate 模式唯一真值來源) ──
-function textMatch(poi, q) {
-  const s = (q || '').trim().toLowerCase();
-  if (!s) return true;
-  const hay = [poi.name?.zh, poi.name?.local, poi.name?.en, poi.city]
-    .filter(Boolean).join(' ').toLowerCase();
-  return hay.includes(s);
-}
-
-function passesFilter(poi) {
+// 搜尋比對與正規化(多語言 + 去變音符)與列表共用 filters.js 的 searchMatches/normalizeSearch;
+// 兩者迭代同一批 store.getPois() 物件,共享 _searchKey 惰性快取。
+// nq 由呼叫端(renderCurate 迴圈)預先算一次傳入;單點呼叫(reconcileCurate)走預設值即可。
+function passesFilter(poi, nq = normalizeSearch(state.filters.q)) {
   const f = state.filters;
   switch (f.status) {
     case 'favorite': if (poi._status !== 'favorite') return false; break;
@@ -73,7 +69,7 @@ function passesFilter(poi) {
   if (f.city && poi.city !== f.city) return false;
   if (f.categories?.length && !f.categories.includes(poi.category)) return false;
   if (f.tiers?.length && !f.tiers.includes(poi.tier)) return false;
-  if (!textMatch(poi, f.q)) return false;
+  if (!searchMatches(poi, nq)) return false;
   return true;
 }
 
@@ -124,8 +120,9 @@ function renderCurate() {
   clusterGroup.clearLayers();
   favoriteLayer.clearLayers();
   const clustered = [];
+  const nq = normalizeSearch(state.filters.q);
   for (const poi of store.getPois()) {
-    if (!passesFilter(poi)) continue;
+    if (!passesFilter(poi, nq)) continue;
     if (poi._status === 'favorite') {
       // 收藏點:不進 cluster,任何 zoom 恆顯
       const m = makeFavoriteMarker(poi);

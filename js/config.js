@@ -35,6 +35,7 @@ export const CATEGORIES = {
   oldtown:   { zh: '老城街區', glyph: '🏘️', color: '#d35400' },
   landmark:  { zh: '現代地標', glyph: '🗼', color: '#2c3e50' },
   nature:    { zh: '自然景觀', glyph: '🏞️', color: '#27ae60' },
+  route:     { zh: '公路/步道', glyph: '🛣️', color: '#808923' },
   park:      { zh: '公園花園', glyph: '🌳', color: '#16a085' },
   coast:     { zh: '海岸燈塔', glyph: '🌊', color: '#2980b9' },
   history:   { zh: '歷史遺跡', glyph: '🗿', color: '#795548' },

@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 POIS_DIR = ROOT / "data" / "pois"
 MANIFEST = ROOT / "data" / "manifest.json"
 
-CATEGORIES = {"castle", "church", "museum", "oldtown", "landmark", "nature", "park",
+CATEGORIES = {"castle", "church", "museum", "oldtown", "landmark", "nature", "route", "park",
               "coast", "history", "themepark", "market", "experience", "transport"}
 COORD_SOURCES = {"wikipedia-en", "wikipedia-sv", "wikipedia-da", "wikipedia-zh",
                  "wikidata", "osm", "official"}
