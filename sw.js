@@ -14,7 +14,7 @@
 // │    圖片為執行期 LRU 快取,兩者跨部署保留、無需隨版本重建。               │
 // │  - 若新增/移除前端檔案,記得同步增修下方 PRECACHE_URLS 清單。            │
 // └─────────────────────────────────────────────────────────────────────────┘
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 
 const SHELL_CACHE = `sw26-shell-${CACHE_VERSION}`; // 版本化:bump 即重建
 const DATA_CACHE  = 'sw26-data';                   // 穩定:SWR 自動保鮮

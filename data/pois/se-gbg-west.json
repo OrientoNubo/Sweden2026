@@ -24,9 +24,9 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Liseberg",
       "image_file": "Lisebergsportal kväll.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "純入園 95 SEK 起、入園+遊樂通行證 365 SEK 起(線上)",
       "transit": "Göteborg C 搭電車 5 號至 Korsvägen 步行 3 分",
-      "sep_note": "夏季營運多在 8 月中結束,9 月上中旬常僅週末開放,萬聖節檔期要到 9 月下旬才開,前往務必先查官網開放日"
+      "sep_note": "夏季季末為 9/20,9 月非每日開園(多為週末),萬聖節檔期約 9 月下旬起,行前務必查官網開放日"
     },
     {
       "id": "se-gbg-west-universeum",
@@ -49,7 +49,7 @@
       "url": "https://www.universeum.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Universeum",
       "image_file": "Universeum2.JPG",
-      "hours": null,
+      "hours": "每日 10:00–18:00",
       "cost": null,
       "transit": "Göteborg C 搭電車至 Korsvägen 步行 3 分",
       "sep_note": null
@@ -75,7 +75,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Haga,_Gothenburg",
       "image_file": "Haganygata.jpg",
-      "hours": null,
+      "hours": "全天開放",
       "cost": "免費",
       "transit": "Göteborg C 搭電車至 Hagakyrkan 步行 3 分",
       "sep_note": null
@@ -102,7 +102,7 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Feskek%C3%B4rka",
       "image_file": "Feskekôrka, 2019 (04).jpg",
       "hours": null,
-      "cost": null,
+      "cost": "免費",
       "transit": "Göteborg C 搭電車至 Hagakyrkan 步行 5 分",
       "sep_note": null
     },
@@ -127,10 +127,10 @@
       "url": "https://www.botaniska.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Gothenburg_Botanical_Garden",
       "image_file": "Spegeldammen.jpg",
-      "hours": null,
-      "cost": "花園免費(溫室另計)",
+      "hours": "全天開放",
+      "cost": "免費",
       "transit": "Göteborg C 搭電車至 Botaniska trädgården",
-      "sep_note": null
+      "sep_note": "溫室(Växthusen)整修中關閉,僅戶外花園開放"
     },
     {
       "id": "se-gbg-west-slottsskogen",
@@ -153,7 +153,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Slottsskogen",
       "image_file": "Slottskogen1.jpg",
-      "hours": null,
+      "hours": "全天開放",
       "cost": "免費",
       "transit": "Göteborg C 搭電車至 Linnéplatsen 或 Slottsskogsvallen",
       "sep_note": null
@@ -179,8 +179,8 @@
       "url": "https://goteborgskonstmuseum.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Gothenburg_Museum_of_Art",
       "image_file": "Göteborgs konstmuseum - entréhallen.JPG",
-      "hours": null,
-      "cost": null,
+      "hours": "週二 11:00–18:00、週三 11:00–20:00、週四 11:00–18:00、週五至日 11:00–17:00(週一休)",
+      "cost": "成人 75 SEK(20 歲以下免費)",
       "transit": "Göteborg C 搭電車至 Götaplatsen",
       "sep_note": null
     },
@@ -205,7 +205,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/G%C3%B6taplatsen",
       "image_file": "Götaplatsen with Poseidon at night.jpg",
-      "hours": null,
+      "hours": "全天開放",
       "cost": "免費",
       "transit": "Göteborg C 搭電車至 Götaplatsen",
       "sep_note": null
@@ -257,8 +257,8 @@
       "url": "https://www.worldofvolvo.com",
       "wikipedia": "https://en.wikipedia.org/wiki/World_of_Volvo",
       "image_file": "World of Volvo 20230607.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "週一至三 10:00–18:00、週四 10:00–19:00、週五至六 10:00–18:00、週日 10:00–16:00",
+      "cost": "成人 220–250 SEK(19 歲起)",
       "transit": "Göteborg C 搭電車至 Korsvägen 步行 8 分",
       "sep_note": null
     },
@@ -283,8 +283,8 @@
       "url": "https://www.opera.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Gothenburg_Opera",
       "image_file": "Operan Entré april 2003.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "外觀與濱河步道全天開放(內部演出另購票)",
+      "cost": "外觀免費(演出票另計)",
       "transit": "Göteborg C 步行 10 分",
       "sep_note": null
     },
@@ -309,7 +309,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Kungsportsavenyen",
       "image_file": "Kungsportsavenyn.jpg",
-      "hours": null,
+      "hours": "全天開放",
       "cost": "免費",
       "transit": "Göteborg C 步行 10 分至 Kungsportsplatsen",
       "sep_note": null
@@ -387,8 +387,8 @@
       "url": "https://www.maritiman.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Maritiman",
       "image_file": "HMS Nordkaparen (Nor) (1).JPG",
-      "hours": null,
-      "cost": null,
+      "hours": "每日 11:00–17:00",
+      "cost": "平日成人 150 SEK、週末 175 SEK",
       "transit": "Göteborg C 步行 10 分至 Packhuskajen",
       "sep_note": null
     },
@@ -491,7 +491,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Gothenburg_Central_Station",
       "image_file": "Göteborgs Centralstation.jpg",
-      "hours": null,
+      "hours": "全天開放",
       "cost": null,
       "transit": "市中心北緣,電車 Drottningtorget/Centralstationen",
       "sep_note": null
@@ -517,10 +517,10 @@
       "url": "https://www.carlsten.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Carlsten",
       "image_file": "Carlstens Fastning Flygfoto.JPG",
-      "hours": null,
-      "cost": null,
+      "hours": "9 月週末 11:00–15:00(平日需電話預約)",
+      "cost": "成人 120 SEK",
       "transit": "Göteborg 開車約 1 小時至 Koön 轉渡輪上 Marstrand",
-      "sep_note": "9 月導覽場次與渡輪班次較夏季減少,出發前請查官網"
+      "sep_note": "9 月僅週末 11:00–15:00 開放(平日需電話預約),上島渡輪班次較夏季減少,出發前請查官網"
     },
     {
       "id": "se-gbg-west-pilane",
@@ -543,10 +543,10 @@
       "url": "https://pilane.org",
       "wikipedia": "https://sv.wikipedia.org/wiki/Pilane_gravf%C3%A4lt",
       "image_file": "14 m high woman head ANNA by Spanish artist Jaume Plensa.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "9 月每日 10:00–17:00(2026 開放至 9/27 季末)",
+      "cost": "成人 160 SEK(18 歲以下隨行免費)",
       "transit": "Göteborg 開車約 1 小時至 Tjörn",
-      "sep_note": "開放季通常約至 9 月中,之後閉園,前往前務必查官網"
+      "sep_note": "2026 開放季至 9/27 為止,之後閉園,前往前務必查官網"
     },
     {
       "id": "se-gbg-west-smogen",
@@ -569,8 +569,8 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Sm%C3%B6gen",
       "image_file": "Smögen 8667 (19161213886).jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "全天開放",
+      "cost": "免費",
       "transit": "Göteborg 開車約 1.5 小時",
       "sep_note": "9 月為淡季,棧道部分餐廳與商店縮短營業或休息"
     },
@@ -595,8 +595,8 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Fj%C3%A4llbacka",
       "image_file": "Fjällbacka von oben.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "全天開放",
+      "cost": "免費",
       "transit": "Göteborg 開車約 1.5–2 小時",
       "sep_note": "9 月為淡季,部分餐廳與遊船縮短營業"
     },
@@ -621,7 +621,7 @@
       "url": "https://www.vitlyckemuseum.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Rock_Carvings_in_Tanum",
       "image_file": "Tanumshede 2005 rock carvings 5.jpg",
-      "hours": null,
+      "hours": "岩刻戶外全天開放,Vitlycke 博物館另有開放時間",
       "cost": "岩刻免費(博物館另計)",
       "transit": "Göteborg 開車約 2 小時至 Vitlycke",
       "sep_note": null
@@ -647,8 +647,8 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Lysekil",
       "image_file": "Lysekil Compilation 2022.png",
-      "hours": null,
-      "cost": null,
+      "hours": "全天開放",
+      "cost": "免費",
       "transit": "Göteborg 開車約 1.5 小時",
       "sep_note": null
     },
@@ -673,8 +673,8 @@
       "url": "https://nordensark.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Nordens_Ark",
       "image_file": "2011-07-14 Nordens Ark 002.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "秋季每日 10:00–16:00(售票至 15:00)",
+      "cost": "成人 280 SEK",
       "transit": "Göteborg 開車約 1.5–2 小時",
       "sep_note": null
     },
@@ -725,8 +725,8 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Koster_Islands",
       "image_file": "Koster 7884 (1874134312).jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "全天開放",
+      "cost": "免費",
       "transit": "Strömstad 搭渡輪約 45 分至 Koster",
       "sep_note": "9 月渡輪班次較夏季減少,島上部分餐飲季節性歇業,出發前查船班"
     },
@@ -803,7 +803,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Varberg_Fortress",
       "image_file": "Varbergs fästning från söder.jpg",
-      "hours": null,
+      "hours": "城牆與中庭全天開放(博物館時間見官網)",
       "cost": "城牆免費(博物館另計)",
       "transit": "Göteborg 搭火車約 1 小時至 Varberg 步行 10 分",
       "sep_note": null
@@ -855,8 +855,8 @@
       "url": "https://grimeton.org",
       "wikipedia": "https://en.wikipedia.org/wiki/Grimeton_Radio_Station",
       "image_file": "Varberg Radio Station.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "8/17–10/31 週三至六 10:00–15:00",
+      "cost": "成人 160 SEK(線上 155)",
       "transit": "Varberg 開車約 15 分",
       "sep_note": null
     },
@@ -881,7 +881,7 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Tyl%C3%B6sand",
       "image_file": "Tylösands strand.jpg",
-      "hours": null,
+      "hours": "全天開放",
       "cost": "免費",
       "transit": "Halmstad 市區搭巴士約 20 分",
       "sep_note": null
@@ -1063,8 +1063,8 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Bohus_Fortress",
       "image_file": "Bohus fästning.jpg",
-      "hours": null,
-      "cost": "成人約 80 SEK",
+      "hours": "9 月週二至日 11:00–15:00(週一休)",
+      "cost": "成人 120 SEK",
       "transit": "Göteborg 開車或搭巴士約 30 分至 Kungälv",
       "sep_note": "9 月導覽場次與開放時間較夏季縮減,前往前請查官網"
     },
@@ -1089,8 +1089,8 @@
       "url": "https://goteborgsstadsmuseum.se",
       "wikipedia": "https://sv.wikipedia.org/wiki/G%C3%B6teborgs_stadsmuseum",
       "image_file": "Ostindiska huset september 2010.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "週二至四 10:00–18:00(週三至 20:00)、週五至日 10:00–17:00(週一休)",
+      "cost": "成人 75 SEK(20 歲以下與學生免費)",
       "transit": "Göteborg C 步行 8 分至 Norra Hamngatan",
       "sep_note": null
     },
@@ -1135,14 +1135,14 @@
       "city": "Göteborg",
       "category": "museum",
       "tier": 2,
-      "desc": "位於 Korsvägen、Universeum 隔壁的國立世界文化博物館,以現代玻璃建築與具社會議題性的跨文化特展著稱,常設與輪替展探討移民、認同與全球化。常設展免費、內容思辨性強,較少傳統文物。參觀約 1–1.5 小時。",
+      "desc": "位於 Korsvägen、Universeum 隔壁的國立世界文化博物館,以現代玻璃建築與具社會議題性的跨文化特展著稱,常設與輪替展探討移民、認同與全球化。內容思辨性強、較少傳統文物。參觀約 1–1.5 小時。",
       "stay_min": 60,
       "stay_max": 90,
       "url": "https://www.varldskulturmuseet.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Museum_of_World_Culture",
       "image_file": "Museum of World Culture Göteborg entrance.jpeg",
-      "hours": null,
-      "cost": "常設展免費",
+      "hours": "11:00–17:00(休館日見官網)",
+      "cost": "成人 160 SEK(19 歲以下免費)",
       "transit": "Göteborg C 搭電車至 Korsvägen 步行 2 分",
       "sep_note": null
     },
@@ -1167,8 +1167,8 @@
       "url": "https://www.akvarellmuseet.org",
       "wikipedia": "https://en.wikipedia.org/wiki/Nordic_Watercolour_Museum",
       "image_file": "Nordic Watercolour Museum building 02.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "週二至日 11:00–16:00(週一休)",
+      "cost": "成人 80 SEK(26 歲以下免費)",
       "transit": "Göteborg 開車約 1 小時至 Tjörn/Skärhamn",
       "sep_note": null
     },
@@ -1243,7 +1243,7 @@
       "stay_min": 60,
       "stay_max": 90,
       "url": null,
-      "wikipedia": "https://sv.wikipedia.org/wiki/Trollh%C3%A4tte_kanal",
+      "wikipedia": "https://sv.wikipedia.org/wiki/Trollh%C3%A4ttefallen",
       "image_file": "Slussar Trollhättan.jpg",
       "hours": null,
       "cost": null,
@@ -1270,10 +1270,10 @@
       "url": "https://lackoslott.se",
       "wikipedia": "https://en.wikipedia.org/wiki/L%C3%A4ck%C3%B6_Castle",
       "image_file": "0283Läckö slott.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "每日 10:00–17:00(2026 開放至 9/13 季末)",
+      "cost": "成人 165 SEK(含導覽,26 歲以下免費)",
       "transit": "Göteborg 開車約 2 小時,或 Lidköping 轉巴士",
-      "sep_note": "藝術展與庭園多在夏季開放,9 月中後陸續閉展,前往前務必查官網開放日",
+      "sep_note": "2026 開放季至 9/13,之後閉館,前往前務必查官網",
       "country": "SE"
     },
     {
@@ -1297,10 +1297,10 @@
       "url": "https://tjoloholm.se",
       "wikipedia": "https://sv.wikipedia.org/wiki/Tjol%C3%B6holms_slott",
       "image_file": "Tjolöholms Slott - Trädgård 02.jpg",
-      "hours": null,
+      "hours": "9 月僅週五至日 11:00–16:00",
       "cost": null,
       "transit": "Göteborg 走 E6 南下約 40 分至 Fjärås 再轉小路",
-      "sep_note": "9 月起城堡內部導覽場次多縮減為週末,前往前請查官網"
+      "sep_note": "9 月僅週五至日開放(11:00–16:00),前往前請查官網"
     },
     {
       "id": "se-gbg-west-fjaras-bracka",
@@ -1499,14 +1499,14 @@
       "city": "Halmstad",
       "category": "museum",
       "tier": 2,
-      "desc": "Nissan 河畔、2019 年大幅整修重開的 Halland 郡立美術館,收藏以 20 世紀瑞典現代藝術與在地超現實畫派 Halmstadgruppen 為重心,新增頂樓與河景餐廳。常設展多免費、內容當代性強。參觀約 1–1.5 小時,是 E6 順路的 Halmstad 文化亮點。",
+      "desc": "Nissan 河畔、2019 年大幅整修重開的 Halland 郡立美術館,收藏以 20 世紀瑞典現代藝術與在地超現實畫派 Halmstadgruppen 為重心,新增頂樓與河景餐廳。內容當代性強。參觀約 1–1.5 小時,是 E6 順路的 Halmstad 文化亮點。",
       "stay_min": 60,
       "stay_max": 90,
       "url": "https://hallandskonstmuseum.se",
       "wikipedia": "https://sv.wikipedia.org/wiki/Hallands_konstmuseum",
       "image_file": "Hallands Konstmuseum.jpg",
-      "hours": null,
-      "cost": "常設展免費",
+      "hours": "週二至日 11:00–17:00(週三至 20:00,週一休)",
+      "cost": "成人 95 SEK(20 歲以下免費)",
       "transit": "Halmstad C 步行 10 分",
       "sep_note": null
     },
@@ -1713,10 +1713,10 @@
       "url": "https://norrvikenbastad.se",
       "wikipedia": "https://sv.wikipedia.org/wiki/Norrvikens_tr%C3%A4dg%C3%A5rdar",
       "image_file": "Norrvikens trädgårdar 1.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "9 月週三至日 10:00–17:00(低季)",
+      "cost": "成人 120 SEK",
       "transit": "Båstad 開車約 10 分",
-      "sep_note": "花園開放至 9 月上中旬後陸續縮減或閉園,前往前務必查官網"
+      "sep_note": "9 月起進入低季(週三至日 10:00–17:00),整季約至 11 月底,行前查官網"
     },
     {
       "id": "se-gbg-west-hovs-hallar",
@@ -1739,7 +1739,7 @@
       "url": null,
       "wikipedia": "https://sv.wikipedia.org/wiki/Hovs_hallar",
       "image_file": "Hovs hallar 17 april 2022 (03).jpg",
-      "hours": null,
+      "hours": "全天開放",
       "cost": "免費",
       "transit": "Båstad 開車約 20 分至半島西北端",
       "sep_note": null

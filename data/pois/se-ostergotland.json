@@ -23,9 +23,9 @@
       "url": null,
       "wikipedia": "https://sv.wikipedia.org/wiki/Gamla_Linköping",
       "image_file": "Linköping Gamla Platz.jpg",
-      "hours": null,
-      "cost": "免費入園",
-      "transit": null,
+      "hours": "園區全年全天開放;店家、展館與活動時段各異",
+      "cost": "免費入園(部分活動與展館另收費)",
+      "transit": "Linköping C 搭巴士約 10 分或步行約 30 分",
       "sep_note": null
     },
     {
@@ -51,7 +51,7 @@
       "image_file": "Linköpings domkyrka från domkyrkoparken.jpg",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "Linköping C 步行約 12 分",
       "sep_note": null
     },
     {
@@ -69,15 +69,15 @@
       "city": "Linköping",
       "category": "museum",
       "tier": 2,
-      "desc": "瑞典空軍博物館,展出從早期木製飛機到冷戰噴射機、以及 1952 年被蘇聯擊落的 DC-3 情報機打撈殘骸等重量級藏品,航空迷必訪。免費入場,位於 Malmen 空軍基地旁、距市中心約 15 分、無車較不便。E4 順路(林雪平西側),建議 2–3 小時。",
+      "desc": "瑞典空軍博物館,展出從早期木製飛機到冷戰噴射機、以及 1952 年被蘇聯擊落的 DC-3 情報機打撈殘骸等重量級藏品,航空迷必訪。成人門票 120 kr、18 歲以下免費,位於 Malmen 空軍基地旁、距市中心約 15 分、無車較不便。E4 順路(林雪平西側),建議 2–3 小時。",
       "stay_min": 120,
       "stay_max": 180,
       "url": null,
       "wikipedia": "https://sv.wikipedia.org/wiki/Flygvapenmuseum",
       "image_file": "Flygvapenmuseum overview.jpg",
-      "hours": null,
-      "cost": "免費",
-      "transit": null,
+      "hours": "約 11:00–17:00(9/6 後恢復常態季節時段,建議先查官網)",
+      "cost": "成人 120 SEK(9 月;夏季 150)、18 歲以下免費、長者/學生 100 SEK",
+      "transit": "Linköping C 西方 Malmslätt,搭巴士或自駕約 15 分",
       "sep_note": null
     },
     {
@@ -155,7 +155,7 @@
       "image_file": "Bergs slussar - KMB - 16000300030331.jpg",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "Linköping 北郊,需自駕(距 Linköping C 約 20 分車程)",
       "sep_note": "9 月航運班次減少,船隻升降場景不如盛夏。"
     },
     {
@@ -233,7 +233,7 @@
       "image_file": "Holmentornet från Holmtorget april 2005.jpg",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "Norrköping C 步行約 10 分",
       "sep_note": null
     },
     {
@@ -257,9 +257,9 @@
       "url": null,
       "wikipedia": "https://sv.wikipedia.org/wiki/Arbetets_museum",
       "image_file": "Strykjärnet Motala ström Norrköping april 2005.jpg",
-      "hours": null,
+      "hours": "每日 10:00–17:00",
       "cost": "免費",
-      "transit": null,
+      "transit": "Norrköping C 步行約 12 分",
       "sep_note": null
     },
     {
@@ -337,7 +337,7 @@
       "image_file": "Himmelstalund - KMB - 16000700024439.jpg",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "Norrköping C 西郊,搭巴士或自駕約 10 分",
       "sep_note": null
     },
     {
@@ -361,9 +361,9 @@
       "url": null,
       "wikipedia": "https://sv.wikipedia.org/wiki/Visualiseringscenter_C",
       "image_file": "WTNkpng1 Katy AM Visualiseringscenter Norrköping 1.JPG",
-      "hours": null,
-      "cost": null,
-      "transit": null,
+      "hours": "每日 10:00–16:00",
+      "cost": "展覽免費;巨蛋劇場(Domteater)另購票",
+      "transit": "Norrköping C 步行約 10 分(工業景觀區)",
       "sep_note": null
     },
     {
@@ -413,10 +413,10 @@
       "url": null,
       "wikipedia": "https://sv.wikipedia.org/wiki/Kolmårdens_djurpark",
       "image_file": "Kolmården Kolmårdens djurpark.jpg",
-      "hours": null,
-      "cost": null,
-      "transit": null,
-      "sep_note": "9 月為淡季,部分設施與表演縮短開放時段。"
+      "hours": "9 月為淡季,開放日與時段大減(約 10:00–17:00、多集中週末),務必先查官網日曆",
+      "cost": "成人日票淡季約 299 SEK 起(高峰達 579),線上預購較便宜;兒童另計",
+      "transit": "E4 Kolmården 交流道,自駕;Norrköping C 東北約 30 分車程",
+      "sep_note": "9 月為淡季,開放日多集中週末、部分設施與表演縮短或停開,務必先查官網日曆。"
     },
     {
       "id": "se-ostergotland-soderkoping",
@@ -441,7 +441,7 @@
       "image_file": "Söderköpings rådhus.jpg",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "E4 東向約 15 分;Norrköping C 搭巴士約 30 分",
       "sep_note": "9 月後約塔運河遊船班次漸少。"
     },
     {
@@ -545,7 +545,7 @@
       "image_file": "Nyköpingshus2014.jpg",
       "hours": null,
       "cost": "庭園免費",
-      "transit": null,
+      "transit": "Nyköping 市中心,火車站步行約 15 分",
       "sep_note": null
     },
     {
@@ -597,7 +597,7 @@
       "image_file": "Stendörren drone Photo.jpg",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "Nyköping 東方約 20 分,需自駕",
       "sep_note": "9 月自然中心縮短開放時段。"
     },
     {
@@ -623,7 +623,7 @@
       "image_file": "Ombergutsikt.jpeg",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "E4 Ödeshög 交流道旁,需自駕",
       "sep_note": null
     },
     {
@@ -649,7 +649,7 @@
       "image_file": "Alvastra klosterruin.jpg",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "E4 Ödeshög 附近,需自駕",
       "sep_note": null
     },
     {
@@ -675,7 +675,7 @@
       "image_file": "Rökstenen 1.JPG",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "E4 Ödeshög 東側,需自駕",
       "sep_note": null
     },
     {
@@ -701,7 +701,7 @@
       "image_file": "Naturrum Tåkern 544.jpg",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "Ödeshög 與 Mjölby 之間,需自駕",
       "sep_note": null
     },
     {
@@ -753,7 +753,7 @@
       "image_file": "DKoehl Gota Kanal Motala sluss 2009.jpg",
       "hours": null,
       "cost": "免費",
-      "transit": null,
+      "transit": "E4 之外西向約 30–40 分,需自駕",
       "sep_note": "9 月航運淡季,多數約塔運河遊船停駛。"
     },
     {
@@ -855,10 +855,10 @@
       "url": null,
       "wikipedia": "https://sv.wikipedia.org/wiki/Löfstad_slott",
       "image_file": "Löfstads slott, den 10 december 2008, bild 9.JPG",
-      "hours": null,
-      "cost": "庭園免費",
-      "transit": null,
-      "sep_note": "9 月起室內導覽場次減少,參觀前需確認。"
+      "hours": "9 月:週六日 11:00–16:00,城堡導覽 13:00 與 14:00",
+      "cost": "庭園免費;導覽(含入堡)成人 120 SEK、3–17 歲 60 SEK",
+      "transit": "E4 旁(Kimstad 附近),需自駕;Norrköping C 約 15 分車程",
+      "sep_note": "9 月城堡商店僅週六日 11:00–16:00、導覽 13:00 與 14:00;庭園全天免費。"
     },
     {
       "id": "se-ostergotland-medevi-brunn",

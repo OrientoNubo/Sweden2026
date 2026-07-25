@@ -23,8 +23,8 @@
       "url": "https://www.kalmarslott.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Kalmar_Castle",
       "image_file": "1285Kalmar slott.jpg",
-      "hours": null,
-      "cost": "成人約 170 SEK",
+      "hours": "每日 10:00–16:00(9 月;春秋季)",
+      "cost": "成人 180 SEK(9 月春秋季;夏季 190、冬季 130)",
       "transit": "Kalmar C 步行 15 分",
       "sep_note": null
     },
@@ -102,7 +102,7 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/Kalmar_l%C3%A4ns_museum",
       "image_file": "Kalmar County Museum.jpg",
       "hours": null,
-      "cost": "成人約 120 SEK",
+      "cost": "成人 150 SEK(9 月;夏季 190)",
       "transit": "Kalmar C 步行 8 分",
       "sep_note": null
     },
@@ -128,7 +128,7 @@
       "wikipedia": "https://en.wikipedia.org/wiki/%C3%96land_Bridge",
       "image_file": "Ölandsbron augusti 2018.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "免費通行(2013 年起取消過路費)",
       "transit": "自駕或巴士過橋",
       "sep_note": null
     },
@@ -153,8 +153,8 @@
       "url": "https://www.borgholmsslott.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Borgholm_Castle",
       "image_file": "Borgholms slott.jpg",
-      "hours": null,
-      "cost": "成人約 120 SEK",
+      "hours": "每日開放,秋季營運至 11 月初",
+      "cost": "成人 140 SEK(9 月秋季;夏季 150)",
       "transit": "Borgholm 鎮外,建議自駕",
       "sep_note": null
     },
@@ -179,10 +179,10 @@
       "url": "https://www.sollidensslott.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Solliden_Palace",
       "image_file": "Villa Solliden from the west 2006.jpg",
-      "hours": null,
-      "cost": "花園成人約 100 SEK",
+      "hours": "9 月每日 11:00–16:00(賽季 8/31–9/27)",
+      "cost": "花園成人 150 SEK",
       "transit": "Borgholm 南側,建議自駕",
-      "sep_note": "9 月中旬後花園多半已關園,前往前務必確認開放日期"
+      "sep_note": "2026 花園賽季至 9 月 27 日、每日 11:00–16:00 開放,之後關園"
     },
     {
       "id": "se-smaland-gotland-ismantorps-borg",
@@ -231,10 +231,10 @@
       "url": "https://www.eketorp.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Eketorp",
       "image_file": "Eketorps borg - KMB - 16000300029907.jpg",
-      "hours": null,
-      "cost": "成人約 120 SEK",
+      "hours": "旺季館舍週三–日 11:00–16:00(至 8/30);9 月起館舍多半關閉,僅戶外堡體可免費參觀",
+      "cost": "館舍開放時成人 150 SEK;戶外堡體免費進入",
       "transit": "厄蘭島南部,需自駕",
-      "sep_note": "9 月中旬後多改為淡季有限開放,前往前務必確認"
+      "sep_note": "9 月起商店/展覽/café 多半關閉(höstlov 才再開),建議只當免費戶外遺跡點,務必先查官網"
     },
     {
       "id": "se-smaland-gotland-gettlinge-gravfalt",
@@ -335,8 +335,8 @@
       "url": "https://www.kostaboda.com",
       "wikipedia": "https://sv.wikipedia.org/wiki/Kosta_glasbruk",
       "image_file": "Kosta fabriken, juni 2018.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "商店 平日 10:00–19:00、週末 10:00–18:00;玻璃工坊(öppen hytta)每日 10:00–16:00",
+      "cost": "工坊參觀免費;hyttsill 熔爐晚宴需預約付費",
       "transit": "Glasriket 內陸,需自駕",
       "sep_note": null
     },
@@ -388,7 +388,7 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Karlskrona",
       "image_file": "Karlskrona Panorama Luftaufnahme (2021).jpg",
       "hours": null,
-      "cost": null,
+      "cost": "散步免費,各博物館另計",
       "transit": "Karlskrona C 步行可達市中心",
       "sep_note": null
     },
@@ -407,14 +407,14 @@
       "city": "Karlskrona",
       "category": "museum",
       "tier": 2,
-      "desc": "位於 Stumholmen 島上的國家海軍博物館,展出瑞典海軍船艦模型、船首雕像與可下潛參觀的潛艇 Neptun,水下玻璃廊道可看沉船遺構。免費、內容扎實,是軍港世界遺產的最佳入門。約停留 1.5–2 小時。",
+      "desc": "位於 Stumholmen 島上的國家海軍博物館,展出瑞典海軍船艦模型、船首雕像與可下潛參觀的潛艇 Neptun,水下玻璃廊道可看沉船遺構。18 歲以下與每週三免費、內容扎實,是軍港世界遺產的最佳入門。約停留 1.5–2 小時。",
       "stay_min": 90,
       "stay_max": 120,
       "url": "https://www.marinmuseum.se",
       "wikipedia": "https://sv.wikipedia.org/wiki/Marinmuseum",
       "image_file": "Marinmuseum Karlskrona exterior.jpg",
-      "hours": null,
-      "cost": "免費",
+      "hours": "每日 10:00–17:00",
+      "cost": "成人 170 SEK、18 歲以下免費、每週三成人免費",
       "transit": "Karlskrona C 步行 12 分",
       "sep_note": null
     },
@@ -467,7 +467,7 @@
       "image_file": "Visby ringmur vid Östergravar.jpg",
       "hours": null,
       "cost": "免費",
-      "transit": "Visby 老城,渡輪碼頭步行 10 分",
+      "transit": "Visby 老城,渡輪碼頭步行 10 分;本土 Nynäshamn/Oskarshamn 搭 Destination Gotland 渡輪約 3–3.5 小時抵 Visby(9 月淡季班次較夏季少、需訂位),另有 Visby 機場國內航線",
       "sep_note": null
     },
     {
@@ -543,8 +543,8 @@
       "url": "https://www.gotlandsmuseum.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Gotland_Museum",
       "image_file": "Gotlands Museum (Fornsalen) ingången från Strandgatan (12).JPG",
-      "hours": null,
-      "cost": "成人約 150 SEK",
+      "hours": "每日 09:00–17:00(至 9 月底;10 月起 11:00–16:00)",
+      "cost": "成人 190 SEK,19 歲以下免費",
       "transit": "Visby 老城中心",
       "sep_note": null
     },
@@ -569,10 +569,10 @@
       "url": "https://lummelundagrottan.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Lummelunda_cave",
       "image_file": "Lummelundagrottans mynning inifran.jpg",
-      "hours": null,
-      "cost": "成人約 180 SEK",
+      "hours": "9 月僅週末 11:00–16:00",
+      "cost": "導覽成人 195 SEK",
       "transit": "Visby 北方 13 公里,建議自駕",
-      "sep_note": "9 月導覽班次縮減,出發前務必確認開放時間"
+      "sep_note": "9 月僅週末開放(11:00–16:00)、平日休洞,務必先查官網"
     },
     {
       "id": "se-smaland-gotland-faro",
@@ -581,9 +581,9 @@
         "local": "Fårö",
         "en": "Fårö"
       },
-      "lat": 57.95,
-      "lng": 19.15,
-      "coord_source": "wikipedia-en",
+      "lat": 57.86849,
+      "lng": 19.08113,
+      "coord_source": "osm",
       "country": "SE",
       "region": "se-smaland-gotland",
       "city": "Fårö",
@@ -597,7 +597,7 @@
       "image_file": "Rauks (3881539849).jpg",
       "hours": null,
       "cost": "渡輪免費",
-      "transit": "Fårösund 搭渡輪約 8 分",
+      "transit": "Fårösund 搭免費渡輪(Fårösundsleden)約 7 分至 Broa 登島,需自駕上島",
       "sep_note": null
     },
     {
@@ -673,10 +673,10 @@
       "url": "https://www.alv.se",
       "wikipedia": "https://en.wikipedia.org/wiki/Astrid_Lindgren%27s_World",
       "image_file": "Astrid Lindgrens Värld - Entré.jpg",
-      "hours": null,
-      "cost": "成人約 545 SEK",
+      "hours": "開放日約 10:00–17:00(時段依日期,詳見官網日曆)",
+      "cost": "成人 565 SEK、兒童(3–14 歲)/長者 430 SEK(2026 日票)",
       "transit": "Vimmerby 鎮郊,建議自駕",
-      "sep_note": "樂園主季至 8 月底/9 月初,9 月多半已閉園,務必先查營運日曆"
+      "sep_note": "2026 賽季 9 月僅週五–週日開放(9/4–6、9/11–13、9/18–20),9 月 20 日為當季最後一天,平日不開園,務必先查官網日曆"
     },
     {
       "id": "se-smaland-gotland-granna",
@@ -1167,8 +1167,8 @@
       "url": "https://www.vandalorum.se",
       "wikipedia": "https://sv.wikipedia.org/wiki/Vandalorum",
       "image_file": "Vandalorum foto John Nelander.jpg",
-      "hours": null,
-      "cost": null,
+      "hours": "每日 10:00–16:00(9 月;夏季至 17:00)",
+      "cost": "成人 130 SEK",
       "transit": "Värnamo 南郊,E4 交流道旁",
       "sep_note": null
     },

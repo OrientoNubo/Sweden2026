@@ -91,6 +91,28 @@ function sanitizePoiState(obj) {
   return out;
 }
 
+// routes 清洗：畸形 waypoints/geometry 會讓下游（getRoutes 的 [...w]、F4 繪製）
+// 迭代時崩潰。waypoints 剔除非「長度≥2 數字陣列」的元素（如 {lat,lng} 物件、字串），
+// 剩餘 <2 點的 route 整條丟棄；geometry 同理，任一點非法即整段設 null 並清 road_*
+// （下游改由 waypoints 重算）。合法資料一律 ≥2 個 [lat,lng] 數字點，零影響。
+function sanitizeRoutes(arr) {
+  if (!Array.isArray(arr)) return [];
+  const isCoord = (w) => Array.isArray(w) && w.length >= 2
+    && Number.isFinite(w[0]) && Number.isFinite(w[1]);
+  const out = [];
+  for (const r of arr) {
+    if (!r || typeof r !== 'object') continue;
+    const waypoints = Array.isArray(r.waypoints) ? r.waypoints.filter(isCoord) : [];
+    if (waypoints.length < 2) continue;
+    let { geometry, road_distance, road_duration } = r;
+    if (geometry != null && !(Array.isArray(geometry) && geometry.every(isCoord))) {
+      geometry = null; road_distance = null; road_duration = null;
+    }
+    out.push({ ...r, waypoints, geometry, road_distance, road_duration });
+  }
+  return out;
+}
+
 function normalizeOverlay(obj) {
   const skel = emptyOverlay();
   if (!obj || typeof obj !== 'object') return skel;
@@ -107,7 +129,7 @@ function normalizeOverlay(obj) {
       : [],
     itinerary: sanitizeItinerary(obj.itinerary),
     dayNotes: sanitizeDayNotes(obj.dayNotes),
-    routes: Array.isArray(obj.routes) ? obj.routes.filter((r) => r && typeof r === 'object') : [],
+    routes: sanitizeRoutes(obj.routes),
     settings: sanitizeSettings(obj.settings),
   };
 }

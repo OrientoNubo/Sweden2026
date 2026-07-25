@@ -25,7 +25,7 @@
       "image_file": "Falu koppargruva July 2017 01.jpg",
       "hours": null,
       "cost": "地下導覽成人約 250 SEK",
-      "transit": "Falun C 步行 20 分或搭巴士",
+      "transit": "Stockholm 火車經 Borlänge 至 Falun C,步行 20 分或搭巴士",
       "sep_note": "9 月地下導覽班次減少,務必先預約確認"
     },
     {
@@ -102,8 +102,8 @@
       "wikipedia": "https://en.wikipedia.org/wiki/R%C3%A4ttvik",
       "image_file": "Rättvik2002.JPG",
       "hours": null,
-      "cost": null,
-      "transit": "Rättvik 火車站步行可達湖畔",
+      "cost": "免費",
+      "transit": "Stockholm 火車經 Borlänge 至 Rättvik,站步行可達湖畔",
       "sep_note": null
     },
     {
@@ -206,7 +206,7 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Skuleberget",
       "image_file": "Vy mot Skuleberget över Gällstasjön.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "健行免費,纜車另購票",
       "transit": "E4 公路旁 Naturum,建議自駕",
       "sep_note": null
     },
@@ -232,7 +232,7 @@
       "wikipedia": "https://en.wikipedia.org/wiki/H%C3%B6ga_Kusten_Bridge",
       "image_file": "High Coast Bridge 2016.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "免費(觀景)",
       "transit": "E4 公路,建議自駕",
       "sep_note": null
     },
@@ -258,8 +258,8 @@
       "wikipedia": "https://en.wikipedia.org/wiki/%C3%85re",
       "image_file": "Åresjön Dcastor 2003.jpg",
       "hours": null,
-      "cost": null,
-      "transit": "Åre 火車站即在鎮中心",
+      "cost": "鎮上免費,登山纜車另購票",
+      "transit": "Stockholm 夜火車直達 Åre 站(即在鎮中心)",
       "sep_note": "9 月為淡季,纜車與餐飲營運時間縮減,前往前務必確認"
     },
     {
@@ -285,7 +285,7 @@
       "image_file": "Jamtli klockstapel2.jpg",
       "hours": null,
       "cost": "成人約 180 SEK",
-      "transit": "Östersund C 步行 15 分",
+      "transit": "Stockholm 夜火車至 Östersund C,步行 15 分",
       "sep_note": "9 月露天村的扮裝活動多已收尾,以室內展與戶外環境為主"
     },
     {
@@ -309,9 +309,9 @@
       "url": null,
       "wikipedia": "https://en.wikipedia.org/wiki/Gammelstad_Church_Town",
       "image_file": "Gammelstad.jpg",
-      "hours": null,
+      "hours": "教堂村戶外全年自由參觀;遊客中心 9 月僅週末 12:00–16:00",
       "cost": "免費",
-      "transit": "Luleå 市區搭巴士約 20 分",
+      "transit": "Luleå 機場/火車站,市區搭巴士約 20 分",
       "sep_note": null
     },
     {
@@ -336,8 +336,8 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Lule%C3%A5",
       "image_file": "Lulea-city-festival-water.jpg",
       "hours": null,
-      "cost": null,
-      "transit": "Luleå 機場/火車站進出",
+      "cost": "市區免費,群島與活動另計",
+      "transit": "Luleå 機場,或 Stockholm 夜火車至 Luleå/Boden 進出",
       "sep_note": null
     },
     {
@@ -361,9 +361,9 @@
       "url": "https://www.icehotel.com",
       "wikipedia": "https://sv.wikipedia.org/wiki/Icehotel",
       "image_file": "Icehotel entre ms.jpg",
-      "hours": null,
-      "cost": "參觀成人約 320 SEK",
-      "transit": "Kiruna 機場搭巴士約 25 分",
+      "hours": "11:00–18:00(9 月僅全年開放的 Icehotel 365 冰廳)",
+      "cost": "成人 325 SEK,學生/長者 225 SEK,兒童(4–12 歲)39 SEK",
+      "transit": "Kiruna 機場搭巴士/接駁約 25 分;或 Stockholm 夜火車至 Kiruna 再轉車",
       "sep_note": "9 月僅全年開放的 Icehotel 365 冰廳可看,季節性冰旅館尚未動工"
     },
     {
@@ -414,8 +414,8 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Kiruna",
       "image_file": "Kiruna montage.png",
       "hours": null,
-      "cost": null,
-      "transit": "Kiruna 機場/火車站進出",
+      "cost": "市區免費,LKAB 礦坑導覽另計",
+      "transit": "Kiruna 機場,或 Stockholm 夜火車直達 Kiruna 站",
       "sep_note": "城市搬遷進行中,部分舊市區建築陸續拆遷或關閉,景點狀態多變"
     },
     {
@@ -440,8 +440,8 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Abisko_National_Park",
       "image_file": "Lapporten 2.jpg",
       "hours": null,
-      "cost": null,
-      "transit": "Abisko Turiststation 火車站即在園區",
+      "cost": "國家公園免費;Aurora Sky Station 纜車另購票",
+      "transit": "Stockholm 夜火車或 Kiruna 機場再轉車;Abisko Turiststation 站即在園區",
       "sep_note": "9 月下旬夜長轉暗,已進入極光季前段,Sky Station 營運視天候而定"
     },
     {
@@ -492,8 +492,8 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Kebnekaise",
       "image_file": "Kebnekaise viewed from Tarfala valley - narrower crop.jpg",
       "hours": null,
-      "cost": null,
-      "transit": "Kiruna 開車至 Nikkaluokta 再健行進山",
+      "cost": "免費(自由進入);山屋與嚮導另計",
+      "transit": "Kiruna 機場/火車站,開車至 Nikkaluokta 再健行進山",
       "sep_note": "9 月下旬山區已入秋、恐降雪,山屋與接駁陸續收尾,行前務必查天候與營運"
     },
     {
@@ -518,7 +518,7 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Sarek_National_Park",
       "image_file": "Pierikpakte in Sarek.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "國家公園免費入園;無任何設施",
       "transit": "無公路可達,需自 Kvikkjokk/Ritsem 徒步進入",
       "sep_note": "9 月已入秋、天候多變並可能降雪,僅具經驗與裝備者可進入"
     },
@@ -570,8 +570,8 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Jokkmokk",
       "image_file": "Jokkmokks kyrka.JPG",
       "hours": null,
-      "cost": null,
-      "transit": "Luleå 開車約 2 小時,或搭巴士",
+      "cost": "市區免費;Ájtte 博物館成人 120 SEK",
+      "transit": "Luleå 機場/火車站,開車或搭巴士約 2 小時",
       "sep_note": "著名的 Jokkmokks marknad 冬季市集在 2 月,9 月以 Ájtte 博物館與周邊自然為主"
     },
     {
@@ -986,8 +986,8 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/Stenstaden",
       "image_file": "Stenstaden, Sundsvall, Sweden - panoramio.jpg",
       "hours": null,
-      "cost": null,
-      "transit": "Sundsvall C 即在區內",
+      "cost": "免費",
+      "transit": "Stockholm 火車至 Sundsvall C(即在區內)",
       "sep_note": null
     },
     {
@@ -1168,7 +1168,7 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/Nordingr%C3%A5",
       "image_file": "Nordingra kyrka ext1.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "免費",
       "transit": "高海岸內,建議自駕",
       "sep_note": null
     },
@@ -1272,9 +1272,9 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/H%C3%B6gbonden",
       "image_file": "Högbonden.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "登島免費;渡船另購票",
       "transit": "自 Bönhamn 搭渡輪登島",
-      "sep_note": "9 月渡輪與島上旅舍多於中旬前後收季,務必先查船班與營運"
+      "sep_note": "9 月渡船僅週五及週末營運、末航約 9/26,島上旅舍與服務收季,務必先查船班"
     },
     {
       "id": "se-north-ulvon",
@@ -1298,7 +1298,7 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/Ulv%C3%B6arna",
       "image_file": "Ulvohamn.JPG",
       "hours": null,
-      "cost": null,
+      "cost": "上島免費;渡船另購票",
       "transit": "自 Köpmanholmen/Docksta 搭渡輪",
       "sep_note": "9 月渡輪班次減少、島上住宿與餐飲收季,務必先查船班"
     },
@@ -1506,8 +1506,8 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/Sara_kulturhus",
       "image_file": "Sara Kulturhus juli 2023.png",
       "hours": null,
-      "cost": null,
-      "transit": "Skellefteå 市中心",
+      "cost": "公共空間免費入場,展演另購票",
+      "transit": "Skellefteå Airport 或巴士轉入,市中心步行可達",
       "sep_note": null
     },
     {
@@ -1921,9 +1921,9 @@
       "url": "https://www.ajtte.com",
       "wikipedia": "https://sv.wikipedia.org/wiki/%C3%81jtte",
       "image_file": "Ajtte entré.JPG",
-      "hours": null,
-      "cost": null,
-      "transit": "Jokkmokk 市中心,Luleå 開車約 2 小時",
+      "hours": "週二–五 10:00–16:00,週六日 12:00–16:00(週一休)",
+      "cost": "成人 120 SEK,16 歲以下免費",
+      "transit": "Jokkmokk 市中心;Luleå 機場/火車站再開車或搭巴士約 2 小時",
       "sep_note": null
     },
     {
@@ -1948,7 +1948,7 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/Kvikkjokk",
       "image_file": "Kvikkjokk-mot-deltat.JPG",
       "hours": null,
-      "cost": null,
+      "cost": "村落免費;山屋與接駁另計",
       "transit": "Jokkmokk 開車約 1.5 小時,公路盡頭",
       "sep_note": "9 月山屋與接駁陸續收季、山區入秋轉冷,行前務必查營運與天候"
     },
@@ -1974,7 +1974,7 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/Skierfe",
       "image_file": "Skierffe and Nammasj.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "免費;渡船與山屋另計",
       "transit": "自 Kvikkjokk/Aktse 搭船再徒步進山",
       "sep_note": "9 月山區已入秋、可能降雪,渡船與山屋陸續收季,僅具經驗與裝備者可前往"
     },
@@ -2000,8 +2000,8 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/Muddus_nationalpark",
       "image_file": "Muddus-wasserfall.jpg",
       "hours": null,
-      "cost": null,
-      "transit": "E45 沿線入口,建議自駕再徒步",
+      "cost": "國家公園免費入園",
+      "transit": "Jokkmokk/Gällivare 方向,E45 沿線入口,建議自駕再徒步",
       "sep_note": "9 月山區入秋、日照漸短並可能降雪,行前務必查步道與天候"
     },
     {
@@ -2026,7 +2026,7 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/Stora_Sj%C3%B6fallets_nationalpark",
       "image_file": "Storasjoefallet1.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "國家公園免費入園",
       "transit": "自 Gällivare 走 827 號路進山,建議自駕",
       "sep_note": "9 月山區入秋、可能降雪,山屋與渡船陸續收季,行前務必查營運與天候"
     },
@@ -2052,7 +2052,7 @@
       "wikipedia": "https://sv.wikipedia.org/wiki/Padjelanta",
       "image_file": "Vielggisbákte 8410.jpg",
       "hours": null,
-      "cost": null,
+      "cost": "國家公園免費入園;直升機與山屋另計",
       "transit": "無公路可達,需自 Kvikkjokk/Ritsem 徒步或搭直升機",
       "sep_note": "9 月已入秋、天候多變並可能降雪,山屋陸續關閉,僅具經驗與裝備者可進入"
     }
