@@ -1613,6 +1613,32 @@
       "cost": "免費",
       "transit": "Jönköping 東側湖濱,需自駕",
       "sep_note": "玫瑰花期集中 6–8 月,9 月花況明顯轉衰"
+    },
+    {
+      "id": "se-smaland-gotland-kinnekulle",
+      "name": {
+        "zh": "基訥山",
+        "local": "Kinnekulle",
+        "en": "Kinnekulle"
+      },
+      "lat": 58.6,
+      "lng": 13.41111,
+      "coord_source": "wikidata",
+      "country": "SE",
+      "region": "se-smaland-gotland",
+      "city": "Götene",
+      "category": "nature",
+      "tier": 2,
+      "desc": "維納恩湖(Vänern)東岸拔地而起的平頂桌山(最高 Högkullen 約 306 公尺),層層沉積岩與火山岩形成階梯狀地質,山坡林木、花海與教堂散布,環山景觀道路串聯觀景點與莊園,被譽為「開花的山」。地處鄉間、無便利大眾運輸,以自駕環山最佳。環山加登頂約 2–3 小時。",
+      "stay_min": 120,
+      "stay_max": 180,
+      "url": null,
+      "wikipedia": "https://en.wikipedia.org/wiki/Kinnekulle",
+      "image_file": "Högkullen, Kinnekulle.jpg",
+      "hours": null,
+      "cost": "免費",
+      "transit": "Götene/Lidköping 近郊,建議自駕環山",
+      "sep_note": null
     }
   ]
 }

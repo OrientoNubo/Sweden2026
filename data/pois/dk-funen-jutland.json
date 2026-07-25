@@ -1,6 +1,6 @@
 {
   "region": "dk-funen-jutland",
-  "version": "2026-07-24",
+  "version": "2026-07-25",
   "pois": [
     {
       "id": "dk-funen-jutland-odense",
@@ -1742,6 +1742,32 @@
       "hours": null,
       "cost": "免費",
       "transit": "Aggersund 近郊,建議自駕",
+      "sep_note": null
+    },
+    {
+      "id": "dk-funen-jutland-margueritruten",
+      "name": {
+        "zh": "雛菊路線",
+        "local": "Margueritruten",
+        "en": "The Marguerite Route"
+      },
+      "lat": 55.70833,
+      "lng": 9.53333,
+      "coord_source": "wikidata",
+      "country": "DK",
+      "region": "dk-funen-jutland",
+      "city": "Vejle",
+      "category": "experience",
+      "tier": 2,
+      "desc": "貫穿全丹麥、以路牌上金色雛菊標示的國家景觀公路網,全長約 3,600 公里,串聯古堡、教堂、海岸與小鎮,刻意避開高速公路走風景小徑。東日德蘭 Vejle 一帶的 Søhøjlandet 湖區路段最上鏡,途經丹麥著名的 Himmelbjerget 山丘。全程需自駕、跟著雛菊標誌走,無單一大眾運輸。單段兜風半日、全網數日。",
+      "stay_min": 180,
+      "stay_max": 480,
+      "url": null,
+      "wikipedia": "https://da.wikipedia.org/wiki/Margueritruten",
+      "image_file": "Margueritrute-skilt.JPG",
+      "hours": null,
+      "cost": "免費(自駕)",
+      "transit": "全丹麥雛菊標誌路網;Vejle/Søhøjlandet 為代表性起點,需自駕",
       "sep_note": null
     }
   ]

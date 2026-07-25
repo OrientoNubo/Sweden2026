@@ -1795,6 +1795,58 @@
       "cost": null,
       "transit": "Torekov 搭渡船約 20 分登島",
       "sep_note": "9 月渡船班次較夏季明顯減少、島上無商店,務必先查船班並自備飲食"
+    },
+    {
+      "id": "se-gbg-west-haveruds-akvedukt",
+      "name": {
+        "zh": "霍弗魯水道橋",
+        "local": "Håveruds akvedukt",
+        "en": "Håverud Aqueduct"
+      },
+      "lat": 58.82139,
+      "lng": 12.41017,
+      "coord_source": "wikidata",
+      "country": "SE",
+      "region": "se-gbg-west",
+      "city": "Mellerud",
+      "category": "landmark",
+      "tier": 2,
+      "desc": "Dalslands kanal 上的鋼造水道橋(1868,Nils Ericson 設計),讓運河船隻凌空跨越 Upperudsälven 湍流,水道、公路橋與鐵路橋在此三層交會,是達爾斯蘭的招牌工程奇景。夏季有觀光船通過水道橋、旁設遊客中心與咖啡。地處內陸、無大眾運輸需自駕。含看船過橋約 45–60 分鐘。",
+      "stay_min": 45,
+      "stay_max": 60,
+      "url": null,
+      "wikipedia": "https://sv.wikipedia.org/wiki/H%C3%A5verud",
+      "image_file": "Akvedukten i Haverud.jpg",
+      "hours": null,
+      "cost": "看橋免費(觀光船另計)",
+      "transit": "Mellerud 東北約 15 公里 Håverud,建議自駕",
+      "sep_note": "觀光船與遊客中心主季為夏季,9 月船班與營運縮減,行前查詢"
+    },
+    {
+      "id": "se-gbg-west-dalslands-kanal",
+      "name": {
+        "zh": "達爾斯蘭運河",
+        "local": "Dalslands kanal",
+        "en": "Dalsland Canal"
+      },
+      "lat": 58.85,
+      "lng": 12.4,
+      "coord_source": "wikidata",
+      "country": "SE",
+      "region": "se-gbg-west",
+      "city": "Bengtsfors",
+      "category": "experience",
+      "tier": 3,
+      "desc": "貫穿達爾斯蘭湖區、全長約 250 公里(含約 12 公里人工開鑿)的運河水道,串聯數十座湖泊與 30 餘座船閘,夏季有觀光遊船與獨木舟航行,最著名的景點是 Håverud 水道橋。以搭船或沿岸自駕賞景為主,無便利大眾運輸。乘船半日至整日。",
+      "stay_min": 180,
+      "stay_max": 480,
+      "url": null,
+      "wikipedia": "https://sv.wikipedia.org/wiki/Dalslands_kanal",
+      "image_file": "Dalsland Kanal Håverud a.jpg",
+      "hours": null,
+      "cost": null,
+      "transit": "達爾斯蘭湖區,自駕沿線或於 Håverud/Bengtsfors 搭觀光船",
+      "sep_note": "觀光遊船主季為 6–8 月,9 月航班大減或停航,搭船前務必查船期"
     }
   ]
 }
