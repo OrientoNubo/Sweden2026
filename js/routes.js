@@ -17,7 +17,7 @@ export function init() {
     routedraw.startNew();
   });
   on('pois:ready', render);
-  on('overlay:changed', (p) => { if (!p || ['route', 'import', 'reset'].includes(p.type)) render(); });
+  on('overlay:changed', (p) => { if (!p || ['route', 'import', 'reset', 'external'].includes(p.type)) render(); });
   on('tab:changed', (tab) => { if (tab === 'routes') render(); });
   render(); // app 於 store.init() 後才呼叫本 init,需主動首渲染
 }

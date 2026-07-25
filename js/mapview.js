@@ -615,7 +615,7 @@ export function init() {
   on('overlay:changed', (payload = {}) => {
     const { type, ids } = payload;
     if (type === 'route') { renderRoutes(); return; }
-    if (type === 'import' || type === 'reset') { renderPois(); renderRoutes(); return; }
+    if (type === 'import' || type === 'reset' || type === 'external') { renderPois(); renderRoutes(); return; }
     if (type === 'settings' || type === 'daynote') return;   // 不影響任何 marker
 
     if (state.viewMode === 'curate') {

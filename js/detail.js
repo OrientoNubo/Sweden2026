@@ -18,6 +18,7 @@ let lastTrigger = null;   // 開啟前的觸發元素,關閉時還原焦點
 let lastTriggerInList = false; // 觸發元素是否來自景點列表(關閉時列可能已重繪移除,退回列表容器)
 let lastImgKey = '';      // 上次解析的圖片指紋(currentId + refs);未變則不重 resolve
 let lastUrls = [];        // 上次解析結果(對應 lastImgKey)
+let commitingNote = false; // 重繪前 blur 備註提交 setNote,其連鎖的 overlay:changed 交由外層單次重繪(防重入)
 
 function revokeUrls() {
   for (const u of objectUrls) URL.revokeObjectURL(u);
@@ -607,8 +608,18 @@ export function init() {
   // 僅在變更影響目前 POI 時重繪(payload.ids 含 currentId;無 ids 視為全域變更)。
   on('overlay:changed', (payload) => {
     if (panel.hidden || mode !== 'view' || currentId == null) return;
+    // blur 提交備註觸發的 overlay:changed(type:'status', ids:[currentId])→ 交由外層本次重繪,不重入
+    if (commitingNote) return;
     const ids = payload && payload.ids;
     if (Array.isArray(ids) && !ids.includes(currentId)) return;
+    // 無 ids 的整包變更(external/import)會整塊重繪。若焦點在本面板備註輸入框且尚未 blur,
+    // 先 blur 讓既有 blur handler 提交輸入(setNote 值未變會早退,不觸發連鎖),避免輸入遺失。
+    const active = document.activeElement;
+    if (!Array.isArray(ids) && active && content.contains(active)
+        && active.classList && active.classList.contains('detail-note')) {
+      commitingNote = true;
+      try { active.blur(); } finally { commitingNote = false; }
+    }
     if (store.getPoi(currentId)) openPoi(currentId);
     else close();
   });

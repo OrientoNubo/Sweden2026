@@ -1,15 +1,20 @@
 // sw.js — Sweden2026 PWA Service Worker(離線 app shell + 執行期資料/圖片快取)
 //
 // ┌─────────────────────────────────────────────────────────────────────────┐
+// │ 快取策略(方案 A:app shell 純 precache-only,更新一律靠版本 bump 原子化)│
+// │                                                                          │
 // │ 重要:改任何前端檔案(index.html / css/* / js/* / vendor/* / manifest / │
-// │ favicon)後,請同步 bump 下方 CACHE_VERSION。                             │
-// │  - shell 快取名含 CACHE_VERSION → bump 後 install 會重新 precache 全部    │
-// │    app shell,activate 會刪掉舊版 shell 快取,使用者下次載入即取得新版。 │
+// │ favicon / data/borders.json)後,請同步 bump 下方 CACHE_VERSION。        │
+// │  - shell 快取名含 CACHE_VERSION。bump 後 install 會整批重新 precache 全部 │
+// │    app shell,activate 刪掉舊版 shell 快取,使用者下次載入即整批換新。   │
+// │  - shell 走 cache-first 且「不」背景 revalidate:命中即回;僅未 precache │
+// │    的同源檔 cache miss 時才走網路並寫回。更新只認 CACHE_VERSION bump,   │
+// │    避免逐檔背景更新造成新舊混雜的部分更新。                             │
 // │  - data / img 快取「不」含版本號:資料走 stale-while-revalidate 自動更新, │
 // │    圖片為執行期 LRU 快取,兩者跨部署保留、無需隨版本重建。               │
 // │  - 若新增/移除前端檔案,記得同步增修下方 PRECACHE_URLS 清單。            │
 // └─────────────────────────────────────────────────────────────────────────┘
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 
 const SHELL_CACHE = `sw26-shell-${CACHE_VERSION}`; // 版本化:bump 即重建
 const DATA_CACHE  = 'sw26-data';                   // 穩定:SWR 自動保鮮
@@ -26,6 +31,8 @@ const PRECACHE_URLS = [
   './index.html',
   './manifest.webmanifest',
   './favicon.svg',
+  // 站台靜態資料(非 isDataRequest → 走 shell;隨版本重建)
+  './data/borders.json',
   // 站台 CSS
   './css/tokens.css',
   './css/layout.css',
@@ -68,6 +75,8 @@ const PRECACHE_URLS = [
   './vendor/leaflet/images/marker-icon.png',
   './vendor/leaflet/images/marker-icon-2x.png',
   './vendor/leaflet/images/marker-shadow.png',
+  // 註:apple-touch-icon.png 與 icons/*.png 為 OS/安裝層品牌資產,非執行期必需,
+  //     刻意不進 precache——由瀏覽器依需擷取即可,避免無謂膨脹 shell 快取。
 ];
 
 // ---------- install:precache app shell(容錯,單檔失敗不整體中斷)----------
@@ -106,7 +115,7 @@ self.addEventListener('fetch', (event) => {
   let url;
   try { url = new URL(req.url); } catch (e) { return; }
 
-  // 同源:資料 → SWR;其餘 app shell → cache-first(背景更新)
+  // 同源:資料 → SWR;其餘 app shell → cache-first(precache-only,不背景更新)
   if (url.origin === self.location.origin) {
     if (isDataRequest(url)) {
       event.respondWith(staleWhileRevalidate(req, DATA_CACHE));
@@ -134,15 +143,13 @@ function isDataRequest(url) {
     || /\/data\/pois\/[^/]+\.json$/.test(url.pathname);
 }
 
-// cache-first + 背景更新:命中即回,並在背景重新抓取更新快取供下次使用;
-// 未命中(如未 precache 的同源檔)則走網路並寫入快取;離線且無快取時對導覽請求回退 shell。
+// cache-first(precache-only shell):命中即回,不做背景 revalidate——
+// shell 一律由 CACHE_VERSION bump 原子重建,避免逐檔背景更新造成新舊混雜。
+// 未命中(如未 precache 的同源檔)才走網路並寫入快取;離線且無快取時對導覽請求回退 shell。
 async function cacheFirst(req, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(req);
-  if (cached) {
-    revalidate(cache, req); // 不 await,背景更新
-    return cached;
-  }
+  if (cached) return cached;
   try {
     const resp = await fetch(req);
     if (resp && resp.ok) cache.put(req, resp.clone());
@@ -154,12 +161,6 @@ async function cacheFirst(req, cacheName) {
     }
     throw e;
   }
-}
-
-function revalidate(cache, req) {
-  fetch(req).then((resp) => {
-    if (resp && resp.ok) cache.put(req, resp.clone());
-  }).catch(() => {});
 }
 
 // stale-while-revalidate:有快取先回(立即可用),同時背景抓網路更新快取(下次生效);
@@ -178,22 +179,24 @@ async function staleWhileRevalidate(req, cacheName) {
   });
 }
 
-// Commons 圖片 cache-first:命中即回;未命中抓網路(含 opaque 回應)寫入並背景修剪至上限。
+// Commons 圖片 cache-first:命中即回;未命中抓網路(含 opaque 回應)並「非阻塞」寫入 + 修剪。
+// 關鍵:cache.put 不在關鍵路徑上——quota 超限時 put 會 reject,但已 .catch 吞掉,
+// 永遠回傳已抓到的 resp。quota 失敗只是「這張不快取」,絕不再退 Response.error() 造成破圖。
 async function cacheFirstImage(req, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(req);
   if (cached) return cached;
+  let resp;
   try {
-    const resp = await fetch(req);
-    // 跨域 <img> 為 no-cors → opaque(status 0);仍可快取供離線顯示。
-    if (resp && (resp.ok || resp.type === 'opaque')) {
-      await cache.put(req, resp.clone());
-      trimCache(cacheName, IMG_LIMIT); // 不 await,背景修剪
-    }
-    return resp;
+    resp = await fetch(req);
   } catch (e) {
-    return cached || Response.error();
+    return Response.error(); // 網路失敗(離線且無快取):交由 <img> 顯示破圖,屬預期
   }
+  // 跨域 <img> 為 no-cors → opaque(status 0);仍可快取供離線顯示。
+  if (resp && (resp.ok || resp.type === 'opaque')) {
+    cache.put(req, resp.clone()).then(() => trimCache(cacheName, IMG_LIMIT)).catch(() => {});
+  }
+  return resp;
 }
 
 // FIFO 修剪:Cache API keys() 依插入序回傳,刪最前(最舊)者直到不超過上限。

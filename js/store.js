@@ -129,12 +129,23 @@ export async function init() {
   // IndexedDB 優雅降級：開啟失敗不擋 init（圖片功能停用，其餘照常）
   try { await db.openDb(); } catch (e) { console.warn('[store] IndexedDB 不可用，圖片功能停用', e); }
 
-  const manifest = await (await fetch('./data/manifest.json')).json();
+  // SW 離線時 fetch 可能回 503（帶 {error:'offline'} JSON）或某 shard 未進快取，
+  // 不檢查 res.ok 會讓錯誤 JSON 進入 flatMap，對 undefined pois 崩潰整站。逐一檢查後拋錯，
+  // 交由上層（main.js）以「離線且無快取」的友善畫面接手，而非白屏。
+  const manifestRes = await fetch('./data/manifest.json');
+  if (!manifestRes.ok) throw new Error(`manifest 載入失敗（HTTP ${manifestRes.status}）`);
+  const manifest = await manifestRes.json();
   manifestVersion = manifest.version;
   const shards = await Promise.all(
-    manifest.files.map((f) => fetch(`./data/${f}`).then((r) => r.json())),
+    manifest.files.map(async (f) => {
+      const res = await fetch(`./data/${f}`);
+      if (!res.ok) throw new Error(`分片 ${f} 載入失敗（HTTP ${res.status}）`);
+      return res.json();
+    }),
   );
-  base = shards.flatMap((s) => s.pois);
+  // 雙保險：即便某 shard 意外通過 res.ok 卻非正常分片（如被 200 包裝的錯誤 JSON），
+  // 過濾掉無 pois 陣列的物件，避免 flatMap 對 undefined 展開而崩潰。
+  base = shards.filter((s) => s && Array.isArray(s.pois)).flatMap((s) => s.pois);
 
   overlay = loadOverlay();
   rebuild();
@@ -570,7 +581,8 @@ function dataUrlToBlob(dataUrl) {
 
 export async function exportAll() {
   const images = {};
-  for (const id of collectIdbRefs()) {
+  const refIds = collectIdbRefs();
+  for (const id of refIds) {
     try {
       const blob = await db.getImage(id);
       if (!blob) continue;
@@ -579,6 +591,10 @@ export async function exportAll() {
       console.warn('[store] 匯出圖片失敗', id, e);
     }
   }
+  // IndexedDB 不可用或個別圖片取不到時，會靜默匯出殘缺備份。統計 overlay 的 idb: 引用數
+  // 與實際打包成功數，缺口>0 時提示使用者（僅提示，匯出照常進行）。
+  const missing = refIds.size - Object.keys(images).length;
+  if (missing > 0) toast(`${missing} 張圖片未含入備份（圖片庫不可用）`);
   return {
     app: 'sweden2026',
     exportVersion: 1,

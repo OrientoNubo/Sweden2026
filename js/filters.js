@@ -167,7 +167,7 @@ export function init() {
   // 資料變更時更新城市清單(新增自訂點/匯入/重設可能帶入新城市)
   on('pois:ready', rebuildCities);
   on('overlay:changed', (p) => {
-    if (p && ['custom', 'import', 'reset'].includes(p.type)) rebuildCities();
+    if (p && ['custom', 'import', 'reset', 'external'].includes(p.type)) rebuildCities();
   });
 
   // 外部改動 state.filters(如地圖圖例點擊)後,重繪篩選列同步 chip / select 選中狀態。
